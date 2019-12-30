@@ -1,6 +1,4 @@
-
-
-Clyc: A port of Cyc to Common Lisp
+# Clyc: A port of Cyc to Common Lisp
 
 Project Intent
 --------------
@@ -24,9 +22,9 @@ License
 ---
 Clyc is licensed under the GNU Affero General Public License v3. Some files derive from LarKC's Apache v2 licensed files, with the modifications licensed under the AGPL v3.
 
-The AGPL is the most forced-open major license of which we're aware. If there was a standardized "no commercial use allowed" open source software license[^1], we would use it here to respect Cycorp's commercial interests. The Clyc developers have no affiliation with Cycorp, its employees, or its customers.
+The AGPL is the most forced-open major license of which we're aware. If there was a standardized "no commercial use allowed" open source software license[*], we would use it here to respect Cycorp's commercial interests. The Clyc developers have no affiliation with Cycorp, its employees, or its customers.
 
-[^1]:Creative Commons is [not recommended](https://creativecommons.org/faq/#can-i-apply-a-creative-commons-license-to-software) for software, and does not mandate making source code available.
+[*]: Creative Commons is [not recommended](https://creativecommons.org/faq/#can-i-apply-a-creative-commons-license-to-software) for software, and does not mandate making source code available.
 
 
 
@@ -93,14 +91,14 @@ Data Structures
 
 ### File Exists But the Implementation is missing-larkc
 
-`bijection` - A key/value mapping that also supports reversed value→key lookups.  A-list for small maps, pair of hashtables for large maps.  No given implementation, but can be easily recreated.
-`shelfs` - Some data container that supports "finalize", "rearrange", "bsearch", etc.
-`glob` - Some dual-indexed data container.
-`bag` - A multi-set. Possible to recreate.
-`accumulation` - A data accumulation interface that can append its values to various different concrete datastructures.  Probably reconstructable.
-`red-*` - Some form of generic on-disk data repository, maybe similar to the Windows registry?
-`file-hash-table` - On-disk key/value store. Huge function list.
-`sparse-matrix` `sparse-vector` `heap` - Self explanatory.
+`bijection` - A key/value mapping that also supports reversed value→key lookups.  A-list for small maps, pair of hashtables for large maps.  No given implementation, but can be easily recreated.  
+`shelfs` - Some data container that supports "finalize", "rearrange", "bsearch", etc.  
+`glob` - Some dual-indexed data container.  
+`bag` - A multi-set. Possible to recreate.  
+`accumulation` - A data accumulation interface that can append its values to various different concrete datastructures.  Probably reconstructable.  
+`red-*` - Some form of generic on-disk data repository, maybe similar to the Windows registry?  
+`file-hash-table` - On-disk key/value store. Huge function list.  
+`sparse-matrix` `sparse-vector` `heap` - Self explanatory.  
 
 Utilities
 ---------
@@ -119,34 +117,34 @@ Utilities
 
 Glossary
 --------
-**Cyc:**
-`Term` = a constant, NAT, variable, others.
-`Constant` = atomic vocabulary word, in a flat global namespace.  Prefixed with `#$`.
-`Predicate` = relationship between constants, itself named via constant starting with a lowercase letter.
-`Sentence` = cyc s-expression, including logical connectives and predicates.
-`Assertion` = KB storage item comprising a sentence, microtheory, truth value, direction, support.
-`Logical Connective` = `#$and`, `#$or`, `#$not`, `#$implies`, etc.
-`Rule` or `Conditional` = an `#$implies` sentence.
-`Microtheory` = a partition of a KB that can be independently scoped in & out of inferential visibility.
+**Cyc:**  
+`Term` = a constant, NAT, variable, others.  
+`Constant` = atomic vocabulary word, in a flat global namespace.  Prefixed with `#$`.  
+`Predicate` = relationship between constants, itself named via constant starting with a lowercase letter.  
+`Sentence` = cyc s-expression, including logical connectives and predicates.  
+`Assertion` = KB storage item comprising a sentence, microtheory, truth value, direction, support.  
+`Logical Connective` = `#$and`, `#$or`, `#$not`, `#$implies`, etc.  
+`Rule` or `Conditional` = an `#$implies` sentence.  
+`Microtheory` = a partition of a KB that can be independently scoped in & out of inferential visibility.  
 
-**Clyc:**
-`missing-larkc` = specific term for things in Cyc that were not provided to the LarKC project, distinguished from unimplemented or unfinished things in Clyc.
+**Clyc:**  
+`missing-larkc` = specific term for things in Cyc that were not provided to the LarKC project, distinguished from unimplemented or unfinished things in Clyc.  
 
 
 Acronyms
 --------
-`MT` = MicroTheory.
-`GAF` = Ground Atomic Formula, a sentence that contains no variables or logical connectives.
-`NAT` = Non-Atomic Term, a parameterized function representing a term. `(#$FruitFn #$AppleTree)` is the collection of fruit from apple trees, as opposed to the atomic term `#$Apples` or something.
-`NAUT` = Non-Atomic Unreified Term. A function NAT, before reification, having only the Fn and args.
-`NART` = Non-Atomic Reified Term. Actual information that the Fn resolved to.
-`WFF` = Well-Formed Form?
-`EL` = Epistemological Level, expressive human-editable form.
-`HL` = Heuristic Level, efficient low-level form.
-`FOL` = First-Order Logic, the full sentence style of EL.
-`CNF` = Conjunctive Normal Form, the style of HL. (#$and (#$or ?term+)+), where terms may also be negated.
-`FORT` = First-Order Reified Term, which is a constant or a NART.
-`SBHL` = (acronym?), meta predicates like `#$isa`, `#$genls`, `#$genlAttributes`.
-`PSC` = Problem Solving Context, related to which microtheories are in view.
-`GUID` = Globally Unique ID, external identifier.
-`SUID` = (System?) Unique ID, internal identifier.
+`MT` = MicroTheory.  
+`GAF` = Ground Atomic Formula, a sentence that contains no variables or logical connectives.  
+`NAT` = Non-Atomic Term, a parameterized function representing a term. `(#$FruitFn #$AppleTree)` is the collection of fruit from apple trees, as opposed to the atomic term `#$Apples` or something.  
+`NAUT` = Non-Atomic Unreified Term. A function NAT, before reification, having only the Fn and args.  
+`NART` = Non-Atomic Reified Term. Actual information that the Fn resolved to.  
+`WFF` = Well-Formed Form?  
+`EL` = Epistemological Level, expressive human-editable form.  
+`HL` = Heuristic Level, efficient low-level form.  
+`FOL` = First-Order Logic, the full sentence style of EL.  
+`CNF` = Conjunctive Normal Form, the style of HL. (#$and (#$or ?term+)+), where terms may also be negated.  
+`FORT` = First-Order Reified Term, which is a constant or a NART.  
+`SBHL` = (acronym?), meta predicates like `#$isa`, `#$genls`, `#$genlAttributes`.  
+`PSC` = Problem Solving Context, related to which microtheories are in view.  
+`GUID` = Globally Unique ID, external identifier.  
+`SUID` = (System?) Unique ID, internal identifier.  
