@@ -266,7 +266,9 @@
 (defmacro symbol-mapping (&rest plist)
   `(progn
      ,@ (loop for (from to) on plist by #'cddr
-           collect `(define-symbol-macro ,from ',to))))
+           collect `(progn
+                      (define-symbol-macro ,from ',to)
+                      (defmacro ,from (&rest rest) (cons ',to rest))))))
 
 (defun read-32bit-be (stream)
   "Reads a 4-byte, unsigned, big-endian binary number from the stream."

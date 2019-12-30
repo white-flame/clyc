@@ -17,6 +17,10 @@ Requirements
 
 Clyc currently loads only on SBCL, as a small number of its extensions and low-level implementation details are used. In the future these dependencies could be refactored out as the codebase matures past the specifics of the initial direct port, or else portability shims for other Common Lisp implementations will be added.
 
+Compilation warnings can be made visible by evaluating the following before quickloading:
+```
+(setf quicklisp-client:*quickload-verbose* t)
+```
 
 License
 ---
