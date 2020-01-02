@@ -175,10 +175,10 @@ and permission notice:
                                      
                                      (:file "api-control-vars")
                                      (:file "eval-in-api")
-                                     ;;(:file "eval-in-api-registrations")
-                                     ;;(:file "api-kernel")
-                                     ;;(:file "cfasl-kernel")
-                                     ;;(:file "guardian")
+                                     ;;(:file "eval-in-api-registrations") ;; TODO - contains hundres of registrations for the API, but the API doesn't work because of missing-larkc stuff
+                                     (:file "api-kernel")
+                                     (:file "cfasl-kernel")
+                                     ;; ELIDED (:file "guardian") - just struct. Likely a threaded watchdog of some sort.
 
                                      (:file "hl-interface-infrastructure")
                                      (:file "kb-macros")

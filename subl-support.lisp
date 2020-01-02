@@ -242,6 +242,14 @@
          for ,index fixnum from 0
       do (progn ,@body)))
 
+(defmacro dolistn ((index val list) &body body)
+  "Like dolist, but also binds a 0-based index progress"
+  `(let ((,index 0))
+     (declare (fixnum ,index))
+     (dolist (,val ,list)
+       ,@body
+       (incf ,index))))
+
 (declaim (inline simple-reader-error))
 (defun simple-reader-error (&rest rest)
   (apply #'error rest))
@@ -286,6 +294,11 @@
   `(handler-case ,form
      (error () ,@handler)))
 
+(defmacro setf-error (place &body body)
+  "If an error is raised in running BODY, store it in PLACE and return."
+  `(handler-case (progn ,@body)
+     (error (e) (setf ,place e))))
+
 (declaim (inline get-process-id))
 (defun get-process-id ()
   (sb-posix:getpid))
@@ -308,4 +321,3 @@
   (or (functionp obj)
       (and (symbolp obj)
            (fboundp obj))))
-

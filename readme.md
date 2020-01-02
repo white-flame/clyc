@@ -12,16 +12,6 @@ This native Common Lisp version will be refactored, documented, and modernized y
 "Clyc" is pronounced as if "clock" rhymed with "like".
 
 
-Requirements
-------------
-
-Clyc currently loads only on SBCL, as a small number of its extensions and low-level implementation details are used. In the future these dependencies could be refactored out as the codebase matures past the specifics of the initial direct port, or else portability shims for other Common Lisp implementations will be added.
-
-Compilation warnings can be made visible by evaluating the following before quickloading:
-```
-(setf quicklisp-client:*quickload-verbose* t)
-```
-
 License
 ---
 Clyc is licensed under the GNU Affero General Public License v3. Some files derive from LarKC's Apache v2 licensed files, with the modifications licensed under the AGPL v3.
@@ -32,11 +22,16 @@ The AGPL is the most forced-open major license of which we're aware. If there wa
 
 
 
+Current Status
+-------
+
+Still in Step 1 of the plan below, with most SubL stdlib datastructure and utility code converted but untested. File-by-file hand conversion is ongoing. Many function and variable references are still unmet.
+
+The original LarKC distribution has most of its Cyc source code in a flat directory, which is reflected here in `larkc-cycl`. This will be reorganized after things are up & running.
+
 
 Rough Plan
 ----------
-
-**CURRENT STATUS**: Early in step 1, with most SubL stdlib datastructure and utility code converted but untested.
 
 1. Convert code as-is to working-ish Common Lisp
    - leave as-is dependency ordering errors, repetitive complexity, orphaned vars/funs, etc
@@ -53,11 +48,24 @@ Rough Plan
    - utilize lambdas and closures instead of toplevel `-INT` DEFUNs, symbolic function names, and dynamic bindings
    - reevaluate what macros should be written and where they're needed
    - separate intended-public APIs from internal functions based on the Java declarations
-   - eliminate redundancies and pare down protocols
+   - apply deprecations, eliminate redundancies, and pare down protocols
    - create more technical documentation
 4. Profile and optimize particularly egregious sections
    - major refactoring of algorithms and infrastructure is allowable
-6. Add new code, including based on commented-out function/macro names
+5. Add new code, including based on commented-out function/macro names
+
+
+Requirements
+------------
+
+Clyc currently loads only on SBCL, as a small number of its extensions and low-level implementation details are used. In the future these dependencies could be refactored out as the codebase matures past the specifics of the initial direct port, or else portability shims for other Common Lisp implementations will be added.
+
+Compilation warnings can be made visible by evaluating the following before quickloading:
+```
+(setf quicklisp-client:*quickload-verbose* t)
+```
+
+[The modern Common Lisp + Quicklisp modus operandi is to add a symlink in `~/quicklisp/local-projects/` to projects like Clyc, and run `(ql:quickload "clyc")` from the REPL to load a project.]
 
 
 
@@ -130,6 +138,9 @@ Glossary
 `Logical Connective` = `#$and`, `#$or`, `#$not`, `#$implies`, etc.  
 `Rule` or `Conditional` = an `#$implies` sentence.  
 `Microtheory` = a partition of a KB that can be independently scoped in & out of inferential visibility.  
+`Arity` = the number of terms in a predicate not including the first (the operator).  
+`Sequence` = a cons list.  
+`Sequence term` = a term holding the remainder of a sequence, as in a dotted list. Also `sequence variable` if the term is a variable.
 
 **Clyc:**  
 `missing-larkc` = specific term for things in Cyc that were not provided to the LarKC project, distinguished from unimplemented or unfinished things in Clyc.  
@@ -152,3 +163,4 @@ Acronyms
 `PSC` = Problem Solving Context, related to which microtheories are in view.  
 `GUID` = Globally Unique ID, external identifier.  
 `SUID` = (System?) Unique ID, internal identifier.  
+`TOU` = Term Of Unit, maps a constant NART to a NAUT.

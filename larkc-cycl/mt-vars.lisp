@@ -190,5 +190,4 @@ Note that this includes #$AtemporalNecessarilyEssentialCollectionType itself, an
       (pushnew (minimize-mts-wrt-core mt-set) reduced-mt-sets :test #'sets-equal?))
     (nreverse reduced-mt-sets)))
   
-  ;; INCOMPLETE
 
