@@ -228,6 +228,10 @@
 (defun fixnump (expr)
   (typep expr 'fixnum))
 
+(declaim (inline doublep))
+(defun doublep (expr)
+  (typep expr 'double-float))
+
 (defmacro do-plist ((key val list) &body body)
   `(loop for (,key ,val) on ,list by #'cddr
         do (progn ,@body)))
@@ -243,7 +247,7 @@
       do (progn ,@body)))
 
 (defmacro dolistn ((index val list) &body body)
-  "Like dolist, but also binds a 0-based index progress"
+  "Like dolist, but also binds a 0-based index variable as the iteration progresses."
   `(let ((,index 0))
      (declare (fixnum ,index))
      (dolist (,val ,list)

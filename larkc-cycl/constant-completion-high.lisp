@@ -78,4 +78,16 @@ and permission notice:
            (fixnum start))
   (kb-constant-complete-exact string start end))
 
-;; INCOMPLETE
+(defun constant-complete (prefix &optional case-sensitive? exact-length? (start 0) end)
+  "[Cyc] Return all valid constants with PREFIX as a prefix of their name.
+When CASE-SENSITIVE? is non-NIL, the comparison is done in a case-sensitive fashion.
+When EXACT-LENGTH? is non-NIL, the prefix must be the entire string.
+Optionally the START and END character positions can be specified, such that the PREFIX matches characters between the START and END range. If no constant exists, return NIL."
+  (kb-constant-complete prefix case-sensitive? exact-length? start end))
+
+(defun new-constant-completion-iterator (&optional (forward? t) (buffer-size 1))
+  (kb-new-constant-completion-iterator forward? buffer-size))
+
+(defun map-constants-in-completions (function)
+  (let ((iterator (new-constant-completion-iterator)))
+    (map-iterator function iterator)))

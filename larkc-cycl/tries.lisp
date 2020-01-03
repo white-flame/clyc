@@ -71,27 +71,6 @@ and permission notice:
 (deflexical *trie-free-lock* (bt:make-lock "TRIE resource lock")
   "[Cyc] Lock for TRIE object free list")
 
-
-  ;; TODO - all of this stuff is missing-larkc'd when enabled, so I'm reducing it to nothing
-
-(defparameter *trie-ancestor-tracking-resource* nil)
-(defparameter *trie-ancestor-tracking-lock* (bt:make-lock "Ancestor tracking resource"))
-(defparameter *trie-ancestor-tracking-vector-size* 100)
-(defparameter *trie-ancestor-vector* nil)
-(defparameter *trie-ancestor-next* nil)
-(defun-ignore initialize-trie-ancestor-tracking (top-node))
-(defun-ignore finish-trie-ancestor-tracking ())
-(defun-ignore trie-ancestor-tracking-descend (node))
-(defun-ignore trie-ancestor-tracking-ascend ())
-(defun-ignore trie-relevant-ancestor-path? (trie) t)
-(defun-ignore trie-relevant-object (trie object) t)
-(defun-ignore multi-trie-new-insert-mark (trie object))
-(defun-ignore multi-trie-remove-mark (trie object))
-
-
-  ;; INCOMPLETE
-
-
 (defun init-trie (trie)
   "[Cyc] Initialize a TRIE for use"
   ;; micro-optimized, because why not
@@ -421,7 +400,8 @@ and permission notice:
   (new-iterator (new-trie-iterator-state trie forward?)
                 #'trie-iterator-done
                 #'trie-iterator-next
-                #'trie-iterator-finalize))
+                ;; TODO - this function doesn't exist.  Are iterators effectively nonfunctional?
+                'trie-iterator-finalize))
 
 (defun new-trie-iterator-state (trie forward?)
   (vector trie (trie-top-node trie) forward?
@@ -433,5 +413,62 @@ and permission notice:
        ;; TODO - because of this, are trie-iterators never used?
        (missing-larkc 12528)))
 
+(defun trie-iterator-done-node (node)
+  (not node))
 
-;; INCOMPLETE - iterators
+(defun trie-iterator-next (state)
+  (let ((trie (aref state 0))
+        (node (aref state 1))
+        (forward? (aref state 2))
+        (queue (aref state 3))
+        (stack (aref state 4)))
+    (multiple-value-bind (next invalid? new-node)
+        (if (queue-p queue)
+            (missing-larkc 12530)
+            (trie-iterator-next-unique trie node forward? stack))
+      (if invalid?
+          (progn
+            (setf (aref state 1) nil)
+            (setf (aref state 3) nil)
+            (clear-stack stack))
+          (setf (aref state 1) new-node))
+      (values next state invalid?))))
+
+(defun trie-iterator-next-unique (trie node forward? stack)
+  (let ((next nil)
+        (invalid? nil))
+    (until (or next invalid?)
+      (if (trie-leaf-node-p node)
+          (let ((data (trie-node-data node)))
+            (when (trie-relevant-object trie data)
+              (setf next data)))
+          (let ((subnodes (trie-node-subnodes node)))
+            (if forward?
+                (dolist (subnode (reverse subnodes))
+                  (stack-push subnode stack))
+                (dolist (subnode subnodes)
+                  (stack-push subnode stack)))))
+      (setf node (stack-pop stack))
+      (when (and (not next)
+                 (not node)
+                 (stack-empty-p stack))
+        (setf invalid? t)))
+    (values next invalid? node)))
+
+  ;; TODO - all of this stuff is missing-larkc'd when enabled, so I'm reducing it to nothing
+
+(defparameter *trie-ancestor-tracking-resource* nil)
+(defparameter *trie-ancestor-tracking-lock* (bt:make-lock "Ancestor tracking resource"))
+(defparameter *trie-ancestor-tracking-vector-size* 100)
+(defparameter *trie-ancestor-vector* nil)
+(defparameter *trie-ancestor-next* nil)
+(defun-ignore initialize-trie-ancestor-tracking (top-node))
+(defun-ignore finish-trie-ancestor-tracking ())
+(defun-ignore trie-ancestor-tracking-descend (node))
+(defun-ignore trie-ancestor-tracking-ascend ())
+(defun-ignore trie-relevant-ancestor-path? (trie) t)
+(defun-ignore trie-relevant-object (trie object) t)
+(defun-ignore multi-trie-new-insert-mark (trie object))
+(defun-ignore multi-trie-remove-mark (trie object))
+
+

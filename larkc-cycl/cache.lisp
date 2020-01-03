@@ -191,22 +191,21 @@ return (i) the value previously associated with KEY in CACHE (ii) a boolean valu
   "[Cyc] Returns the number of entries in CACHE"
   (hash-table-count (cache-map cache)))
 
-(defun do-cache-first (cache order)
-  (do-cache-next (cache-head-entry cache) order))
-
-(defun do-cache-done? (cache entry)
-  (eq entry (cache-head-entry cache)))
-
-(defun do-cache-key (entry)
-  (cache-entry-key entry))
-
-(defun do-cache-value (entry)
-  (cache-entry-value entry))
-
-(defun do-cache-next (entry order)
-  (ecase order
-    (:newest (cache-entry-older entry))
-    (:oldest (cache-entry-newer entry))))
+;; Implementation taken from kb-object-manager's swap-out-all-pristine-kb-objects-int
+;; Absorbs all the do-cache-* helpers into itself
+(defmacro do-cache ((id value cache &optional (order :newest)) &body body)
+  (alexandria:with-gensyms (head entry)
+    `(let* ((,head (cache-head-entry ,cache))
+            (,entry ,head))
+       (until (progn
+                (setf ,entry ,(ecase order
+                                (:newest `(cache-entry-older ,entry))
+                                (:oldest `(cache-entry-newer ,entry))))
+                (eq ,entry ,head))
+         (let ((,id (cache-entry-key ,entry))
+               (,value (cache-entry-value ,entry)))
+           (declare (ignorable ,id ,value))
+           ,@body)))))
 
 (defconstant *cfasl-opcode-cache* 63)
 

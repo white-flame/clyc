@@ -52,6 +52,7 @@ and permission notice:
 
 ;; The original code had an empty-list marker (symbol, replaced to NIL in results), and a 'tombstone' marker for unused entries (NIL, replaced to the default in results).  The older model does more comparison than necessary, and has to do conversion on insertion.
 ;; I think SubL might have had to do this if it cannot control the default value of arrays and they might have always been NIL.
+;; Tombstones are only used in the array, not in the hashtable.
 ;; Rewrote into using only tombstone marker, keeping NIL as an empty list untouched.
 (defconstant +id-index-tombstone+ :%tombstone)
 
@@ -74,7 +75,7 @@ and permission notice:
      ,@body))
 
 (defun-inline id-index-lock (id-index)
-  "[Cyc] Returnt he lock used to control modifications of ID-INDEX."
+  "[Cyc] Return the lock used to control modifications of ID-INDEX."
   (idix-lock id-index))
 
 (defun-inline id-index-count (id-index)
@@ -117,7 +118,7 @@ and permission notice:
 
 (defun-inline id-index-old-object-id-p (id-index id)
   (declare (fixnum id))
-  ;; TODO DESIGN - can probably eliminate the non-negative-integer-p check and just leave the fixnum declaration, since optimized-id-index will break if negative indexes are placed into the new-objects table anwyay.
+  ;; TODO DESIGN - can probably eliminate the non-negative-integer-p check and just leave the fixnum declaration, since optimize-id-index will break if negative indexes are placed into the new-objects table anwyay.
   (and (non-negative-integer-p id)
        (< id (id-index-new-id-threshold id-index))))
 
@@ -128,10 +129,9 @@ and permission notice:
 (deflexical *id-index-equality-test* #'eq
   "Used to define the hashtable test for array spillover values.  Seems like it'll stay fixnums.")
 
-(defun new-id-index (&optional (old-objects-size 16) (new-id-start old-objects-size))
+(defun new-id-index (&optional (old-objects-size 0) (new-id-start old-objects-size))
   "[Cyc] Return a new ID-INDEX with ids for new entries starting at NEW-ID-START.
 Access to OLD-OBJECTS-SIZE number of ids starting at 0 will be optimized."
-  ;; Increased the default old-objects-size from 0 to 16, as a zero-length vector is pointless and will always become garbage with use.
   (let* ((new-objects-size (max 10 (floor old-objects-size
                                           *id-index-default-scaling-factor*))))
     (make-id-index :lock (bt:make-lock "ID-INDEX")
@@ -232,6 +232,53 @@ If the insert fills up the old objects vector, grow the vector."
 
 (defun-inline id-index-new-objects-empty-p (id-index)
   (zerop (id-index-new-object-count id-index)))
+
+;; TODO - the tombstone variable is very annoying, with its :skip option. I think the "hide tombstone" default value should be the tombstone symbol itself, since there's now 2 separate special values to check for (:%tombstone and :skip) all in the same value space, and the predicates for checking them are very poorly named.
+(defmacro do-id-index ((id object id-index &key (tombstone :skip tombstone-p)
+                           ordered progress-message done)
+                       &body body)
+  "Iterate over all values in the id-index, binding id/object to the stored key/value.  If the :tombstone is T then tombstones will be iterated as well with value NIL; else they are skipped."
+  ;; TODO - don't know what DONE is supposed to do
+  (when done
+    (error ":DONE not supported on DO-ID-INDEX"))
+  ;; Reconstructed from constant-handles set-next-constant-suid
+  (alexandria:with-gensyms (total sofar new-ht)
+    (alexandria:once-only (id-index tombstone)
+      `(let ((,total (id-index-count ,id-index))
+             (,sofar 0))
+         ;; TODO - only use noting-percent-progress when :progress-message is provided
+         (noting-percent-progress (,progress-message)
+           ;; Skip if empty
+           (unless (id-index-objects-empty-p ,id-index ,tombstone)
+             ;; Vector (old contents)
+             (unless (id-index-old-objects-empty-p ,id-index ,tombstone)
+               (dovector (,id ,object (id-index-old-objects ,id-index))
+                 (unless (id-index-tombstone-p ,object)
+                   (note-percent-progress ,sofar ,total)
+                   (incf ,sofar)
+                   ,@body)))
+             ;; Hashtable (new contents)
+             (unless (id-index-new-objects-empty-p ,id-index)
+               ;; Ordered must iterate the index values
+               ,(if ordered
+                   `(loop with ,new-ht = (id-index-new-objects ,id-index)
+                       for ,id from (id-index-new-id-threshold ,id-index)
+                       below (id-index-next-id ,id-index)
+                       for ,object = (gethash ,id ,new-ht ,(if tombstone-p
+                                                               tombstone
+                                                               `(id-index-tombstone)))
+                       do (unless ,(if tombstone-p nil `(id-index-tombstone-p ,object))
+                            (note-percent-progress ,sofar ,total)
+                            (incf ,sofar)
+                            ,@body))
+                   ;; Unordered can just hit the hashtable entries
+                   ;; but only if we're skipping tombstones
+                   (if tombstone-p
+                       (error ":ORDERED + :TOMBSTONE can't both be used in DO-ID-INDEX.")
+                       `(dohash (,id ,object (id-index-new-objects ,id-index))
+                          (note-percent-progress ,sofar ,total)
+                          (incf ,sofar)
+                          ,@body))))))))))
 
 (defconstant *cfasl-wide-opcode-id-index* 128)
 

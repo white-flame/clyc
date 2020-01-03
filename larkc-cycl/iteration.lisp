@@ -105,7 +105,7 @@ FINALIZE is a unary function which is applied to STATE when the iterator is dest
                  :next next
                  :finalize finalize))
 
-(defun iterator-done (iterator)
+(defun iteration-done (iterator)
   "[Cyc] Return NIL iff ITERATOR has not yet been exhausted."
   (funcall (it-done iterator) (it-state iterator)))
 

@@ -386,7 +386,7 @@ and permission notice:
 
 (defun member-equal (item list)
   "[Cyc] An optimized form of (member? ITEM LIST #'equal)"
-  (member item list :test #'equal)) 
+  (member item list :test #'equal))
 
 (defun singleton? (list)
   (and (consp list)
@@ -557,7 +557,6 @@ and permission notice:
 (deflexical *remove-duplicates-equal-table-lock* (bt:make-lock "remove-duplicates-equal-table-lock"))
 (deflexical *remove-duplicates-equalp-table-lock* (bt:make-lock "remove-duplicates-equalp-table-lock"))
 
-(declaim (inline fast-delete-duplicates))
 (defun fast-delete-duplicates (sequence &optional (test #'equal) (key #'identity) hashtable (start 0) end)
   (cond
     ((length<= sequence 1) sequence)
@@ -582,7 +581,6 @@ and permission notice:
 
 (defun remove-duplicate-forts (forts)
   "[Cyc] Return the list FORTS with all duplicates removes"
-  
   (fast-delete-duplicates forts #'eq))
 
 (defun delete-duplicate-forts (forts)
@@ -729,15 +727,19 @@ and permission notice:
 
 (defparameter *plistlist-sort-indicator* nil)
 
-(declaim (inline any-in-list)) ;; should collapse into being pretty small
+;; TODO - what's the difference between this and SOME?
 
+
+
+(declaim (inline any-in-list)) ;; should collapse into being pretty small
 (defun any-in-list (predicate list &optional (key #'identity))
   (let ((ans nil))
     (if (eq key #'identity)
         (csome (item list ans)
           (setf ans (funcall predicate item)))
         (csome (item list ans)
-          (setf ans (funcall predicate (funcall key item)))))))
+          (setf ans (funcall predicate (funcall key item)))))
+    ans))
 
 (declaim (inline every-in-list))
 (defun every-in-list (predicate list &optional (key #'identity))
@@ -835,8 +837,188 @@ Return 1: T if a sub-object is found."
                       ;; Iteration
                       (multiple-value-bind (ans found?) (tree-find item sub test key)
                         (when found?
-                          (return (values ans found?)))))
-)
+                          (return (values ans found?))))))
     (t (values nil nil))))
 
-;; INCOMPLETE
+(defun simple-tree-find? (item object)
+  "[Cyc] Return T iff the non-nil ITEM is found in OBJECT (via EQ)."
+  (cond
+    ((eq item object) t)
+    ((consp object) (do* ((list object (cdr list))
+                          (sub (car list) (car list)))
+                         ((not (consp (cdr list)))
+                          ;; Ending forms, searches the final cons cell's car & cdr
+                          (or (simple-tree-find? item (car list))
+                              (and (cdr list)
+                                   (simple-tree-find? item (cdr list)))))
+                      ;; Iteration
+                      ;; TODO - unwrap the equality test & use a LABELS to avoid leaf recursion, both here and in the -equal version below.
+                      (when (simple-tree-find? item sub)
+                        (return t))))))
+
+(defun simple-tree-find-via-equal? (item object)
+  "[Cyc] Return T iff the non-nil ITEM is found in OBJECT (via EQUAL)"
+  (cond
+    ((equal item object) t)
+    ((consp object) (do* ((list object (cdr list))
+                          (sub (car list) (car list)))
+                         ((not (consp (cdr list)))
+                          ;; Ending forms
+                          (or (simple-tree-find-via-equal? item (car list))
+                              (and (cdr list)
+                                   (simple-tree-find-via-equal? item (cdr list)))))
+                      ;; Iteration
+                      (when (simple-tree-find-via-equal? item sub)
+                        (return t))))))
+
+(defun tree-find-any (items tree &optional (test #'eql) (key #'identity))
+  "[Cyc] Look for any of ITEMS in the tree OBJECT. Return the first item found, or NIL if none found."
+  (dolist (item items)
+    (when (tree-find item tree test key)
+      (return item))))
+
+(defun cons-tree-find-if (test object &optional (key #'identity))
+  "[Cyc] Obsolete -- use tree-find-if"
+  ;; TODO - mark obsolete
+  (tree-find-if test object key))
+
+(defun tree-find-if (test object &optional (key #'identity))
+  (cond
+    ((funcall test (funcall key object)) object)
+    ((consp object) (do* ((list object (cdr list))
+                          (sub (car list) (car list)))
+                         ((not (consp (cdr list)))
+                          (or (tree-find-if test (car list) key)
+                              (and (cdr list)
+                                   (tree-find-if test (cdr list) key))))
+                      (alexandria:when-let ((ans (tree-find-if test sub key)))
+                        (return ans))))))
+
+(defun tree-count-if (test object &optional (key #'identity))
+  (cond
+    ((funcall test (funcall key object)) 1)
+    ((consp object) (let ((total 0))
+                      (do* ((list object (cdr list))
+                            (sub (car list) (car list)))
+                           ((not (consp (cdr list)))
+                            (incf total (tree-count-if test (car list) key))
+                            (when (cdr list)
+                              (incf total (tree-count-if test (cdr list) key)))
+                            total)
+                        (incf total (tree-count-if test sub key)))))
+    (t 0)))
+
+(defun tree-gather (object predicate &optional (test #'eql) (key #'identity) (subs-too? t))
+  (nreverse (tree-gather-internal object predicate test key subs-too? nil)))
+
+(defun tree-gather-internal (object predicate test key subs-too? so-far)
+  (let ((result so-far))
+    (when (funcall predicate (funcall key object))
+      (if test
+          (pushnew object result :test test)
+          (push object result))
+      (unless subs-too?
+        (return-from tree-gather-internal result)))
+    (when (consp object)
+      (do* ((list object (cdr list))
+            (sub (car list) (car list)))
+           ((not (consp (cdr list)))
+            (setf result (tree-gather-internal (car list) predicate test key subs-too? result))
+            (when (cdr list)
+              (setf result (tree-gather-internal (cdr list) predicate test key subs-too? result))))
+        (setf result (tree-gather-internal sub predicate test key subs-too? result))))
+    result))
+
+(defun delete-subsumed-items (list test &optional (key #'identity))
+  "[Cyc] If a and b are in LIST, and (TEST (KEY a) (KEY b)) is true, don't include b in the result"
+  (declare (ignore test key))
+  (when list
+    (missing-larkc 9081)))
+
+(defun permute-list (elements &optional (test #'equal))
+  "[Cyc] Return a list of all possible distinct ordered lists of the elements in ELEMENTS.
+By convention, (permute-list NIL) -> NIL.
+By convention, if TEST is NIL, the check for duplicates is skipped."
+  (when elements
+    (let ((number-of-elements (length elements))
+          (result nil))
+      (cond
+        ((null test)
+         (dolist (permutation (all-permutations (length elements)))
+           (push (permute elements permutation) result)))
+        
+        ((< number-of-elements 5)
+         (dolist (permutation (all-permutations (length elements)))
+           (pushnew (permute elements permutation) result :test test)))
+
+        (t (dolist (permutation (all-permutations (length elements)))
+             (push (permute elements permutation) result))
+           (setf result (fast-delete-duplicates result test))))
+      result)))
+
+(defun permute-list-int (elements &optional (test #'eq))
+  "[Cyc] Given a list of elements, return all permutations of the elements.
+Assumes no two elements are equal with respect to TEST."
+  (cond
+   ((not elements) nil)
+   ((atom elements) (list elements))
+   ((not (cdr elements)) (list elements))
+   ((not (cddr elements)) (list elements (reverse elements)))
+   (t (let ((perms nil))
+        (dolist (elem elements)
+          (dolist (perm (permute-list-int (remove elem elements :test test)))
+            (push (cons elem perm) perms)))
+        perms))))
+
+(defun all-permutations (n)
+  "[Cyc] Returns all permutations of the numbers from 0 to N-1.
+By convention, (all-permutations 0) -> (NIL)."
+  (if (zerop n)
+      (list nil)
+      (permute-list-int (num-list n))))
+
+(defun permute (list permutation)
+  "[Cyc] e.g. (permute '(a b c) '(2 0 1)) -> (c a b)
+By convention, (permute X NIL) -> X."
+  (if permutation
+      (let (result)
+        (dolist (elem permutation)
+          (push (nth elem list) result))
+        (nreverse result))
+      list))
+
+(defun cartesian-product (l &optional (fun #'cons) (start '()) test)
+  "[Cyc] Returns a list of the cartesian product of the elements of l.
+FUN: an optional function to build the product.
+START: an optional seed for building the product."
+  (let ((accum (list start)))
+    (if (fboundp test)
+        (dolist (this-one l)
+          (declare (ignore this-one))
+          (setf accum (missing-larkc 9053)))
+        (dolist (this-one l)
+          (setf accum (cartesian-helper this-one accum fun))))
+    (nmapcar #'reverse accum)))
+
+(defun cartesian-helper (a b fun)
+  "[Cyc] Takes two lists and returns the cartesian product. FUN generally should be #'CONS."
+  (let (accum)
+    (dolist (b-er b)
+      (dolist (a-er a)
+        (push (funcall fun a-er b-er) accum)))
+    (nreverse accum)))
+
+(defun list-of-type-p (pred object)
+  "[Cyc] Returns T if OBJECT is a non-dotted list, and PRED returns non-NIL when applied to any item in OBJECT. Otherwise, returns NIL."
+  (when (non-dotted-list-p object)
+    (some pred object)))
+
+
+
+
+
+
+
+
+
+

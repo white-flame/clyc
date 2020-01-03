@@ -87,13 +87,19 @@ and permission notice:
 (defun new-constant-suid-threshold ()
   (id-index-new-id-threshold *constant-from-suid*))
 
-  ;; INCOMPLETE - large macroexpansion
-  ;; (defun set-next-constant-suid (&optional max-constant-suid)
-  ;;   (let ((max -1))
-  ;;     (if max-constant-suid
-  ;;         (setf max max-constant-suid)
-  ;;         (noting-percent-progress )
-  ;;         )))
+(defun set-next-constant-suid (&optional max-constant-suid)
+  (let ((max -1))
+    (if max-constant-suid
+        (setf max max-constant-suid)
+        (do-id-index (idx constant (do-constants-table)
+                          :progress-message "Determining maximum constant SUID"
+                          ;; TODO - original code was in order, not sure why for a max scan
+                          :ordered t)
+          (let ((suid (constant-suid constant)))
+            (setf max (max max suid)))))
+    (let ((next-suid (1+ max)))
+      (set-id-index-next-id *constant-from-suid* next-suid)
+      next-suid)))
 
 
 (declaim (inline reset-constant-suid))
@@ -180,8 +186,7 @@ and permission notice:
             (register-invalid-constant-by-name constant name))
           constant))))
 
-  ;; TODO - any reason this isn't setting NAME via the constructor?
-
+;; TODO - any reason this isn't setting NAME via the constructor?
 (defun make-constant-shell-internal (name static)
   (declare (ignore static))
   (let ((constant (get-constant)))
@@ -197,11 +202,13 @@ and permission notice:
   ;; wow, great docstring. such explain.
   (make-constant-shell-internal nil nil))
 
-
-  ;; INCOMPLETE - compare this macroexpansion to the one above.  Might be iterating similar things
-  ;; (defun free-all-constants ()
-  ;;   )
-
+(defun free-all-constants ()
+  (do-id-index (id constant (do-constants-table)
+                   :progress-message "Freeing constants"
+                   :ordered t)
+    (free-term-index constant)
+    (free-constant constant))
+  (clear-constant-tables))
 
 (declaim (inline constant-suid))
 (defun constant-suid (constant)

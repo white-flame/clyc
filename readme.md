@@ -25,7 +25,7 @@ The AGPL is the most forced-open major license of which we're aware. If there wa
 Current Status
 -------
 
-Still in Step 1 of the plan below, with most SubL stdlib datastructure and utility code converted but untested. File-by-file hand conversion is ongoing. Many function and variable references are still unmet.
+Still in Step 1 of the plan below, with most SubL stdlib datastructure and utility code converted but untested. File-by-file conversion from Java is ongoing. Many function and variable references are still unmet.
 
 The original LarKC distribution has most of its Cyc source code in a flat directory, which is reflected here in `larkc-cycl`. This will be reorganized after things are up & running.
 
@@ -153,13 +153,13 @@ Acronyms
 `NAT` = Non-Atomic Term, a parameterized function representing a term. `(#$FruitFn #$AppleTree)` is the collection of fruit from apple trees, as opposed to the atomic term `#$Apples` or something.  
 `NAUT` = Non-Atomic Unreified Term. A function NAT, before reification, having only the Fn and args.  
 `NART` = Non-Atomic Reified Term. Actual information that the Fn resolved to.  
-`WFF` = Well-Formed Form?  
+`WFF` = Well-Formed Formula  
 `EL` = Epistemological Level, expressive human-editable form.  
 `HL` = Heuristic Level, efficient low-level form.  
 `FOL` = First-Order Logic, the full sentence style of EL.  
 `CNF` = Conjunctive Normal Form, the style of HL. (#$and (#$or ?term+)+), where terms may also be negated.  
 `FORT` = First-Order Reified Term, which is a constant or a NART.  
-`SBHL` = (acronym?), meta predicates like `#$isa`, `#$genls`, `#$genlAttributes`.  
+`SBHL` = Subsumption Based HL, meta predicates like `#$isa`, `#$genls`, `#$genlAttributes`.  
 `PSC` = Problem Solving Context, related to which microtheories are in view.  
 `GUID` = Globally Unique ID, external identifier.  
 `SUID` = (System?) Unique ID, internal identifier.  

@@ -1,3 +1,5 @@
+
+
 #|
   Copyright (c) 2019 White Flame
 
@@ -98,6 +100,90 @@ and permission notice:
      while (lookup-hl-store-iterator next-id)
      finally (return next-id)))
 
+;; TODO - maybe just use a synchronized hashtable instead?
 (deflexical *hl-store-iterator-lock* (bt:make-lock "HL Store Iterator Lock"))
 
-;; INCOMPLETE
+(defun note-hl-store-iterator (iterator)
+  (bt:with-lock-held (*hl-store-iterator-lock*)
+    (let ((id (new-hl-store-iterator-id)))
+      (setf (gethash id *hl-store-iterators*) iterator)
+      id)))
+
+(defun lookup-hl-store-iterator (id)
+  (gethash id *hl-store-iterators*))
+
+(defun unnote-hl-store-iterator (id)
+  (bt:with-lock-held (*hl-store-iterator-lock*)
+    (remhash id *hl-store-iterators*)))
+
+;; TODO DESIGN - this uses eval
+(defun new-hl-store-iterator-int (form)
+  (let ((iterator (eval form)))
+    (and (iterator-p iterator)
+         (note-hl-store-iterator iterator))))
+
+(defun hl-store-iterator-next-int (id)
+  (let ((iterator (lookup-hl-store-iterator id)))
+    (if iterator
+        (multiple-value-bind (next valid?) (iteration-next iterator)
+          (list next valid?))
+        (list nil nil))))
+
+(defun hl-store-iterator-done-int (id)
+  (let ((iterator (lookup-hl-store-iterator id)))
+    (if iterator
+        (iteration-done iterator)
+        t)))
+
+(defun hl-store-iterator-destroy-int (id)
+  (let ((iterator (lookup-hl-store-iterator id)))
+    (if iterator
+        (progn
+          (unnote-hl-store-iterator id)
+          (iteration-finalize iterator))
+        t)))
+
+(defun new-hl-store-iterator (form &optional (buffer-size 1))
+  (let ((id (if (hl-access-remote?)
+                (missing-larkc 29558)
+                (new-hl-store-iterator-int form))))
+    (if (= buffer-size 1)
+        (create-hl-store-iterator id)
+        (missing-larkc 29503))))
+
+(defun create-hl-store-iterator (id)
+  (new-iterator id
+                #'hl-store-iterator-done?
+                #'hl-store-iterator-next
+                #'hl-store-iterator-destroy))
+
+(defun hl-store-iterator-done? (id)
+  (if (hl-access-remote?)
+      (missing-larkc 29559)
+      (hl-store-iterator-done-int id)))
+
+(defun hl-store-iterator-next (id)
+  (destructuring-bind (next valid?) (if (hl-access-remote?)
+                                        (missing-larkc 29560)
+                                        (hl-store-iterator-next-int id))
+    (values next id (not valid?))))
+
+(defun hl-store-iterator-destroy (id)
+  (if (hl-access-remote?)
+      (missing-larkc 29561)
+      (hl-store-iterator-destroy-int id)))
+
+(defglobal *hl-transcript-stream* nil)
+
+(defun note-hl-modifier-invocation (name &optional (arg1 :unprovided)
+                                           (arg2 :unprovided)
+                                           (arg3 :unprovided)
+                                           (arg4 :unprovided)
+                                           (arg5 :unprovided))
+  (declare (ignore name arg1 arg2 arg3 arg4 arg5))
+  (when (streamp *hl-transcript-stream*)
+    '(let ((hlop (missing-larkc 29566)))
+      (cfasl-output-externalized hlop *hl-transcript-stream*))
+    (missing-larkc 29566)))
+
+
