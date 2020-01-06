@@ -157,7 +157,7 @@ Acronyms
 `EL` = Epistemological Level, expressive human-editable form.  
 `HL` = Heuristic Level, efficient low-level form.  
 `FOL` = First-Order Logic, the full sentence style of EL.  
-`CNF` = Conjunctive Normal Form, the style of HL. (#$and (#$or ?term+)+), where terms may also be negated.  
+`CNF` = Conjunctive Normal Form, the style of HL. `(#$and (#$or ?term+)+)`, where terms may also be negated.  
 `FORT` = First-Order Reified Term, which is a constant or a NART.  
 `SBHL` = Subsumption Based HL, meta predicates like `#$isa`, `#$genls`, `#$genlAttributes`.  
 `PSC` = Problem Solving Context, related to which microtheories are in view.  

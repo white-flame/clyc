@@ -237,7 +237,10 @@
         do (progn ,@body)))
 
 (defmacro dohash ((key val hashtable) &body body)
-  `(maphash (lambda (,key ,val) ,@body) ,hashtable))
+  `(maphash (lambda (,key ,val)
+              (declare (ignorable ,key ,val))
+              ,@body)
+            ,hashtable))
 
 (defmacro dovector ((index val vector) &body body)
   ;; TODO - convert to DO, probably faster as this version maintains a hidden index anyway
@@ -325,3 +328,23 @@
   (or (functionp obj)
       (and (symbolp obj)
            (fboundp obj))))
+
+
+;; A java ReentrantReadWriteLock allows multiple readers as long as there's no writer, or a single exclusive writer with no readers. So all will lock a central lock, check if it can work, or wait on an appropriate condition variable, and release the central lock. Exiting a "lock" will again gain the central lock, deregister itself, and notify any appropriate cv.
+;; For optimization, fairness, and good ordering semantics, writers could be queued in order of attempt, and readers can block if a writer is already queued instead of starting new read work when write work is waiting.
+;; TODO HACK - just to get this up and running, I'll serialize all access for now. Plus, I don't know how often this is used anyway.
+
+(defstruct (rw-lock (:constructor %make-rw-lock))
+  lock)
+
+(defun new-rw-lock (name)
+  (%make-rw-lock :lock (bt:make-lock name)))
+
+(defmacro with-rw-read-lock ((rw-lock) &body body)
+  `(bt:with-lock-held ((rw-lock-lock ,rw-lock))
+     ,@body))
+
+(defmacro with-rw-write-lock ((rw-lock) &body body)
+  `(bt:with-lock-held ((rw-lock-lock ,rw-lock))
+     ,@body))
+

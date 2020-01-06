@@ -80,3 +80,7 @@ and permission notice:
   "[Cyc] Return a list of all the keys of HASH-TABLE."
   (loop for key being the hash-key of hash-table
      collect key))
+
+(defun hash-table-values (hash-table)
+  (loop for val being the hash-value of hash-table
+       collect val))
