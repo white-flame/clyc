@@ -42,16 +42,20 @@ and permission notice:
 
 
 
-;; TODO - there are do-constants and such macros that might be involved in the big macroexpansions in this file.
+;; Invalid lookup is string->constant mapping
+;; Valid lookup is suid->constant mapping
 
 (defstruct (constant (:conc-name "C-"))
+  ;; Starts as NIL, which is invalid.
+  ;; When it becomes integerp it is "valid".
+  ;; TODO - are there other states, or just nil & integer?  should test for non-nil as it's cheaper than integerp
   suid
+  ;; TODO - String, but a lot of code tests for stringp of this in terms of registering it in tables. Why?
   name)
 
 (declaim (inline constant-handle-valid?))
 (defun constant-handle-valid? (constant)
   (integerp (c-suid constant)))
-
 
 (defglobal *constant-from-suid* nil
   "[Cyc] The SUID->CONSTANT mapping table.")
@@ -178,13 +182,16 @@ and permission notice:
 
 (defun make-constant-shell (name &optional use-existing?)
   (check-type name 'constant-name-spec-p)
-  (when (and use-existing? (stringp name))
-    (or (constant-shell-from-name name)
-        (find-invalid-constant name)
-        (let ((constant (make-constant-shell-internal name t)))
-          (when (stringp name)
-            (register-invalid-constant-by-name constant name))
-          constant))))
+  (or (and use-existing?
+           (stringp name)
+           (or (constant-shell-from-name name)
+               (find-invalid-constant name)))
+      ;; If it wasn't found (or we didn't allow using existing constants),
+      ;; make one and register it as invalid.
+      (let ((constant (make-constant-shell-internal name t)))
+        (when (stringp name)
+          (register-invalid-constant-by-name constant name))
+        constant)))
 
 ;; TODO - any reason this isn't setting NAME via the constructor?
 (defun make-constant-shell-internal (name static)

@@ -82,11 +82,10 @@ and permission notice:
         (values nil t)
         (let* (;; Copy from adjustable vector to a plain one
                (name (subseq buffer 0)))
-          `(values (or (load-time-value
-                        (reader-make-constant-shell ,name
-                                                    ,(not (stream-forbids-constant-creation stream))))
-                       (error "~s is not an existing constant" ,name))
-                   t)))))
+          (values (or (reader-make-constant-shell name
+                                                  (not (stream-forbids-constant-creation stream)))
+                      (error "~s is not an existing constant" name))
+                  t)))))
 
 (defun find-constant-by-name (name)
   (let ((constant (let ((*require-valid-constants* nil))
@@ -103,4 +102,10 @@ and permission notice:
 
 (set-dispatch-macro-character #\# #\$ #'sharpsign-dollar-rmf)
   
+
+(defmethod make-load-form ((obj constant) &optional environment)
+  (declare (ignore environment))
+  "Common Lisp support for constant literals in source code."
+  ;; This is always allowed to create constants?
+  `(reader-make-constant-shell ,(c-name obj) t))
 
