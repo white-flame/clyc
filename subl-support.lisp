@@ -29,6 +29,8 @@
 
 (in-package :clyc)
 
+(import '(alexandria:symbolicate
+          alexandria:when-let))
 
 ;;------
 ;; Variable definitions
@@ -164,7 +166,7 @@
 
 (let ((package (find-package "KEYWORD")))
   (defun make-keyword (str)
-    (intern str package)))
+    (intern (string str) package)))
 
 (defmacro defun-inline (name params &body body)
   `(progn
@@ -328,7 +330,6 @@
   (or (functionp obj)
       (and (symbolp obj)
            (fboundp obj))))
-
 
 ;; A java ReentrantReadWriteLock allows multiple readers as long as there's no writer, or a single exclusive writer with no readers. So all will lock a central lock, check if it can work, or wait on an appropriate condition variable, and release the central lock. Exiting a "lock" will again gain the central lock, deregister itself, and notify any appropriate cv.
 ;; For optimization, fairness, and good ordering semantics, writers could be queued in order of attempt, and readers can block if a writer is already queued instead of starting new read work when write work is waiting.

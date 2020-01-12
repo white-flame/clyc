@@ -159,28 +159,6 @@ Otherwise the operation is a NO-OP."
 
 (defconstant *cfasl-wide-opcode-cache-metrics* 129)
 
-(defmethod cache-strategy-object-keeps-metrics-p ((strategy metered-cache))
-  (cache-strategy-mcache-object-keeps-metrics-p strategy))
-
-(defmethod cache-strategy-object-tracked? ((strategy metered-cache) object)
-  (cache-strategy-mcache-object-tracked? strategy object))
-
-(defmethod cache-strategy-object-note-reference ((strategy metered-cache) object)
-  (cache-strategy-mcache-object-note-reference strategy object))
-
-(defmethod cache-strategy-object-get-metrics ((strategy metered-cache))
-  (cache-strategy-mcache-object-get-metrics strategy))
-
-(defmethod cache-strategy-object-track ((strategy metered-cache) object)
-  (cache-strategy-mcache-object-track strategy object))
-
-(defmethod cache-strategy-object-p ((object metered-cache))
-  "[Cyc] METERED-CACHE-P has a cache strategy implementation."
-  t)
-
-(defmethod cache-strategy-object-gather-metrics ((strategy metered-cache) metrics)
-  (cache-strategy-mcache-object-gather-metrics strategy metrics))
-
 
 
 ;; TODO DESIGN - this is a mess for dispatching through behavior.  Put a slot for the metrics right on the cache objects, or even both metrics slots right in it.
@@ -211,3 +189,28 @@ Otherwise the operation is a NO-OP."
   records
   timestamper)
 
+
+
+
+;; Moved these below the metered-cache defstruct
+(defmethod cache-strategy-object-keeps-metrics-p ((strategy metered-cache))
+  (cache-strategy-mcache-object-keeps-metrics-p strategy))
+
+(defmethod cache-strategy-object-tracked? ((strategy metered-cache) object)
+  (cache-strategy-mcache-object-tracked? strategy object))
+
+(defmethod cache-strategy-object-note-reference ((strategy metered-cache) object)
+  (cache-strategy-mcache-object-note-reference strategy object))
+
+(defmethod cache-strategy-object-get-metrics ((strategy metered-cache))
+  (cache-strategy-mcache-object-get-metrics strategy))
+
+(defmethod cache-strategy-object-track ((strategy metered-cache) object)
+  (cache-strategy-mcache-object-track strategy object))
+
+(defmethod cache-strategy-object-p ((object metered-cache))
+  "[Cyc] METERED-CACHE-P has a cache strategy implementation."
+  t)
+
+(defmethod cache-strategy-object-gather-metrics ((strategy metered-cache) metrics)
+  (cache-strategy-mcache-object-gather-metrics strategy metrics))

@@ -202,70 +202,39 @@ and permission notice:
                                      (:file "sbhl/sbhl-link-vars")
                                      (:file "sbhl/sbhl-marking-vars")
                                      (:file "sbhl/sbhl-search-datastructures")
-                                     ;;(:file "sbhl.sbhl-search-vars")
+                                     (:file "sbhl/sbhl-search-vars")
                                      ;; MISSING-LARKC (:file "sbhl.sbhl-time-vars")
-                                     ;;(:file "sbhl.sbhl-link-iterators")
-                                     ;;(:file "at-vars")
-                                     ;;(:file "gt-vars")
-                                     ;;(:file "czer-vars")
-                                     (:file "mt-relevance-macros"
-                                            :depends-on (;; TODO "hlmt"
-                                                         "mt-vars"
-                                                         ;; TODO "mt-relevance-cache"
-                                                         "psc"
-                                                         "el-utilities"))
-                                     ;;(:file "pred-relevance-macros")
-                                     ;;(:file "at-macros")
+                                     ;; ELIDED (:file "sbhl.sbhl-link-iterators") - structs only
+                                     (:file "at-vars")
+                                     (:file "gt-vars")
+                                     (:file "czer-vars")
+                                     (:file "mt-relevance-macros")
+                                     (:file "pred-relevance-macros")
+                                     (:file "at-macros")
                                      ;; MISSING-LARKC (:file "czer-macros")
-                                     ;;(:file "wff-macros")
-                                     ;;(:file "wff-vars")
+                                     (:file "wff-macros")
+                                     (:file "wff-vars")
                                      ;; MISSING-LARKC (:file "gt-macros")
                                      ;; MISSING-LARKC (:file "hl-macros")
-                                     ;;(:file "obsolete")
+                                     (:file "obsolete")
                                      ;; MISSING-LARKC (:file "obsolete-macros")
-                                     ;;(:file "kb-mapping-macros")
-                                     ;;(:file "kb-access-metering")
-
+                                     (:file "kb-mapping-macros")
+                                     ;; ELIDED (:file "kb-access-metering") - mostly missing-larkc
                                      (:file "kb-object-manager")
-                                     ;;(:file "hlmt")
-                                     ;;(:file "hlmt-czer")
-
-                                     (:file "constants-interface"
-                                            :depends-on ("hl-interface-infrastructure"
-                                                         "control-vars"
-                                                         "constants-low"
-                                                         "constants-high"
-                                                         "constant-completion-low"))
-                                     ;;(:file "constant-index-manager")
-
-                                     (:file "constants-low"
-                                            :depends-on ("id-index"
-                                                         "constants-high"
-                                                         "constant-completion-low"
-                                                         "constant-handles"))
-                                     (:file "constants-high"
-                                            :depends-on (;; CIRCULAR "constants-interface"
-                                                         "kb-macros"
-                                                         "term"
-                                                         "narts-high"
-                                                         ;; TODO "bookkeeping-store"
-                                                         ;; TODO "kb-indexing"
-                                                         ;; TODO "kb-hl-supports"
-                                                         ;; TODO "cardinality-estimates"
-                                                         "constant-handles"))
+                                     (:file "hlmt")
+                                     (:file "hlmt-czer")
+                                     (:file "constants-interface")
+                                     (:file "constant-index-manager")
+                                     (:file "constants-low")
+                                     (:file "constants-high")
                                      (:file "nart-handles")
                                      ;; MISSING-LARKC (:file "narts-interface")
-                                     ;;(:file "nart-index-manager")
-                                     ;;(:file "nart-hl-formula-manager")
+                                     (:file "nart-index-manager")
+                                     (:file "nart-hl-formula-manager")
                                      ;; MISSING-LARKC (:file "narts-low")
                                      (:file "narts-high")
-                                     (:file "forts"
-                                            :depends-on ("constant-handles"
-                                                         "constants-low"
-                                                         "nart-handles"
-                                                         "id-index"
-                                                         "cfasl"))
-                                     ;;(:file "assertion-handles")
+                                     (:file "forts")
+                                     (:file "assertion-handles")
                                      ;;(:file "assertions-interface")
                                      ;;(:file "assertion-manager")
                                      ;;(:file "assertions-low")
@@ -289,32 +258,13 @@ and permission notice:
                                      ;; MISSING-LARKC (:file "el-macros")
                                      ;;(:file "sbhl.sbhl-macros")
                                      ;;(:file "cycl-variables")
-                                     (:file "el-utilities"
-                                            :depends-on (;; TODO "cycl-utilities"
-                                                         "list-utilities"))
+                                     (:file "el-utilities")
                                      ;;(:file "clause-utilities")
                                      ;;(:file "cycl-utilities")
                                      ;;(:file "cycl-grammar")
                                      ;;(:file "el-grammar")
                                      ;; MISSING-LARKC (:file "unicode-nauts")
-                                     (:file "term"
-                                            :depends-on ("el-utilities"
-                                                         ;; TODO "assertion-handles"
-                                                         ;; CIRCULAR "forts"
-                                                         ;; CIRCULAR "fort-types-interface"
-                                                         ;; TODO "kb-accessors"
-                                                         "el-utilities"
-                                                         ;; TODO "kb-mapping-utilities"
-                                                         "constant-handles"
-                                                         ;; CIRCULAR "constants-high"
-                                                         "string-utilities"
-                                                         "nart-handles"
-                                                         ;; TODO "cycl-utilities"
-                                                         "narts-high"
-                                                         "list-utilities"
-                                                         ;; TODO "cycl-variables"
-                                                         ;; TODO "czer-vars"
-                                                         "mt-relevance-macros"))
+                                     (:file "term")
                                      ;;(:file "kb-indexing-datastructures")
                                      ;;(:file "kb-utilities")
                                      ;;(:file "simple-indexing")
@@ -371,16 +321,7 @@ and permission notice:
                                      ;; MISSING-LARKC (:file "negation-mt")
                                      ;;(:file "ghl-search-methods")
                                      ;;(:file "sbhl.sbhl-cache")
-                                     (:file "fort-types-interface"
-                                            :depends-on ("forts"
-                                                         "mt-relevance-macros"
-                                                         ;; TODO "subhl-module-vars"
-                                                         ;; TODO "subhl-search-vars"
-                                                         ;; TODO "subhl-search-methods"
-                                                         ;; TODO "subhl-paranoia"
-                                                         ;; TODO "isa"
-                                                         ;; TODO "at-defns"
-                                                         ))
+                                     (:file "fort-types-interface")
                                      ;;(:file "czer-trampolines")
                                      ;;(:file "wff-utilities")
                                      ;;(:file "wff-module-datastructures")

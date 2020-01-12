@@ -114,15 +114,15 @@ Data Structures
 
 Utilities
 ---------
-` structure resourcing` - Object pooling for reusing structure instances. Generally missing-larkc, but took a while to figure out what the term meant.
+`structure resourcing` - Object pooling for reusing structure instances. Generally missing-larkc, but took a while to figure out what the term meant.
 
 `cfasl` - Serialization & deserialization tools.
 
- `memoization-state.lisp` - Memoizes function calls.
+`memoization-state.lisp` - Memoizes function calls.
  
- `special-variable-state.lisp` - Snapshots a list of CL special variables.
+`special-variable-state.lisp` - Snapshots a list of CL special variables.
  
- `misc-utilities.lisp` - Startup code.
+`misc-utilities.lisp` - Startup code.
  
 
 
@@ -146,14 +146,14 @@ Glossary
 `missing-larkc` = specific term for things in Cyc that were not provided to the LarKC project, distinguished from unimplemented or unfinished things in Clyc.  
 
 
-Acronyms
+Acronyms & Abbreviations
 --------
 `MT` = MicroTheory.  
 `GAF` = Ground Atomic Formula, a sentence that contains no variables or logical connectives.  
 `NAT` = Non-Atomic Term, a parameterized function representing a term. `(#$FruitFn #$AppleTree)` is the collection of fruit from apple trees, as opposed to the atomic term `#$Apples` or something.  
 `NAUT` = Non-Atomic Unreified Term. A function NAT, before reification, having only the Fn and args.  
-`NART` = Non-Atomic Reified Term. Actual information that the Fn resolved to.  
-`WFF` = Well-Formed Formula  
+`NART` = Non-Atomic Reified Term. Internal identifier that a NAUT resolved to.  
+`WFF` = Well-Formed Formula.  
 `EL` = Epistemological Level, expressive human-editable form.  
 `HL` = Heuristic Level, efficient low-level form.  
 `FOL` = First-Order Logic, the full sentence style of EL.  
@@ -163,4 +163,7 @@ Acronyms
 `PSC` = Problem Solving Context, related to which microtheories are in view.  
 `GUID` = Globally Unique ID, external identifier.  
 `SUID` = (System?) Unique ID, internal identifier.  
-`TOU` = Term Of Unit, maps a constant NART to a NAUT.
+`TOU` = Term Of Unit, predicate that maps a NART to a NAUT.  
+`TV` = Truth value. Default or monotonically true or false, unknown truth, etc.  
+`CZER` = Canonicalizer.
+`AT` = the `arg-type` mechanisms.  

@@ -186,7 +186,7 @@ and permission notice:
       (with-inference-mt-relevance-all-mts? mt)))
 
 (defun conservative-constraint-mt (mt)
-  "[Cyc] Assumign that relevance is being established from MT, and we are imposing a constraint about which we need to be conservative, return the mt in which we should look for such constraints."
+  "[Cyc] Assuming that relevance is being established from MT, and we are imposing a constraint about which we need to be conservative, return the mt in which we should look for such constraints."
   (if (any-or-all-mts-relevant-to-mt? mt)
       *core-mt-floor*
       mt))
