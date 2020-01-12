@@ -65,11 +65,11 @@ and permission notice:
   "Combine fixnum hashes together, using platform-specific hashing. Should not cons."
   (reduce (lambda (x y) `(sb-int::mix ,x (sxhash ,y))) hashes))
 
-  ;; DESIGN - as far as I can tell, the entire point of this caching-state stuff is to eliminate the need to cons up a list containing the params as a key to pass to gethash each time the function is called.  So the sxhash of the list of args is manually calculated without consing, then collisions are manually checked with the parameter values directly, using the TEST function on each parameter (note that this allows EQ or EQL slot testing within a composite key).  On a cache miss, the key is consed up to register it.  The zero parameter caching scheme is also broken out to its own storage slot.
+;; DESIGN - as far as I can tell, the entire point of this caching-state stuff is to eliminate the need to cons up a list containing the params as a key to pass to gethash each time the function is called.  So the sxhash of the list of args is manually calculated without consing, then collisions are manually checked with the parameter values directly, using the TEST function on each parameter (note that this allows EQ or EQL slot testing within a composite key).  On a cache miss, the key is consed up to register it.  The zero parameter caching scheme is also broken out to its own storage slot.
 
-  ;; This also stores the multiple-value-list of the calculation, instead of just a single return value.
+;; This also stores the multiple-value-list of the calculation, instead of just a single return value.  TODO DESIGN - optimizing a route for single-value returns can save consing & speed
 
-  ;; If these caches are hit a ton, consing up a list key to pass to gethash would add more GC pressure, and the steps through the code from the java looks shorter than what gethash does,although there is a gethash underlying the key->collisions storage.  The test seems to be part of the generated code (though I don't have a reference macro body to work from), so there's no unnecessary dispatch.  I think it's worth keeping this claptrap instead of just going for gethash for the moment.  As always, profiling needed.
+;; If these caches are hit a ton, consing up a list key to pass to gethash would add more GC pressure, and the steps through the code from the java looks shorter than what gethash does,although there is a gethash underlying the key->collisions storage.  The test seems to be part of the generated code (though I don't have a reference macro body to work from), so there's no unnecessary dispatch.  I think it's worth keeping this claptrap instead of just going for gethash for the moment.  As always, profiling needed.
 
 ;; Also, the caches can be selectively cleared, so having knowledge of which global variables hold the cahing states of various usages needs to remain exposed.
 
@@ -155,17 +155,19 @@ and permission notice:
       (caching-state-put caching-state sxhash (cons (list args-list results) collisions))))
 
 
-  ;; TODO - detect no-arg as well?  will probably work (suboptimally) without it, though.
-  ;; TODO - where is clearing of its memoization registered?
-  ;; This macroexpansion should (assuming list-utilities' num-list-cached is being implemented):
-  ;;  (defun num-list-cached (num start) ...)
-  ;;  create the name *num-list-cached-caching-state* to hold the lazily instantiated cache
-  ;;  hit the cache lookup by hashing the params without consing, and checking the list of collisions
-  ;;  define the cache-miss expression to generate the value for the params
+;; TODO - detect no-arg as well?  will probably work (suboptimally) without it, though.
+;; TODO - where is clearing of its memoization registered?
+;; This macroexpansion should (assuming list-utilities' num-list-cached is being implemented):
+;;  (defun num-list-cached (num start) ...)
+;;  create the name *num-list-cached-caching-state* to hold the lazily instantiated cache
+;;  hit the cache lookup by hashing the params without consing, and checking the list of collisions
+;;  define the cache-miss expression to generate the value for the params
 
-(defmacro defun-memoized (name params (&key (capacity nil) (test 'eql) (initial-size 0) declare doc) &body calculate-cache-miss)
+;; kb-mapping-macros simple-term-assertion-list-filtered also registers a clearing parameter from the hl-store being cleared, and :CLEAR-WHEN is in the java stuff here, surrounded by other keywords that we're going to try to use.
+(defmacro defun-memoized (name params (&key (capacity nil) (test 'eql) (initial-size 0) declare doc clear-when) &body calculate-cache-miss)
   "Define a memoized function.  The body can still have a docstring & declarations."
-  (let ((varname (intern (format nil "*~a-CACHING-STATE*" name))))
+  (let ((varname (symbolicate "*" name "-CACHING-STATE*"))
+        (clear-name (symbolicate "CLEAR-" name)))
     (alexandria:with-gensyms (cs key collisions results)
       `(progn
          (defvar ,varname nil)
@@ -174,11 +176,15 @@ and permission notice:
            (create-global-caching-state-for-name ',name ',varname ,capacity
                                                  ,(if (symbolp test) (list 'quote test) test)
                                                  ,(length params) ,initial-size)
-           (note-globally-cached-function ',name))
+           (note-globally-cached-function ',name)
+           ,(when clear-when
+              (case clear-when
+                (:hl-store-modified `(register-hl-store-cache-clear-callback #',clear-name))
+                (otherwise (error "Unknown defun-memoized :clear-when option: ~s" clear-when)))))
          ;; TODO - this would be the place to inject metrics on memoized functions
          (defun ,name ,params
-           ,(when declare `(declare ,@declare))
-           ,(when doc doc)
+           ,@(when declare `((declare ,@declare)))
+           ,@(when doc (list doc) doc)
            (let* ((,cs ,varname)
                   ;; Calculate the key by doing a non-consing hash construction
                   (,key (multi-hash ,@params))
@@ -198,7 +204,7 @@ and permission notice:
              (let ((,results (multiple-value-list (progn ,@calculate-cache-miss))))
                ;;(format t "~&cache miss ~a ~s~%" ',name (list ,@params))
                (caching-state-enter-multi-key-n ,cs ,key ,collisions ,results (list ,@params))
-               ,results)))))))
+               (caching-results ,results))))))))
 
 
 
@@ -364,7 +370,7 @@ and permission notice:
 (defglobal *quoted-isa-dependent-cache-clear-callbacks* nil
   "[Cyc] The list of zero-arity function-spec-p's to funcall each time the quotedIsa structure changes. These are intended to clear mt-dependent caches.")
 
-(defun caching-results (results)
+(defun-inline caching-results (results)
   "Returns the list of results as multiple-values."
   ;; Bypass the function call to values-list when there's only 1 result
   ;; TODO - can there be zero results? this code would return 0 results into 1 NIL
