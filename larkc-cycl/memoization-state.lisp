@@ -184,7 +184,7 @@ and permission notice:
          ;; TODO - this would be the place to inject metrics on memoized functions
          (defun ,name ,params
            ,@(when declare `((declare ,@declare)))
-           ,@(when doc (list doc) doc)
+           ,@(when doc (list doc))
            (let* ((,cs ,varname)
                   ;; Calculate the key by doing a non-consing hash construction
                   (,key (multi-hash ,@params))

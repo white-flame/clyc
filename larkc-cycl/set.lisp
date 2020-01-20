@@ -107,3 +107,16 @@ Returns SET."
   set)
 
 
+(defmacro do-set ((item set &optional done-form) &body body)
+  (alexandria:with-gensyms (val)
+    `(block nil
+       (maphash (lambda (,item ,val)
+                  (declare (ignore ,val))
+                  ,(when done-form
+                     `(when ,done-form
+                        (return nil)))
+                  ,@body)
+                ,set))))
+
+
+

@@ -30,7 +30,9 @@
 (in-package :clyc)
 
 (import '(alexandria:symbolicate
-          alexandria:when-let))
+          alexandria:when-let
+          alexandria:when-let*
+          alexandria:if-let))
 
 ;;------
 ;; Variable definitions
@@ -330,6 +332,13 @@
   (or (functionp obj)
       (and (symbolp obj)
            (fboundp obj))))
+
+(defmacro prog1-let (((name val)) &body body)
+  "Creates a single LET binding for a value to be returned."
+  `(let ((,name ,val))
+     ,@body
+     ,name))
+
 
 ;; A java ReentrantReadWriteLock allows multiple readers as long as there's no writer, or a single exclusive writer with no readers. So all will lock a central lock, check if it can work, or wait on an appropriate condition variable, and release the central lock. Exiting a "lock" will again gain the central lock, deregister itself, and notify any appropriate cv.
 ;; For optimization, fairness, and good ordering semantics, writers could be queued in order of attempt, and readers can block if a writer is already queued instead of starting new read work when write work is waiting.

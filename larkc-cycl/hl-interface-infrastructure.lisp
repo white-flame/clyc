@@ -74,14 +74,42 @@ and permission notice:
 (deflexical *remote-hl-store-connection-pool-lock* (bt:make-lock "Remote HL Store Connection Pool Lock"))
 (deflexical *remote-hl-store-connection-pool-max-size* 9)
 
-(defun define-hl-modifier-preamble ()
+(defun-inline define-hl-modifier-preamble ()
   "[Cyc] Code to execute before the internals of the hl-modifier (or hl-creator)."
   (clear-hl-store-dependent-caches))
 
-(defun define-hl-modifier-postamble ()
+(defun-inline define-hl-modifier-postamble ()
   "[Cyc] Code to execute before the internals of the hl-modifier (or hl-creator)."
   ;; probably should be "after" in the comment?
   (clear-hl-store-dependent-caches))
+
+(defmacro define-hl-creator (name arglist documentation-string type-declarations &body body)
+  ;; Implementation from assertions-interface kb-create-assertion.
+  ;; Due to the way the args were listed in the java, this seems to subsume the defun, too
+  `(defun ,name ,arglist
+     ,documentation-string
+     ,type-declarations
+     (define-hl-modifier-preamble)
+     ;; TODO - take care of &optional, &key, etc in a general utility
+     (note-hl-modifier-invocation ',name ,@arglist)
+     (when (hl-modify-anywhere?)
+       (bt:with-lock-held (*hl-lock*)
+         (prog1 (progn ,@body)
+           (define-hl-modifier-postamble))))))
+
+(defmacro define-hl-modifier (name arglist documentation-string type-declarations &body body)
+  ;; Implementation from assertions-interface kb-remove-assertion.
+  `(defun ,name ,arglist
+     ,documentation-string ,type-declarations
+     (define-hl-modifier-preamble)
+     ;; TODO - take care of &optional, &key, etc in a general utility
+     (note-hl-modifier-invocation ',name ,@arglist)
+     (when (hl-modify-remote?)
+       (missing-larkc 29510))
+     (when (hl-modify-local?)
+       (let ((*override-hl-store-remote-access?* t))
+         (bt:with-lock-held (*hl-lock*)
+           ,@body)))))
 
 (defparameter *hl-store-error-handling-mode* nil)
 (defglobal *hl-store-iterators* (make-hash-table))

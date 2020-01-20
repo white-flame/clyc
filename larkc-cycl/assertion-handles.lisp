@@ -144,7 +144,7 @@ and permission notice:
   "[Cyc] Return the id of this ASSERTION."
   (as-id assertion))
 
-(defun reset-assertion-id (assertion new-id)
+(defun-inline reset-assertion-id (assertion new-id)
   "[Cyc] Primitively change the assertion id for ASSERTION to NEW-ID."
   (setf (as-id assertion) new-id))
 
