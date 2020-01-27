@@ -41,7 +41,7 @@ and permission notice:
 (in-package :clyc)
 
 
-;; Replaced the implemenation with key->key hashtables
+;; Replaced the implemenation with key->T hashtables
 
 ;; TODO - could defer the inlines to set-contents instead of hash-table
 
@@ -62,22 +62,20 @@ Assume that SIZE elements will likely be immediately added."
 
 (defun-inline set-member? (element set)
   "[Cyc] Return T iff ELEMENT is in SET."
-  (nth-value 1 (gethash element set)))
+  (gethash element set))
 
-;; TODO DESIGN - this is a lot slower than if it didn't have to have the return value test.  Same with set-remove.
+;; TODO DESIGN - this is a lot slower than if it didn't have to have the return value test. SBCL internals might allow us to do this more directly, but we should first check if the return value is ever actually used.
 (defun-inline set-add (element set)
   "[Cyc] Add this ELEMENT into the SET.
 Return T iff ELEMENT was not already there."
   (unless (set-member? element set)
-      (setf (gethash element set) element)
-      t))
+      (setf (gethash element set) t)))
 
 (defun-inline set-remove (element set)
   "[Cyc] If ELEMENT is present in SET, then take it out of SET.
 Returns T iff ELEMENT was in SET to begin with."
-  (when (set-member? element set)
-    (remhash element set)
-    t))
+  ;; remhash matches this return behavior
+  (remhash element set))
 
 (defun-inline clear-set (set)
   "[Cyc] Reset SET to the status of being just allocated.
@@ -106,6 +104,11 @@ Returns SET."
 (defun-inline set-rebuild (set)
   set)
 
+
+(defun-inline set-p (obj)
+  "Since Clyc sets are hashtables, this overfits."
+  ;; TODO - See if there are any places where set-p is used as a peer of dictionary-p or hash-table-p etc
+  (hash-table-p obj))
 
 (defmacro do-set ((item set &optional done-form) &body body)
   (alexandria:with-gensyms (val)

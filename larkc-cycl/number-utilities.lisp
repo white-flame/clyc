@@ -144,7 +144,8 @@ The answer is limited to SIGNIFICANT-DIGITS, when non-NIL."
         (significant-digits result significant-digits)
         result)))
 
-;; TODO DESIGN - SBCL does support infinite numbers in sb-ext:, including math operators, numeric comparisons, and predicates.  The serialization process, however, would need to be extended to support it.  It's a tossup which way to go, but I'm hoping that the potentially-infinite-* functions aren't the norm and thus these manual implementations won't have too much of a burden.
+;; TODO DESIGN - SBCL does support infinite numbers in sb-ext:, including math operators, numeric comparisons, and predicates.  The serialization process, however, would need to be extended to support it, if these are ever asserted.  It's a tossup which way to go, but I'm hoping that the potentially-infinite-* functions aren't the norm and thus these manual implementations won't have too much of a burden.
+;; TODO - instrument or deprecate these to measure their presence.
 
 (defun-inline potentially-infinite-number-p (object)
   (or (numberp object)

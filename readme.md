@@ -89,7 +89,9 @@ Data Structures
 
 `deck` - A push/pop interface manually dispatched to either a queue or stack.
 
-`fvector` - file-vector, an indexed on-disk array of arbitrary-length elements.
+`fvector` - file-vector, an indexed on-disk array of arbitrary-length elements. However, writing seems to be missing-larkc.
+
+`kb-object-manager` - In-memory cache for a fixed percentage of a `fvector`. Forms the basis of most high-level storage.
 
 ### Deprecated
 
@@ -123,7 +125,8 @@ Utilities
 `special-variable-state.lisp` - Snapshots a list of CL special variables.
  
 `misc-utilities.lisp` - Startup code.
- 
+
+
 
 
 

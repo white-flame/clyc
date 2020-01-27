@@ -54,7 +54,7 @@ Returns KEY."
         (error "Corrupted dictionary; attempting to push values on a non-LISTP ~a." current-val))))
 
 (defun-inline dictionary-pushnew (dictionary key val &optional (test #'eql) (key-accessor #'identity))
-  "[Cyc] Push VALUE onto the current value at KEY in DICTINOARY. Ensures that the current value at KEY is a LISTP and that VALUE is not yet a member of the list. If the number of entries would exceed the limit, revamp the dictionary to the next better representation. TEST is a predicate that tests elements for equality and KEY-ACCESSOR is a function that represents the key field of the element.
+  "[Cyc] Push VALUE onto the current value at KEY in DICTIONARY. Ensures that the current value at KEY is a LISTP and that VALUE is not yet a member of the list. If the number of entries would exceed the limit, revamp the dictionary to the next better representation. TEST is a predicate that tests elements for equality and KEY-ACCESSOR is a function that represents the key field of the element.
 Returns KEY."
   (let ((current-val (gethash key dictionary)))
     (if (listp current-val)

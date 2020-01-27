@@ -1,5 +1,5 @@
 #|
-  Copyright (c) 2019 White Flame
+  Copyright (c) 2019-2020 White Flame
 
   This file is part of Clyc
  
@@ -490,10 +490,19 @@ OBJECT is not required to be well-formed."
   "[Cyc] Return T iff OBJECT is NIL (epsilon)."
   (null object))
 
+(defconstant *cyc-const-exception-operators* (list #$exceptFor
+                                                   #$exceptWhen)
+  "[Cyc] Used in the precanonicalizer.")
+
+(defun cyc-const-exception-operator-p (object)
+  "[Cyc] Return T iff OBJECT is one of the predefined exception operators."
+  (or (eq object #$exceptFor)
+      (eq object #$exceptWhen)))
+
 (defconstant *cyc-const-pragmatic-requirement-operators* (list #$pragmaticRequirement)
   "[Cyc] Used in the precanonicalizer.")
 
-(defun cyc-const-pragmatic-requirement-operator-p (object)
+(defun-inline cyc-const-pragmatic-requirement-operator-p (object)
   "[Cyc] Return T iff OBJECT is one fo the predefined exception operators."
   (eq object #$pragmaticRequirement))
 
@@ -1275,7 +1284,7 @@ Returns NIL if LITERAL is negative or is not an EL formula."
   "[Cyc] Returns T iff TERM is a denotational function, a variable, or a NAT whose result is a denotational function."
   (cond
     ((functor? term) t)
-    ((funcall var-func term)t)
+    ((funcall var-func term) t)
     ((function-term? term) (let ((nat (reify-when-closed-naut term)))
                              (if (fort-p nat)
                                  (functor? nat)

@@ -1,5 +1,5 @@
 #|
-  Copyright (c) 2019 White Flame
+  Copyright (c) 2019-2020 White Flame
 
   This file is part of Clyc
  
@@ -34,10 +34,6 @@ and permission notice:
   limitations under the License.
 |#
 
-
-
-
-
 (in-package :clyc)
 
 
@@ -45,13 +41,19 @@ and permission notice:
 A fvector is saved over 2 files:
 
  The index file holds 4-byte offset pointers into the data stream.
- The data stream is a concatenation of presumatly arbitrary-length items.
- Presumably, data items are mutated by appending the end of the data stream if they don't fit in the prior value's footprint, then updating the index entry to point to it.
+ The data stream is a concatenation of presumably arbitrary-length binary items.
 
 This seems limited to holding a bit over 4GiB of data.
 
-Unfortunately, there's no actual reading/writing implementation in here.  Yet.
+Reads are performed by having this position the data-stream to the selected index, and then using external cfasl stuff on the data-stream.
+Unfortunately, writing seems to be missing-larkc.
+
+ Presumably, data items are mutated by appending the end of the data stream if they don't fit in the prior value's footprint, then updating the index entry to point to it.  However, this would require eventual vacuuming.
+
+Hmm, there doesn't seem to be any place in the struct or index file to hold the footprint of the prior object, so it would actually have to be incompatibly reworked to add that in somehow.  But an append-only system would function without issue.
+
 |#
+
 
 (defstruct fvector
   data-stream

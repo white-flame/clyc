@@ -25,14 +25,17 @@
            cl:defvar
            cl:defparameter
            cl:defconstant
-           cl:sxhash))
+           cl:sxhash
+           cl:variable))
 
 (in-package :clyc)
 
+;; TODO - code probably has some alexandria prefixes left in it
 (import '(alexandria:symbolicate
           alexandria:when-let
           alexandria:when-let*
           alexandria:if-let))
+
 
 ;;------
 ;; Variable definitions
@@ -212,6 +215,9 @@
     `(unless (member ,val ,place :test ,test)
        (push-last ,val ,place))))
 
+(defmacro npush-list (list place)
+  `(setf ,place (nconc ,list ,place)))
+
 (defun put (symbol key val)
   (setf (get symbol key) val))
 
@@ -339,6 +345,11 @@
      ,@body
      ,name))
 
+(defmacro prog1-when (val &body body)
+  (alexandria:once-only (val)
+    `(prog1 ,val
+       (when ,val
+         ,@body))))
 
 ;; A java ReentrantReadWriteLock allows multiple readers as long as there's no writer, or a single exclusive writer with no readers. So all will lock a central lock, check if it can work, or wait on an appropriate condition variable, and release the central lock. Exiting a "lock" will again gain the central lock, deregister itself, and notify any appropriate cv.
 ;; For optimization, fairness, and good ordering semantics, writers could be queued in order of attempt, and readers can block if a writer is already queued instead of starting new read work when write work is waiting.

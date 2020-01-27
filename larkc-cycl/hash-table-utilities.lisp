@@ -84,3 +84,4 @@ and permission notice:
 (defun hash-table-values (hash-table)
   (loop for val being the hash-value of hash-table
        collect val))
+
