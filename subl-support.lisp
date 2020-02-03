@@ -247,10 +247,11 @@
         do (progn ,@body)))
 
 (defmacro dohash ((key val hashtable) &body body)
-  `(maphash (lambda (,key ,val)
-              (declare (ignorable ,key ,val))
-              ,@body)
-            ,hashtable))
+  `(block nil
+     (maphash (lambda (,key ,val)
+                (declare (ignorable ,key ,val))
+                ,@body)
+              ,hashtable)))
 
 (defmacro dovector ((index val vector) &body body)
   ;; TODO - convert to DO, probably faster as this version maintains a hidden index anyway
