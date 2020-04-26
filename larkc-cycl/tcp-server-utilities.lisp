@@ -89,7 +89,7 @@ Otherwise, disable all servers with DESIGNATOR as their type."
   (port nil :type (or null fixnum))
   process)
 
-(defun-inline tcp-server-port (tcp-server)
+(defun* tcp-server-port (tcp-server) (:inline t)
   "[Cyc] Return the port of TCP-SERVER, or NIL if disabled."
   (tcps-port tcp-server))
 

@@ -77,8 +77,10 @@ and permission notice:
   `(member ,@rest))
 
 ;; PERFORMANCE - do we assume fixnum for subl-level code?
-(defun-inline positive-integer-p (obj)
+(defun* positive-integer-p (obj)
+    (:inline t)
   (typep obj '(integer 1)))
 
-(defun-inline non-negative-integer-p (obj)
+(defun* non-negative-integer-p (obj)
+    (:inline t)
   (typep obj '(integer 0)))

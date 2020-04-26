@@ -234,11 +234,11 @@ If (machine-bogomips) is unknown, return NUMBERS unscaled."
         (let ((scaling-factor (/ bogomips local-bogomips)))
           (mapcar (lambda (number) (* scaling-factor number)) numbers)))))
 
-(defun-inline uninitialized ()
+(defun* uninitialized () (:inline t)
   :uninitialized)
 
-(defun-inline uninitialized-p (object)
+(defun* uninitialized-p (object) (:inline t)
   (eq object (uninitialized)))
 
-(defun-inline initialized-p (object)
+(defun* initialized-p (object) (:inline t)
   (not (uninitialized-p object)))

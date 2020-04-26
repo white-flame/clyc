@@ -74,7 +74,7 @@ and permission notice:
 (def-at-state-var *at-check-defining-mts?* t
   "[Cyc] Enforce #$definingMt constraints?")
 
-(defun-inline at-check-defining-mts-p ()
+(defun* at-check-defining-mts-p () (:inline t)
   (and *at-check-defining-mts?*
        *at-possibly-check-defining-mts?*))
 
@@ -183,7 +183,7 @@ and permission notice:
 (def-at-state-var *within-tou-gaf?* nil
   "[Cyc] Is the formula being canonicalized a termOfUnit gaf?")
 
-(defun-inline within-tou-gaf? () 
+(defun* within-tou-gaf? () (:inline t)
   "[Cyc] Return T iff the formula being canonicalized isa a termOfUnit gaf."
   *within-tou-gaf?*)
 
@@ -202,7 +202,7 @@ and permission notice:
 (def-at-state-var *at-some-arg-isa-required?* nil
   "[Cyc] Must there be some arg-isa constraint applicable to an arg for a given arg, relation, argnum to be wf?")
 
-(defun-inline at-some-arg-isa-required? () 
+(defun* at-some-arg-isa-required? ()  (:inline t)
   "[Cyc] Returns boolean, must there be some arg-isa constraint applicable to an arg for a given arg, relation, argnum to be WF?"
   *at-some-arg-isa-required?*)
 
@@ -272,10 +272,10 @@ and permission notice:
 (def-at-state-var *at-search-genl-inverses?* t
   "[Cyc] Consider genlInverses during current at search?")
 
-(defun-inline at-searching-genl-preds? ()
+(defun* at-searching-genl-preds? () (:inline t)
   *at-search-genl-preds?*)
 
-(defun-inline at-searching-genl-inverses? ()
+(defun* at-searching-genl-inverses? () (:inline t)
   *at-search-genl-inverses?*)
 
 (def-at-state-var *at-profile-term* nil

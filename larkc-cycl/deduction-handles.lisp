@@ -40,7 +40,7 @@ and permission notice:
 (defglobal *deduction-from-id* nil
     "[Cyc] The ID -> DEDUCTION mapping table.")
 
-(defun-inline do-deductions-table ()
+(defun* do-deductions-table () (:inline t)
   *deduction-from-id*)
 
 (defun setup-deduction-table (size exact?)
@@ -63,7 +63,7 @@ and permission notice:
         (id-index-count index)
         0)))
 
-(defun-inline lookup-deduction (id)
+(defun* lookup-deduction (id) (:inline t)
   (id-index-lookup *deduction-from-id* id))
 
 (defun set-next-deduction-id (&optional max-deduction-id)
@@ -85,7 +85,7 @@ and permission notice:
   "[Cyc] Note that ID is not in use as a deduction id."
   (id-index-remove *deduction-from-id* id))
 
-(defun-inline make-deduction-id ()
+(defun* make-deduction-id () (:inline t)
   "[Cyc] Return a new integer id for a deduction."
   (id-index-reserve *deduction-from-id*))
 
@@ -96,7 +96,7 @@ and permission notice:
   (let ((id (d-id object)))
     (or id 786)))
 
-(defun-inline get-deduction ()
+(defun* get-deduction () (:inline t)
   "[Cyc] Make a new deduction shell, potentially in static space."
   (make-deduction))
 
@@ -108,7 +108,7 @@ and permission notice:
   (and (deduction-p object)
        (deduction-handle-valid? object)))
 
-(defun-inline valid-deduction (deduction &optional robust?)
+(defun* valid-deduction (deduction &optional robust?) (:inline t)
   (valid-deduction? deduction robust?))
 
 (defun valid-deduction? (deduction &optional robust?)
@@ -126,7 +126,7 @@ and permission notice:
     (register-deduction-id deduction id)
     deduction))
 
-(defun-inline create-sample-invalid-deduction ()
+(defun* create-sample-invalid-deduction () (:inline t)
   (get-deduction))
 
 (defun free-all-deductions ()
@@ -136,7 +136,7 @@ and permission notice:
   (clear-deduction-table)
   (clear-deduction-content-table))
 
-(defun-inline deduction-id (deduction)
+(defun* deduction-id (deduction) (:inline t)
   "[Cyc] Return the id of DEDUCTION."
   (d-id deduction))
 
@@ -144,10 +144,10 @@ and permission notice:
   "[Cyc] Primitively change the id of DEDUCTION to NEW-ID."
   (setf (d-id deduction) new-id))
 
-(defun-inline deduction-valid-handle? (deduction)
+(defun* deduction-valid-handle? (deduction) (:inline t)
   ;; TODO - original checked for integerp
   (d-id deduction))
 
-(defun-inline find-deduction-by-id (id)
+(defun* find-deduction-by-id (id) (:inline t)
   (lookup-deduction id))
 

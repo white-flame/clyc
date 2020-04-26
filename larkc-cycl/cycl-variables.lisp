@@ -52,20 +52,20 @@ and permission notice:
 (defconstant *valid-el-var-regular-expression* "([?]|[?][?]) [A-Z] ([A-Z]|[0-9])* ([-] ([A-Z]|[0-9])+)*"
   "[Cyc] The current filter for valid EL variable name in regular expression format.")
 
-(defun-inline el-variable-prefix-char ()
+(defun* el-variable-prefix-char () (:inline t)
   "[Cyc] Returns the character used as teh first character of an EL variable's name."
   *el-variable-prefix-char*)
 
-(defun-inline el-variable-prefix-char? (object)
+(defun* el-variable-prefix-char? (object) (:inline t)
   "[Cyc] Returns T if OBJECT is the character used as the first character of an EL variable's name."
   (char= object (el-variable-prefix-char)))
 
-(defun-inline has-el-variable-prefix? (string)
+(defun* has-el-variable-prefix? (string) (:inline t)
   "[Cyc] Returns T if STRING begins with ?. STRING assumed to be stringp."
   ;; TODO - will crash if string is ""
   (el-variable-prefix-char? (char string 0)))
 
-(defun-inline has-dont-care-var-prefix? (string)
+(defun* has-dont-care-var-prefix? (string) (:inline t)
   "[Cyc] Returns T if STRING begins with ??. STRING assumed to be stringp."
   (and (el-variable-prefix-char? (char string 0))
        (el-variable-prefix-char? (char string 1))))
@@ -77,7 +77,7 @@ and permission notice:
        (not (keywordp object))
        (el-var-name? (el-var-name object))))
 
-(defun-inline el-var-name (el-var)
+(defun* el-var-name (el-var) (:inline t)
   "[Cyc] The name of EL-VAR. Includes the prefix character."
   (symbol-name el-var))
 
@@ -86,7 +86,7 @@ and permission notice:
        (length> object 1)
        (has-el-variable-prefix? object)))
 
-(defun-inline make-el-var (object)
+(defun* make-el-var (object) (:inline t)
   (intern-el-var object))
 
 (defun make-el-var-name (object)
@@ -128,21 +128,21 @@ and permission notice:
        (not (find-if #'invalid-variable-name-char (subseq object 1)))
        (not (search (invalid-hyphen-sequence) object))))
 
-(defun-inline invalid-hyphen-sequence ()
+(defun* invalid-hyphen-sequence () (:inline t)
   *el-variable-invalid-hyphen-sequence*)
 
-(defun-inline intern-el-var (object)
+(defun* intern-el-var (object) (:inline t)
   (intern (make-el-var-name object) *cyc-package*))
 
 (defconstant *keyword-variable-prefix-char* #\:
   "[Cyc] The character used as the first character of a keyword variable's name.")
 
-(defun-inline permissible-keyword-var? (thing)
+(defun* permissible-keyword-var? (thing) (:inline t)
   "[Cyc] Return T iff THING is deemed a keyword variable, and we are allowing such things."
   (and *permit-keyword-variables?*
        (keywordp thing)))
 
-(defun-inline keyword-var? (thing)
+(defun* keyword-var? (thing) (:inline t)
   "[Cyc] Return T iff THING is deemed a keyword variable."
   (keywordp thing))
 
@@ -180,11 +180,11 @@ and permission notice:
     ((generic-arg-var? var) #'generic-arg-var?)
     (t #'false)))
 
-(defun-inline kb-var? (symbol)
+(defun* kb-var? (symbol) (:inline t)
   (kb-variable? symbol))
 
-(defun-inline kb-variable? (symbol)
+(defun* kb-variable? (symbol) (:inline t)
   (variable-p symbol))
 
-(defun-inline hl-var? (thing)
+(defun* hl-var? (thing) (:inline t)
   (variable-p thing))

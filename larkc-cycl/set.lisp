@@ -47,43 +47,44 @@ and permission notice:
 
 (deflexical *new-set-default-test-function* #'eql)
 
-(defun-inline new-set (&optional (test *new-set-default-test-function*) (size 0))
+(defun* new-set (&optional (test *new-set-default-test-function*) (size 0))
+    (:inline t)
   "[Cyc] Allocate a new set with TEST as the equality test.
 Assume that SIZE elements will likely be immediately added."
   (make-hash-table :test test :size size))
 
-(defun-inline set-size (set)
+(defun* set-size (set) (:inline t)
   "[Cyc] Return the number of items currently entered in SET"
   (hash-table-count set))
 
-(defun-inline set-empty? (set)
+(defun* set-empty? (set) (:inline t)
   "[CYc] Return non-NIL iff SET is empty, NIL otherwise."
   (hash-table-empty-p set))
 
-(defun-inline set-member? (element set)
+(defun* set-member? (element set) (:inline t)
   "[Cyc] Return T iff ELEMENT is in SET."
   (gethash element set))
 
 ;; TODO DESIGN - this is a lot slower than if it didn't have to have the return value test. SBCL internals might allow us to do this more directly, but we should first check if the return value is ever actually used.
-(defun-inline set-add (element set)
+(defun* set-add (element set) (:inline t)
   "[Cyc] Add this ELEMENT into the SET.
 Return T iff ELEMENT was not already there."
   (unless (set-member? element set)
       (setf (gethash element set) t)))
 
-(defun-inline set-remove (element set)
+(defun* set-remove (element set) (:inline t)
   "[Cyc] If ELEMENT is present in SET, then take it out of SET.
 Returns T iff ELEMENT was in SET to begin with."
   ;; remhash matches this return behavior
   (remhash element set))
 
-(defun-inline clear-set (set)
+(defun* clear-set (set) (:inline t)
   "[Cyc] Reset SET to the status of being just allocated.
 Returns SET."
   ;; TODO - we're not remembering its initial size.  Oh well.
   (clrhash set))
 
-(defun-inline new-set-iterator (set)
+(defun* new-set-iterator (set) (:inline t)
   (new-hash-table-iterator set))
 
 (defconstant *cfasl-opcode-set* 60)
@@ -96,16 +97,16 @@ Returns SET."
 
 (defconstant *cfasl-opcode-legacy-set* 67)
 
-(defun-inline set-element-list (set)
+(defun* set-element-list (set) (:inline t)
   "[Cyc] Returns a list of the elements of SET."
   (hash-table-keys set))
 
 ;; TODO - deprecate this
-(defun-inline set-rebuild (set)
+(defun* set-rebuild (set) (:inline t)
   set)
 
 
-(defun-inline set-p (obj)
+(defun* set-p (obj) (:inline t)
   "Since Clyc sets are hashtables, this overfits."
   ;; TODO - See if there are any places where set-p is used as a peer of dictionary-p or hash-table-p etc
   (hash-table-p obj))

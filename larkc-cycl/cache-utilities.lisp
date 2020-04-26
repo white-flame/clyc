@@ -44,51 +44,51 @@ and permission notice:
 ;; cachemtr = cache-metrics
 ;; mcache = metered-cache
 
-(defun-inline cache-strategy-gather-metrics (strategy)
+(defun* cache-strategy-gather-metrics (strategy) (:inline t)
   "[Cyc] Allocate a metrics object and then begin using it to gather metrics."
   (cache-strategy-object-gather-metrics strategy (new-cache-metrics)))
 
-(defun-inline cache-strategy-p (object)
+(defun* cache-strategy-p (object) (:inline t)
   "[Cyc] Determine whether the object is a cache strategy or not."
   (cache-strategy-object-p object))
 
-(defun-inline cache-strategy-note-cache-miss (strategy)
+(defun* cache-strategy-note-cache-miss (strategy) (:inline t)
   "[Cyc] If metrics are being kept, then note the cache miss.
 Otherwise, the operation is a NO-OP."
   (when (cache-strategy-keeps-metrics-p strategy)
     (cache-metrics-note-miss (cache-strategy-get-metrics strategy)))
   strategy)
 
-(defun-inline cache-metrics-note-miss (metrics)
+(defun* cache-metrics-note-miss (metrics) (:inline t)
   "[Cyc] Update the metrics to reflect that the cache lookup resulted in a miss."
   (incf (cachemtr-miss-count metrics)))
 
-(defun-inline cache-strategy-note-reference (strategy object)
+(defun* cache-strategy-note-reference (strategy object) (:inline t)
   "[Cyc] Inform the cache strategy tracking system that the object mentioned was referenced. Objects that are not currently being tracked will be ignored."
   (when (cache-strategy-tracked? strategy object)
     (cache-strategy-object-note-reference strategy object))
   strategy)
 
-(defun-inline cache-strategy-tracked? (strategy object)
+(defun* cache-strategy-tracked? (strategy object) (:inline t)
   "[Cyc] Determine whether this object is currently being tracked in the cache."
   (cache-strategy-object-tracked? strategy object))
 
 (defgeneric cache-strategy-object-tracked? (strategy object)
   (:documentation "[Cyc] By default, we do not know whether the object is tracked."))
 
-(defun-inline cache-strategy-mcache-object-note-reference (mcache object)
+(defun* cache-strategy-mcache-object-note-reference (mcache object) (:inline t)
   (cache-set-without-values (mcache-cache mcache) object object))
 
-(defun-inline cache-strategy-mcache-object-tracked? (mcache object)
+(defun* cache-strategy-mcache-object-tracked? (mcache object) (:inline t)
   (cache-contains-key-p (mcache-cache mcache) object))
 
 (defgeneric cache-strategy-object-note-reference (strategy object)
   (:documentation "[Cyc] By default, we do not know how to note a reference."))
 
-(defun-inline cache-strategy-mcache-object-keeps-metrics-p (mcache)
+(defun* cache-strategy-mcache-object-keeps-metrics-p (mcache) (:inline t)
   (cache-metrics-p (mcache-metrics mcache)))
 
-(defun-inline cache-strategy-mcache-object-get-metrics (mcache)
+(defun* cache-strategy-mcache-object-get-metrics (mcache) (:inline t)
   (mcache-metrics mcache))
 
 (defun cache-strategy-note-cache-hits (strategy several)
@@ -100,14 +100,14 @@ Otherwise the operation is a NO-OP."
         (cache-metrics-note-hit metrics))))
   strategy)
 
-(defun-inline cache-strategy-note-cache-hit (strategy)
+(defun* cache-strategy-note-cache-hit (strategy) (:inline t)
   "[Cyc] If metrics are being kept, then note the cache hit.
 Otherwise the operation is a NO-OP."
   (when (cache-strategy-keeps-metrics-p strategy)
     (cache-metrics-note-hit (cache-strategy-get-metrics strategy)))
   strategy)
 
-(defun-inline cache-strategy-get-metrics (strategy)
+(defun* cache-strategy-get-metrics (strategy) (:inline t)
   "[Cyc] Return CACHE-METRICS-P or NIL if no metrics are being gathered."
   (and (cache-strategy-keeps-metrics-p strategy)
        (cache-strategy-object-get-metrics strategy)))
@@ -115,19 +115,19 @@ Otherwise the operation is a NO-OP."
 (defgeneric cache-strategy-object-get-metrics (strategy)
   (:documentation "[Cyc] By default we do not know how to get the metrics."))
 
-(defun-inline cache-metrics-note-hit (metrics)
+(defun* cache-metrics-note-hit (metrics) (:inline t)
   "[Cyc] Update the metrics to reflect that the cache lookup resulted in a hit."
   (incf (cachemtr-hit-count metrics))
   metrics)
 
-(defun-inline cache-strategy-keeps-metrics-p (strategy)
+(defun* cache-strategy-keeps-metrics-p (strategy) (:inline t)
   "[Cyc] Determine if the cache strategy is currently gathering metrics or not."
   (cache-strategy-object-keeps-metrics-p strategy))
 
 (defgeneric cache-strategy-object-keeps-metrics-p (strategy)
   (:documentation "[Cyc] By default, we do not know whether the strategy is keeping metrics or not."))
 
-(defun-inline cache-strategy-track (strategy object)
+(defun* cache-strategy-track (strategy object) (:inline t)
   "[Cyc] Track this object in the cache. If CACHE-STRATEGY-CACHE-FULL-P is TRUE, then select an object to untrack and return that no longer tracked object; otherwise return the newly tracked object."
   (cache-strategy-object-track strategy object))
 
@@ -172,15 +172,15 @@ Otherwise the operation is a NO-OP."
     (declare (ignore value))
     (if dropped-p key object)))
 
-(defun-inline new-metered-cache (cache)
+(defun* new-metered-cache (cache) (:inline t)
   "[Cyc] Allocate the new metered cache, leaving the metrics slot empty for now."
   (make-metered-cache :cache cache))
 
-(defun-inline new-metered-preallocated-cache (capacity &optional (test #'eql))
+(defun* new-metered-preallocated-cache (capacity &optional (test #'eql)) (:inline t)
   "[Cyc] Allocate a new metered cache for a pre-allocated cache of the specified capacity and test-type."
   (new-metered-cache (new-preallocated-cache capacity test)))
 
-(defun-inline cache-strategy-mcache-object-gather-metrics (mcache metrics)
+(defun* cache-strategy-mcache-object-gather-metrics (mcache metrics) (:inline t)
   (setf (mcache-metrics mcache) metrics)
   mcache)
 

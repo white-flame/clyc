@@ -54,10 +54,10 @@ and permission notice:
     (update-special-variable-state svs)))
 
 ;; TODO - weird naming convention, is this a macroexpansion?
-(defun-inline with-special-variable-state-variables (svs)
+(defun* with-special-variable-state-variables (svs) (:inline t)
   (svs-variables svs))
 
-(defun-inline with-special-variable-state-values (svs)
+(defun* with-special-variable-state-values (svs) (:inline t)
   (svs-values svs))
 
 (defun update-special-variable-state (svs)

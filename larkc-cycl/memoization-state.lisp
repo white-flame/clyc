@@ -370,7 +370,7 @@ and permission notice:
 (defglobal *quoted-isa-dependent-cache-clear-callbacks* nil
   "[Cyc] The list of zero-arity function-spec-p's to funcall each time the quotedIsa structure changes. These are intended to clear mt-dependent caches.")
 
-(defun-inline caching-results (results)
+(defun* caching-results (results) (:inline t)
   "Returns the list of results as multiple-values."
   ;; Bypass the function call to values-list when there's only 1 result
   ;; TODO - can there be zero results? this code would return 0 results into 1 NIL

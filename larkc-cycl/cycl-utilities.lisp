@@ -49,7 +49,7 @@ and permission notice:
   "[Cyc] Returns T iff FORMULA is opaque in the argument position ARGNUM, meaning that it should not be recursed into in that arg position. By convention, if ARGNUM is greater than the arity of FORMULA, this denotes the sequence variable in FORMULA."
   (opaque-arg?-int formula argnum *opaque-arg-function*))
 
-(defun-inline expression-nsubst-free-vars (new old expression &optional (test #'eql))
+(defun* expression-nsubst-free-vars (new old expression &optional (test #'eql)) (:inline t)
   (expression-nsubst-free-vars-int new old expression test))
 
 (defun expression-nsubst-free-vars-int (new old expression test)
@@ -104,23 +104,23 @@ and permission notice:
            (unless (opaque-arg-wrt-free-vars? expression argnum)
              (rplaca rest-of-expression (expression-nsubst-free-vars-int new old term test))))))))
 
-(defun-inline opaque-seqvar? (formula)
+(defun* opaque-seqvar? (formula) (:inline t)
   "[Cyc] Returns T iff FORMULA contains an opaque sequence variable, which should not be considered a proper part of the formula."
   (funcall *opaque-seqvar-function* formula))
 
-(defun-inline nat-arg2 (nat &optional (seqvar-handling :ignore))
+(defun* nat-arg2 (nat &optional (seqvar-handling :ignore)) (:inline t)
   "[Cyc] Returns the 2nd argument of NAT. Returns NIL if NAT is not a nat."
   (nat-arg nat 2 seqvar-handling))
 
-(defun-inline opaque-arg?-int (formula argnum opaque-arg-function)
+(defun* opaque-arg?-int (formula argnum opaque-arg-function) (:inline t)
   ;; This did a case to find known function names and bypass funcall.
   (funcall opaque-arg-function formula argnum))
 
-(defun-inline formula-arg4 (formula &optional (seqvar-handling :ignore))
+(defun* formula-arg4 (formula &optional (seqvar-handling :ignore)) (:inline t)
   "[Cyc] Returns the 4th argument of FORMULA. Returns NIL if FORMULA is not a formula."
   (formula-arg formula 4 seqvar-handling))
 
-(defun-inline formula-arg5 (formula &optional (seqvar-handling :ignore))
+(defun* formula-arg5 (formula &optional (seqvar-handling :ignore)) (:inline t)
   "[Cyc] Returns the 5th argument of FORMULA. Returns NIL if FORMULA is not a formula."
   (formula-arg formula 5 seqvar-handling))
 
@@ -169,10 +169,10 @@ Note: Careful: the result is not destructible!"
   (or (atomic-reified-term-p object)
       (reified-formula-p object)))
 
-(defun-inline atomic-reified-term-p (object)
+(defun* atomic-reified-term-p (object) (:inline t)
   (constant-p object))
 
-(defun-inline reified-formula-p (object)
+(defun* reified-formula-p (object) (:inline t)
   (hl-formula-p object))
 
 ;;TODO DESIGN - again a long list of parameters that are passed through multiple levels.  Reevaluate.
@@ -201,10 +201,11 @@ Note: Careful: the result is not destructible!"
   (fast-delete-duplicates (expression-gather-int-2 expression pred penetrate-hl-structures? key subs-too?)
                           test key))
 
-(defun-inline expression-gather (expression pred &optional penetrate-hl-structures?
-                                            (test #'eql)
-                                            (key #'identity)
-                                            (subs-too? t))
+(defun* expression-gather (expression pred &optional penetrate-hl-structures?
+                                      (test #'eql)
+                                      (key #'identity)
+                                      (subs-too? t))
+    (:inline t)
   "[Cyc] Return a list of all objects within EXPRESSION which pass the test PRED, without duplicates but in no particular order.
 See file-level documentation for explanation of PENETRATE-HL-STRUCTURES? and #$ExpandSubLFn.
 Returns the singleton list containing EXPRESSION if EXPRESSION passes PRED."
@@ -227,15 +228,16 @@ Returns the singleton list containing EXPRESSION if EXPRESSION passes PRED."
 (defparameter *expression-count-item* nil)
 (defparameter *expression-count-test* nil)
 
-(defun-inline formula-gather (formula pred &optional penetrate-hl-structures?
-                                      (test #'eql)
-                                      (key #'identity)
-                                      (subs-too? t))
+(defun* formula-gather (formula pred &optional penetrate-hl-structures?
+                                (test #'eql)
+                                (key #'identity)
+                                (subs-too? t))
+    (:inline t)
   "[Cyc] Return a list of all objects within the EL formula FORMULA which pass the test PRED, without duplicates but in no particular order.
 See file-level documentation for explanation of PENETRATE-HL-STRUCTURES? and #$ExpandSubLFn."
   (expression-gather formula pred penetrate-hl-structures? test key subs-too?))
 
-(defun-inline expression-narts (expression &optional penetrate-hl-structures? (subs-too? t))
+(defun* expression-narts (expression &optional penetrate-hl-structures? (subs-too? t)) (:inline t)
   "[Cyc] Return a list of the narts mentioned in EXPRESSION, without duplicates but in no particular order.
 See file-level documentation for explanation of PENETRATE-HL-STRUCTURES? and #$ExpandSubLFn.
 Returns the singleton list containing EXPRESSION if EXPRESSION is a nart."
@@ -269,8 +271,9 @@ See file-level documentation for explanation of PENETRATE-HL-STRUCTURES? and #$E
                (not (tree-find-if test expression key)))
     (expression-find-if-int test expression penetrate-hl-structures? key)))
 
-(defun-inline formula-find-if (test formula &optional penetrate-hl-structures?
-                                    (key #'identity))
+(defun* formula-find-if (test formula &optional penetrate-hl-structures?
+                              (key #'identity))
+    (:inline t)
   "[Cyc] Return an object which passes the test TEST if such an object exists within the EL formula FORMULA. Otherwise NIL.
 See file-level documentation for explanation of PENETRATE-HL-STRUCTURES? and #$ExpandSubLFn."
   (expression-find-if test formula penetrate-hl-structures? key))
@@ -291,9 +294,10 @@ See file-level documentation for explanation of PENETRATE-HL-STRUCTURES? and #$E
          (unless (opaque-arg? expression argnum)
            (return (expression-find-int object term penetrate-hl-structures? test key)))))))
 
-(defun-inline expression-find (object expression &optional penetrate-hl-structures?
+(defun* expression-find (object expression &optional penetrate-hl-structures?
                                       (test #'eql)
                                       (key #'identity))
+     (:inline t)
   "[Cyc] Return OBJECT if it is found within the CycL expression EXPRESSION, otherwise NIL.
 See file-level documentation for explanation of PENETRATE-HL-STRUCTURES? and #$ExpandSubLFn."
   (expression-find-int object expression penetrate-hl-structures? test key))
@@ -352,7 +356,7 @@ See file-level documentation for explanation of PENETRATE-HL-STRUCTURES? and #$E
               (rplacd rest-of-expression transformed-seqvar)))
       transformed-expression)))
 
-(defun-inline expression-transform (expression pred transform &optional transform-sequence-variables? (transformation-limit *default-transformation-limit*))
+(defun* expression-transform (expression pred transform &optional transform-sequence-variables? (transformation-limit *default-transformation-limit*)) (:inline t)
   "[Cyc] Recursively tests PRED within the CycL expression EXPRESSION. If PRED applies to EXPRESSION or a subexpression/subterm of EXPRESSION, TRANSFORM is called on that term or expression. If an expression is transformed into another expression, the result is itself subjected to the transformation if PRED applies to the result. Thus one must take care when calling this function, to avoid infinite recursion. It does not penetrate into HL structures."
   (expression-ntransform-int (copy-expression expression) pred transform transform-sequence-variables? transformation-limit 0 nil nil))
 
@@ -416,7 +420,7 @@ See file-level documentation for explanation of PENETRATE-HL-STRUCTURES? and #$E
                  (rplacd rest-of-expression substituted-seqvar)))
          expression))))
 
-(defun-inline expression-nsublis-free-vars (alist expression &optional (test #'eql))
+(defun* expression-nsublis-free-vars (alist expression &optional (test #'eql)) (:inline t)
   (expression-nsublis-free-vars-int alist expression test))
 
 ;; TODO - probably from a missing-larkc defun-memoized?
@@ -633,22 +637,22 @@ but  (el-formula-arg (<pred> <arg1> . ?SEQ) 2 :REGULARIZE) -> ?SEQ"
     ((nart-p formula) (missing-larkc 10396))
     ((assertion-p formula) (el-formula-operator (assertion-hl-formula formula)))))
 
-(defun-inline formula-operator (formula)
+(defun* formula-operator (formula) (:inline t)
   "[Cyc] Returns the operator of FORMULA. Returns NIL if FORMULA is not a formula."
   (formula-arg0 formula))
 
-(defun-inline el-formula-operator (el-formula)
+(defun* el-formula-operator (el-formula) (:inline t)
   "[Cyc] Returns the operator of EL-FORMULA."
   (car el-formula))
 
-(defun-inline formula-arg1 (formula &optional (seqvar-handling :ignore))
+(defun* formula-arg1 (formula &optional (seqvar-handling :ignore)) (:inline t)
   (formula-arg formula 1 seqvar-handling))
 
-(defun-inline formula-arg2 (formula &optional (seqvar-handling :ignore))
+(defun* formula-arg2 (formula &optional (seqvar-handling :ignore)) (:inline t)
   "[Cyc] Returns the 2nd argument of FORMULA. Returns NIL if FORMULA is not a formula."
   (formula-arg formula 2 seqvar-handling))
 
-(defun-inline formula-arg3 (formula &optional (seqvar-handling :ignore))
+(defun* formula-arg3 (formula &optional (seqvar-handling :ignore)) (:inline t)
   "[Cyc] Returns the 3rd argument of FORMULA. Returns NIL if FORMULA is not a formula."
   (formula-arg formula 3 seqvar-handling))
 
@@ -689,7 +693,7 @@ returns NIL if FORMULA is not a possibly-cycl-formula-p."
     ((nart-p formula) (missing-larkc 10398))
     ((assertion-p formula) (el-formula-terms (assertion-hl-formula formula)))))
 
-(defun-inline el-formula-terms (el-formula &optional (seqvar-handling :ignore)) 
+(defun* el-formula-terms (el-formula &optional (seqvar-handling :ignore))  (:inline t)
   "[Cyc] Returns a list of the terms in EL-FORMULA.
 If seqvar-handling is :IGNORE, it chops off the sequence var if there is one.
 If seqvar-handling is :REGULARIZE, it treats the sequence var as a regular variable.
@@ -726,14 +730,14 @@ In the case of formula-args having the optional sequence var argument be :INCLUD
          (t (el-error 3 "formula-terms-int got a non-el-variable or cons: ~a~%" formula)
             (values nil t))))
 
-(defun-inline nat-args (nat &optional (seqvar-handling :ignore)) 
+(defun* nat-args (nat &optional (seqvar-handling :ignore))  (:inline t)
   "[Cyc] Returns (as a list or a variable) the arguments of NAT. Returns NIL if NAT is not a nat.
 If seqvar-handling is :IGNORE, it chops off the sequence var if there is one.
 If seqvar-handling is :REGULARIZE, it treats the sequence var as a regular variable.
 If seqvar-handling is :INCLUDE, it returns it as a sequence var."
   (formula-args nat seqvar-handling))
 
-(defun-inline nat-arg (nat n &optional (seqvar-handling :ignore)) 
+(defun* nat-arg (nat n &optional (seqvar-handling :ignore))  (:inline t)
   "[Cyc] Return the argument in position N of non-atomic term NAT.
 If seqvar-handling is :IGNORE, it will return NIL if asked for the arg position where the sequence variable is.
 If seqvar-handling is :REGULARIZE, it will return the sequence variable if asked for its position.
@@ -741,11 +745,11 @@ e.g. (nat-arg (<func> <arg1> . ?SEQ) 2 :IGNORE)     -> NIL
 but  (nat-arg (<func> <arg1> . ?SEQ) 2 :REGULARIZE) -> ?SEQ"
   (formula-arg nat n seqvar-handling))
 
-(defun-inline nat-functor (nat) 
+(defun* nat-functor (nat)  (:inline t)
   "[Cyc] Returns the functor of NAT. Returns NIL if NAT is not a nat."
   (nat-arg0 nat))
 
-(defun-inline naut-functor (naut)
+(defun* naut-functor (naut) (:inline t)
   "[Cyc] Returns the functor of NAUT."
   (el-formula-operator naut))
 
@@ -755,42 +759,42 @@ but  (nat-arg (<func> <arg1> . ?SEQ) 2 :REGULARIZE) -> ?SEQ"
     ((el-formula-p nat) (naut-functor nat))
     ((nart-p nat) (missing-larkc 10400))))
 
-(defun-inline nat-arg1 (nat &optional (seqvar-handling :ignore)) 
+(defun* nat-arg1 (nat &optional (seqvar-handling :ignore))  (:inline t)
   "[Cyc] Returns the 1st argument of NAT. Returns NIL if NAT is not a nat."
   (nat-arg nat 1 seqvar-handling))
 
-(defun-inline sentence-arg (sentence argnum &optional (seqvar-handling :ignore))
+(defun* sentence-arg (sentence argnum &optional (seqvar-handling :ignore)) (:inline t)
   (formula-arg sentence argnum seqvar-handling))
 
-(defun-inline sentence-args (sentence &optional (seqvar-handling :ignore))
+(defun* sentence-args (sentence &optional (seqvar-handling :ignore)) (:inline t)
   (formula-args sentence seqvar-handling))
 
-(defun-inline sentence-truth-function (sentence)
+(defun* sentence-truth-function (sentence) (:inline t)
   (formula-arg0 sentence))
 
-(defun-inline sentence-arg0 (sentence)
+(defun* sentence-arg0 (sentence) (:inline t)
   (formula-arg0 sentence))
 
-(defun-inline sentence-arg1 (asent &optional (seqvar-handling :ignore))
+(defun* sentence-arg1 (asent &optional (seqvar-handling :ignore)) (:inline t)
   (formula-arg1 asent seqvar-handling))
 
-(defun-inline sentence-arg2 (asent &optional (seqvar-handling :ignore))
+(defun* sentence-arg2 (asent &optional (seqvar-handling :ignore)) (:inline t)
   (formula-arg2 asent seqvar-handling))
 
-(defun-inline atomic-sentence-arg (asent argnum &optional (seqvar-handling :ignore))
+(defun* atomic-sentence-arg (asent argnum &optional (seqvar-handling :ignore)) (:inline t)
   (formula-arg asent argnum seqvar-handling))
 
-(defun-inline atomic-sentence-args (asent &optional (seqvar-handling :ignore))
+(defun* atomic-sentence-args (asent &optional (seqvar-handling :ignore)) (:inline t)
   (formula-args asent seqvar-handling))
 
-(defun-inline atomic-sentence-predicate (asent)
+(defun* atomic-sentence-predicate (asent) (:inline t)
   (formula-arg0 asent))
 
-(defun-inline atomic-sentence-arg1 (asent &optional (seqvar-handling :ignore))
+(defun* atomic-sentence-arg1 (asent &optional (seqvar-handling :ignore)) (:inline t)
   (formula-arg1 asent seqvar-handling))
 
-(defun-inline atomic-sentence-arg2 (asent &optional (seqvar-handling :ignore))
+(defun* atomic-sentence-arg2 (asent &optional (seqvar-handling :ignore)) (:inline t)
   (formula-arg2 asent seqvar-handling))
 
-(defun-inline atomic-sentence-arg3 (asent &optional (seqvar-handling :ignore))
+(defun* atomic-sentence-arg3 (asent &optional (seqvar-handling :ignore)) (:inline t)
   (formula-arg3 asent seqvar-handling))

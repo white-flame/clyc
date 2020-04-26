@@ -753,7 +753,7 @@ and permission notice:
 
 (defparameter *subseq-subst-recursive-answers* nil)
 
-(defun-inline extremal (list test &optional (key #'identity))
+(defun* extremal (list test &optional (key #'identity)) (:inline t)
   "[Cyc] Return the first item in LIST which maximizes TEST."
   (when list
     (let ((best (first list)))

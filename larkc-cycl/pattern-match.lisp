@@ -57,7 +57,8 @@ Entries are of the form (operator method).
 OPERATOR is a token indicating the match method.
 METHOD must be suitable for (funcall method <pattern> <tree>).")
 
-(defun-inline add-pattern-matches-tree-binding (variable value)
+(defun* add-pattern-matches-tree-binding (variable value)
+    (:inline t)
   (setf *pattern-matches-tree-bindings*
         (alist-enter-without-values *pattern-matches-tree-bindings*
                                     variable value #'eql)))
@@ -70,19 +71,23 @@ METHOD must be suitable for (funcall method <pattern> <tree>).")
                     (values t (nreverse *pattern-matches-tree-bindings*))))
     (error () (values nil nil))))
 
-(defun-inline pattern-matches-tree-without-bindings (pattern tree)
+(defun* pattern-matches-tree-without-bindings (pattern tree)
+    (:inline t)
   "[Cyc] Return T iff PATTERN matches TREE.
 :BIND expressions are not allowed in PATTERN."
   (pattern-matches-tree-internal pattern tree))
 
-(defun-inline pattern-matches-tree-internal (pattern tree)
+(defun* pattern-matches-tree-internal (pattern tree)
+    (:inline t)
   "[Cyc] For use by pattern match methods in other files."
   (pattern-matches-tree-recursive pattern tree))
 
-(defun-inline pattern-matches-tree-atomic-method-funcall (method tree)
+(defun* pattern-matches-tree-atomic-method-funcall (method tree)
+    (:inline t)
   (funcall method tree))
 
-(defun-inline pattern-matches-tree-method-funcall (method pattern tree)
+(defun* pattern-matches-tree-method-funcall (method pattern tree)
+    (:inline t)
   (funcall method pattern tree))
 
 (defun pattern-matches-tree-recursive (pattern tree)

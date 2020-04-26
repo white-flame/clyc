@@ -45,31 +45,31 @@ and permission notice:
 (defparameter *sbhl-search-type* nil
   "[Cyc] The current type of search. Governs how each search node is used during search.")
 
-(defun-inline get-sbhl-search-type ()
+(defun* get-sbhl-search-type () (:inline t)
   *sbhl-search-type*)
 
-(defun-inline sbhl-boolean-search-p ()
+(defun* sbhl-boolean-search-p () (:inline t)
   "[Cyc] Whether search type indicates boolean search."
   (eq (get-sbhl-search-type) :boolean))
 
 (defparameter *sbhl-justification-search-p* nil
   "[Cyc] Does the current boolean search show the path that allowed success to be concluded?")
 
-(defun-inline sbhl-justification-search-p ()
+(defun* sbhl-justification-search-p () (:inline t)
   "[Cyc] Whether current search is one that gathers justifications."
   *sbhl-justification-search-p*)
 
 (defparameter *sbhl-search-behavior* nil
   "[Cyc] The current search's entry function.")
 
-(defun-inline get-sbhl-search-behavior ()
+(defun* get-sbhl-search-behavior () (:inline t)
   *sbhl-search-behavior*)
 
 
 (defparameter *sbhl-justification-behavior* :old
   "[Cyc] The current behavior used for assembling sbhl-justifications, and determining how their returns will appear.")
 
-(defun-inline get-sbhl-just-behavior ()
+(defun* get-sbhl-just-behavior () (:inline t)
   *sbhl-justification-behavior*)
 
 (defparameter *sbhl-justification-defaulted-old* nil
@@ -78,19 +78,19 @@ and permission notice:
 (defparameter *sbhl-justification-assembled-p* nil
   "[Cyc] Has the justification path already been assembled?")
 
-(defun-inline sbhl-justification-assembled-p ()
+(defun* sbhl-justification-assembled-p () (:inline t)
   *sbhl-justification-assembled-p*)
 
 (defparameter *sbhl-unmarking-search-p* nil
   "[Cyc] Is current search an unmarking search?")
 
-(defun-inline sbhl-unmarking-search-p ()
+(defun* sbhl-unmarking-search-p () (:inline t)
   *sbhl-unmarking-search-p*)
 
 (defparameter *sbhl-search-module* nil
   "[Cyc] The module initiating the current search.")
 
-(defun-inline get-sbhl-search-module ()
+(defun* get-sbhl-search-module () (:inline t)
   (let ((val *sbhl-search-module*))
     (unless val
       (warn "GET-SBHL-SEARCH-MODULE: *SBHL-SEARCH-MODULE* is unexpectedly null."))
@@ -99,30 +99,30 @@ and permission notice:
 (defparameter *sbhl-search-module-type* nil
   "[Cyc] The module type of the current search module.")
 
-(defun-inline get-sbhl-search-module-type ()
+(defun* get-sbhl-search-module-type () (:inline t)
   *sbhl-search-module-type*)
 
 (defparameter *sbhl-add-node-to-result-test* nil
   "[Cyc] The function used to govern adding nodes to the result during search.")
 
-(defun-inline get-sbhl-search-add-node-test ()
+(defun* get-sbhl-search-add-node-test () (:inline t)
   "[Cyc] The function applied to a node's marking before pushing correctly marked nodes onto result. Determined by current *SBHL-SEARCH-MODULE*."
   *sbhl-add-node-to-result-test*)
 
 (defparameter *sbhl-add-unmarked-node-to-result-test* nil
   "[Cyc] The function used to govern adding nodes to the result of an unmarking search.")
 
-(defun-inline get-sbhl-search-add-unmarked-node-test ()
+(defun* get-sbhl-search-add-unmarked-node-test () (:inline t)
   "[Cyc] The function applied to a node's marking before pushing unmarked nodes onto result. Determined by current *SBHL-SEARCH-MODULE*."
   *sbhl-add-unmarked-node-to-result-test*)
 
 (defparameter *genl-inverse-mode-p* nil
   "[Cyc] Whether current search state has argument order flipped from search's initial order.")
 
-(defun-inline genl-inverse-mode-p ()
+(defun* genl-inverse-mode-p () (:inline t)
   *genl-inverse-mode-p*)
 
-(defun-inline not-genl-inverse-mode-p ()
+(defun* not-genl-inverse-mode-p () (:inline t)
   "[Cyc] Opposite of *sbhl-genl-inverse-mode-p*"
   (not *genl-inverse-mode-p*))
 
@@ -140,35 +140,35 @@ and permission notice:
 (deflexical *sbhl-forward-search-direction* :forward
   "[Cyc] The keyword specifying forward search")
 
-(defun-inline sbhl-forward-search-direction-p (direction)
+(defun* sbhl-forward-search-direction-p (direction) (:inline t)
   "[Cyc] Whether SBHL search direction is forward"
   (eq direction *sbhl-forward-search-direction*))
 
-(defun-inline get-sbhl-forward-search-direction ()
+(defun* get-sbhl-forward-search-direction () (:inline t)
   *sbhl-forward-search-direction*)
 
 ;; TODO - not defconstant?
 (deflexical *sbhl-backward-search-direction* :backward
   "[Cyc] The keyword specifying backward search.")
 
-(defun-inline sbhl-backward-search-direction-p (direction)
+(defun* sbhl-backward-search-direction-p (direction) (:inline t)
   "[Cyc] Whether SBHL search direction is backward"
   (eq direction *sbhl-backward-search-direction*))
 
-(defun-inline get-sbhl-backward-search-direction ()
+(defun* get-sbhl-backward-search-direction () (:inline t)
   *sbhl-backward-search-direction*)
 
 (defparameter *sbhl-search-direction* nil
   "[Cyc] The direction of current search")
 
-(defun-inline get-sbhl-search-direction ()
+(defun* get-sbhl-search-direction () (:inline t)
   *sbhl-search-direction*)
 
-(defun-inline sbhl-forward-search-p ()
+(defun* sbhl-forward-search-p () (:inline t)
   "[Cyc] Whether the *SBHL-SEARCH-DIRECTION* is forward."
   (sbhl-forward-search-direction-p *sbhl-search-direction*))
 
-(defun-inline sbhl-backward-search-p ()
+(defun* sbhl-backward-search-p () (:inline t)
   "[Cyc] Whether the *SBHL-SEARCH-DIRECTION* is backward."
   (sbhl-backward-search-direction-p *sbhl-search-direction*))
 
@@ -182,29 +182,29 @@ and permission notice:
 (defparameter *sbhl-map-function* nil
   "[Cyc] The recursive winding function of current search.")
 
-(defun-inline get-sbhl-map-function ()
+(defun* get-sbhl-map-function () (:inline t)
   *sbhl-map-function*)
 
 (defparameter *sbhl-unwind-function* nil
   "[Cyc] The function applied during recursive unwind.")
 
-(defun-inline get-sbhl-unwind-function ()
+(defun* get-sbhl-unwind-function () (:inline t)
    *sbhl-unwind-function*)
 
 (defparameter *sbhl-apply-unwind-function-p* nil
   "[Cyc] Toggle determining whether to apply *SBHL-UNWIND-FUNCTION*.")
 
-(defun-inline sbhl-apply-unwind-function-p ()
+(defun* sbhl-apply-unwind-function-p () (:inline t)
   *sbhl-apply-unwind-function-p*)
 
-(defun-inline sbhl-toggle-unwind-function-on ()
+(defun* sbhl-toggle-unwind-function-on () (:inline t)
   "[Cyc] Sets to T *SBHL-APPLY-UNWIND-FUNCTION-P*."
   (setf *sbhl-apply-unwind-function-p* t))
 
 (defparameter *sbhl-search-parent-marking* nil
   "[Cyc] The current node's parent marking.")
                         
-(defun-inline set-sbhl-search-parent-marking (marking)
+(defun* set-sbhl-search-parent-marking (marking) (:inline t)
   "[Cyc] Sets *SBHL-SEARCH-PARENT-MARKING* to MARKING."
   (setf *sbhl-search-parent-marking* marking))
 
@@ -214,19 +214,18 @@ and permission notice:
 (defparameter *sbhl-finished?* nil
   "[Cyc] Stores whether sbhl search is finished and if so, how.")
 
-(defun-inline sbhl-finished-with-goal ()
+(defun* sbhl-finished-with-goal () (:inline t)
   "[Cyc] Sets *SBHL-FINISHED?* to :GOAL. Used to specify that an SBHL search terminated upon reaching its goal condition."
   (setf *sbhl-finished?* :goal))
 
 (defparameter *sbhl-stop-search-path?* nil
   "[Cyc] Stop mark and sweep from going further.")
 
-(defun-inline sbhl-stop-search-path-p ()
+(defun* sbhl-stop-search-path-p () (:inline t)
   "[Cyc] Whether to stop the current search path."
   *sbhl-stop-search-path?*)
   
-(defun-inline sbhl-stop-search-path ()
-  "[Cyc] Sets environment to stop current search path."
+(defun* sbhl-stop-search-path () (:inline t)
   (setf *sbhl-stop-search-path?* t))
 
 (defparameter *sbhl-target-node* nil
@@ -235,17 +234,17 @@ and permission notice:
 (defparameter *sbhl-goal-node* nil
   "[Cyc] The goal node for current search.")
 
-(defun-inline sbhl-goal-node-p (node)
+(defun* sbhl-goal-node-p (node) (:inline t)
   "[Cyc] Whether NODE is equal to *sbhl-goal-node*"
   (eq node *sbhl-goal-node*))
 
-(defun-inline get-sbhl-goal-node () 
+(defun* get-sbhl-goal-node () (:inline t)
   *sbhl-goal-node*)
 
 (defparameter *sbhl-goal-nodes* nil
   "[Cyc] The goal nodes for current search for any goal.")
 
-(defun-inline get-sbhl-goal-nodes ()
+(defun* get-sbhl-goal-nodes () (:inline t)
   "[Cyc] The current goal nodes."
   *sbhl-goal-nodes*)
 
@@ -261,13 +260,13 @@ and permission notice:
 (defparameter *sbhl-consider-node-fn* nil
   "[Cyc] Function applied to each node during closure searches.")
 
-(defun-inline get-sbhl-consider-node-fn ()
+(defun* get-sbhl-consider-node-fn () (:inline t)
   *sbhl-consider-node-fn*)
 
 (defparameter *sbhl-compose-fn* nil
   "[Cyc] Function applied to each node during closure searches.")
 
-(defun-inline get-sbhl-compose-fn ()
+(defun* get-sbhl-compose-fn () (:inline t)
   *sbhl-compose-fn*)
 
 (defparameter *sbhl-combine-fn* #'nconc
@@ -294,7 +293,7 @@ and permission notice:
 (defparameter *sbhl-sample-leaf-queues* nil
   "[Cyc] The list of queues guiding sample leaf searches.")
 
-(defun-inline sbhl-leaf-sample-search-p ()
+(defun* sbhl-leaf-sample-search-p () (:inline t)
   "[Cyc] Uses *sbhl-sample-leaf-queues* to answer whether current search is one that uses the leaf queues."
   *sbhl-sample-leaf-queues*)
 
@@ -304,7 +303,7 @@ and permission notice:
 (defparameter *sbhl-check-for-goal-marking-p* nil
   "[Cyc] Whether to check whether a node is marked as :goal before checking other marking in search path termination.")
 
-(defun-inline sbhl-check-for-goal-marking-p ()
+(defun* sbhl-check-for-goal-marking-p () (:inline t)
   *sbhl-check-for-goal-marking-p*)
 
 (defparameter *sbhl-precomputed-goal-space* nil
@@ -328,7 +327,7 @@ and permission notice:
 (defparameter *sbhl-search-truth* nil
   "[Cyc] Used to determine whether the search is true or false.")
 
-(defun-inline sbhl-true-search-p ()
+(defun* sbhl-true-search-p () (:inline t)
   "[Cyc] Whether *SBHL-TV* generalizes to #$True-JustificationTruth. See SBHL-TV-GENERALIZES-TO-GENERAL-TV?"
   (sbhl-true-tv-p *sbhl-search-truth*))
 
@@ -351,18 +350,18 @@ and permission notice:
 (deflexical *sbhl-false-tv* #$False-JustificationTruth
   "[Cyc] The encompassing false truth for searches.")
 
-(defun-inline get-sbhl-true-tv ()
+(defun* get-sbhl-true-tv () (:inline t)
   "[Cyc] The encompassing true truth."
   *sbhl-true-tv*)
 
-(defun-inline get-sbhl-false-tv ()
+(defun* get-sbhl-false-tv () (:inline t)
   "[Cyc] The encompassing false truth."
   *sbhl-false-tv*)
 
 (defparameter *sbhl-tv* #$True-JustificationTruth
   "[Cyc] Search parameter.")
 
-(defun-inline get-sbhl-tv () 
+(defun* get-sbhl-tv () (:inline t)
   "[Cyc] The truth relevance for the current search."
   *sbhl-tv*)
 
@@ -401,7 +400,7 @@ and permission notice:
         (#$Unknown-JustificationTruth
          (eq general-tv #$ArbitraryTruth-JustificationTruth)))))
      
-(defun-inline relevant-sbhl-tv-is-general-tv (tv)
+(defun* relevant-sbhl-tv-is-general-tv (tv) (:inline t)
   "[Cyc] Whether TV generalizes to *sbhl-tv*"
   (sbhl-tv-generalizes-to-general-tv? tv *sbhl-tv*))
 
@@ -411,11 +410,11 @@ and permission notice:
       (funcall *relevant-sbhl-tv-function* tv)
       (relevant-sbhl-tv-is-general-tv tv)))
 
-(defun-inline sbhl-true-tv-p (tv)
+(defun* sbhl-true-tv-p (tv) (:inline t)
   "[Cyc] Whether TV generalizes to #$True-JustificationTruth."
   (sbhl-tv-generalizes-to-general-tv? tv #$True-JustificationTruth))
 
-(defun-inline sbhl-false-tv-p (tv)
+(defun* sbhl-false-tv-p (tv) (:inline t)
   "[Cyc] Whether TV generalizes to #$False-JustificationTruth."
   (sbhl-tv-generalizes-to-general-tv? tv #$False-JustificationTruth))
 
@@ -447,11 +446,11 @@ and permission notice:
     ((sbhl-true-tv-p tv) (sbhl-opposite-tv tv))
     (t (sbhl-error 1 "Expected true or false sbhl truth value. tv: ~a~%" tv))))
 
-(defun-inline sbhl-search-true-tv ()
+(defun* sbhl-search-true-tv () (:inline t)
   "[Cyc] The true truth value with same strength as *SBHL-TV*."
   (sbhl-true-tv *sbhl-tv*))
   
-(defun-inline sbhl-search-false-tv ()
+(defun* sbhl-search-false-tv () (:inline t)
   "[Cyc] The false truth value with same strength as *SBHL-TV*."
   (sbhl-false-tv *sbhl-tv*))
 

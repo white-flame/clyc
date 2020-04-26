@@ -43,11 +43,11 @@ and permission notice:
 
 (defparameter *relevant-mt-function* nil)
 
-(defun-inline mt-function-eq (mt-function symbol)
+(defun* mt-function-eq (mt-function symbol) (:inline t)
   "[Cyc] Return T iff relevant-mt function MT-FUNCTION matches that specified by SYMBOL."
   (eq mt-function symbol))
 
-(defun-inline relevant-mt-function-eq (symbol)
+(defun* relevant-mt-function-eq (symbol) (:inline t)
   "[Cyc] Return T iff the currently relevant mt-function matches that specified by SYMBOL"
   (mt-function-eq *relevant-mt-function* symbol))
 

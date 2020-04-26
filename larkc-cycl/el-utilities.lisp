@@ -337,21 +337,21 @@ Note that OBJECT does not need to be well-formed."
 (defconstant *cyc-const-ternary-logical-ops* nil
     "[Cyc] Used in the syntax checker.")
 
-(defun-ignore cyc-const-ternary-logical-op-p (object)
+(defun* cyc-const-ternary-logical-op-p (object) (:ignore t)
   "[Cyc] Return T iff OBJECT is one of the predefined ternary operators."
   nil)
 
 (defconstant *cyc-const-quaternary-logical-ops* nil
     "[Cyc] Used in the syntax checker.")
 
-(defun-ignore cyc-const-quaternary-logical-op-p (object)
+(defun* cyc-const-quaternary-logical-op-p (object) (:ignore t)
   "[Cyc] Return T iff OBJECT is one of the predefined quaternary operators."
   nil)
 
 (defconstant *cyc-const-quintary-logical-ops* nil
     "[Cyc] Used in the syntax checker.")
 
-(defun-ignore cyc-const-quintary-logical-op-p (object)
+(defun* cyc-const-quintary-logical-op-p (object) (:ignore t)
   "[Cyc] Return T iff OBJECT is one of the predefined quintary operators."
   nil)
 
@@ -502,7 +502,7 @@ OBJECT is not required to be well-formed."
 (defconstant *cyc-const-pragmatic-requirement-operators* (list #$pragmaticRequirement)
   "[Cyc] Used in the precanonicalizer.")
 
-(defun-inline cyc-const-pragmatic-requirement-operator-p (object)
+(defun* cyc-const-pragmatic-requirement-operator-p (object) (:inline t)
   "[Cyc] Return T iff OBJECT is one fo the predefined exception operators."
   (eq object #$pragmaticRequirement))
 

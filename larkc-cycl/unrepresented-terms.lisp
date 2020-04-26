@@ -43,7 +43,7 @@ and permission notice:
 (defglobal *unrepresented-term-from-suid* nil
     "[Cyc] The SUID -> UNREPRESENTED-TERM mapping table.")
 
-(defun-inline do-unrepresented-terms-table ()
+(defun* do-unrepresented-terms-table () (:inline t)
   *unrepresented-term-from-suid*)
 
 (defun setup-unrepresented-term-suid-table (size exact?)
@@ -76,16 +76,16 @@ and permission notice:
     (id-index-count idx)
     0))
 
-(defun-inline lookup-unrepresented-term-by-suid (suid)
+(defun* lookup-unrepresented-term-by-suid (suid) (:inline t)
   (id-index-lookup *unrepresented-term-from-suid* suid))
 
-(defun-inline lookup-unrepresented-term-suid (term)
+(defun* lookup-unrepresented-term-suid (term) (:inline t)
   (gethash term *unrepresented-term-to-suid*))
 
-(defun-inline find-unrepresented-term-by-suid (suid)
+(defun* find-unrepresented-term-by-suid (suid) (:inline t)
   (lookup-unrepresented-term-by-suid suid))
 
-(defun-inline unrepresented-term-suid (term)
+(defun* unrepresented-term-suid (term) (:inline t)
   (lookup-unrepresented-term-suid term))
 
 (defun kb-unrepresented-term-p (object)
@@ -116,7 +116,7 @@ and permission notice:
       (id-index-remove *unrepresented-term-from-suid* suid)
       (remhash term *unrepresented-term-to-suid*))))
 
-(defun-inline make-unrepresented-term-suid ()
+(defun* make-unrepresented-term-suid () (:inline t)
   "[Cyc] Return a new integer suid for a unrepresented-term."
   (id-index-reserve *unrepresented-term-from-suid*))
 
@@ -154,5 +154,5 @@ If BOOTSTRAP? is non-NIL, then a new SUID will be created for TERM if one does n
 
 (defparameter *unrepresented-term-dump-id-table* nil)
 
-(defun-inline find-unrepresented-term-by-dump-id (dump-id)
+(defun* find-unrepresented-term-by-dump-id (dump-id) (:inline t)
   (find-unrepresented-term-by-suid dump-id))

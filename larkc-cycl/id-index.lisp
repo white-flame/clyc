@@ -56,7 +56,7 @@ and permission notice:
 ;; Rewrote into using only tombstone marker, keeping NIL as an empty list untouched.
 (defconstant +id-index-tombstone+ :%tombstone)
 
-(defun-inline id-index-tombstone ()
+(defun* id-index-tombstone () (:inline t)
   +id-index-tombstone+)
 
 
@@ -74,49 +74,49 @@ and permission notice:
   `(bt:with-lock-held ((id-index-lock ,id-index))
      ,@body))
 
-(defun-inline id-index-lock (id-index)
+(defun* id-index-lock (id-index) (:inline t)
   "[Cyc] Return the lock used to control modifications of ID-INDEX."
   (idix-lock id-index))
 
-(defun-inline id-index-count (id-index)
+(defun* id-index-count (id-index) (:inline t)
   "[Cyc] Return the total number of objects indexed in ID-INDEX."
   (idix-count id-index))
 
-(defun-inline id-index-next-id (id-index)
+(defun* id-index-next-id (id-index) (:inline t)
   "[Cyc] Return the next internal ID which would be used in ID-INDEX."
   (idix-next-id id-index))
 
-(defun-inline set-id-index-next-id (id-index next-id)
+(defun* set-id-index-next-id (id-index next-id) (:inline t)
   (declare (fixnum next-id))
   "[Cyc] Start reserving internal IDs in ID-INDEX at NEXT-ID."
   (setf (idix-next-id id-index) next-id))
 
-(defun-inline id-index-old-objects (id-index)
+(defun* id-index-old-objects (id-index) (:inline t)
   "[Cyc] Return the vector for old objects in ID-INDEX."
   (idix-old-objects id-index))
 
-(defun-inline id-index-new-objects (id-index)
+(defun* id-index-new-objects (id-index) (:inline t)
   "[Cyc] Return the hashtable for new objects in ID-INDEX."
   (idix-new-objects id-index))
 
-(defun-inline id-index-empty-p (id-index)
+(defun* id-index-empty-p (id-index) (:inline t)
   "[Cyc] Return T iff ID-INDEX is empty."
   (zerop (id-index-count id-index)))
 
-(defun-inline id-index-new-object-count (id-index)
+(defun* id-index-new-object-count (id-index) (:inline t)
   "[Cyc] Return the number of new objects in ID-INDEX."
   (hash-table-count (id-index-new-objects id-index)))
 
-(defun-inline id-index-old-object-count (id-index)
+(defun* id-index-old-object-count (id-index) (:inline t)
   "[Cyc] Return the number of old objects in ID-INDEX."
   (- (id-index-count id-index)
      (id-index-new-object-count id-index)))
 
-(defun-inline id-index-new-id-threshold (id-index)
+(defun* id-index-new-id-threshold (id-index) (:inline t)
   "[Cyc] Return the ID at which new objects start in ID-INDEX."
   (length (id-index-old-objects id-index)))
 
-(defun-inline id-index-old-object-id-p (id-index id)
+(defun* id-index-old-object-id-p (id-index id) (:inline t)
   (declare (fixnum id))
   ;; TODO DESIGN - can probably eliminate the non-negative-integer-p check and just leave the fixnum declaration, since optimize-id-index will break if negative indexes are placed into the new-objects table anwyay.
   (and (non-negative-integer-p id)
@@ -148,7 +148,7 @@ Access to OLD-OBJECTS-SIZE number of ids starting at 0 will be optimized."
       (setf (idix-next-id id-index) (1+ next-id))
       next-id)))
 
-(defun-inline id-index-tombstone-p (object)
+(defun* id-index-tombstone-p (object) (:inline t)
   (eq object (id-index-tombstone)))
 
 (declaim (inline id-index-lookup-int))
@@ -159,7 +159,7 @@ Access to OLD-OBJECTS-SIZE number of ids starting at 0 will be optimized."
       ;; Added a default tombstone for hash lookups
       (gethash id (id-index-new-objects id-index) (id-index-tombstone))))
 
-(defun-inline id-index-lookup (id-index id &optional default)
+(defun* id-index-lookup (id-index id &optional default) (:inline t)
   (declare (inline id-index-lookup-int)
            (fixnum id))
   (let ((result (id-index-lookup-int id-index id)))
@@ -167,7 +167,7 @@ Access to OLD-OBJECTS-SIZE number of ids starting at 0 will be optimized."
         default
         result)))
 
-(defun-inline id-index-enter-unlocked (id-index id object)
+(defun* id-index-enter-unlocked (id-index id object) (:inline t)
   (declare (fixnum id))
   "[Cyc] Enter OBJECT in ID-INDEX as the object associated with the key ID.
 ID-INDEX is assumed to be already locked from the outside."
@@ -219,18 +219,18 @@ If the insert fills up the old objects vector, grow the vector."
     (clrhash (id-index-new-objects id-index))))
 
 ;; Macro helpers, were used in the expansion in id-index-values
-(defun-inline id-index-skip-tombstones-p (tombstone)
+(defun* id-index-skip-tombstones-p (tombstone) (:inline t)
   (eq :skip tombstone))
 
-(defun-inline id-index-objects-empty-p (id-index tombstone)
+(defun* id-index-objects-empty-p (id-index tombstone) (:inline t)
   (when (id-index-skip-tombstones-p tombstone)
     (id-index-empty-p id-index)))
 
-(defun-inline id-index-old-objects-empty-p (id-index tombstone)
+(defun* id-index-old-objects-empty-p (id-index tombstone) (:inline t)
   (when (id-index-skip-tombstones-p tombstone)
     (zerop (id-index-old-object-count id-index))))
 
-(defun-inline id-index-new-objects-empty-p (id-index)
+(defun* id-index-new-objects-empty-p (id-index) (:inline t)
   (zerop (id-index-new-object-count id-index)))
 
 ;; TODO - the tombstone variable is very annoying, with its :skip option. I think the "hide tombstone" default value should be the tombstone symbol itself, since there's now 2 separate special values to check for (:%tombstone and :skip) all in the same value space, and the predicates for checking them are very poorly named.

@@ -108,21 +108,21 @@ and permission notice:
     (setf (graphl-search-marking-space search) (graphl-instantiate-new-space)))
   search)
 
-(defun-inline graphl-add-to-result (search addition &optional (test #'eq))
+(defun* graphl-add-to-result (search addition &optional (test #'eq)) (:inline t)
   (pushnew addition (graphl-search-result search) :test test))
 
 (deflexical *graphl-search-size* 200)
 
-(defun-inline graphl-search-size ()
+(defun* graphl-search-size () (:inline t)
   *graphl-search-size*)
 
 (defun graphl-instantiate-new-space ()
   (make-hash-table :size (graphl-search-size)))
 
-(defun-inline graphl-forward-direction-p (direction)
+(defun* graphl-forward-direction-p (direction) (:inline t)
   (eq direction :forward))
 
-(defun-inline determine-graphl-relevant-directions (graphl-direction)
+(defun* determine-graphl-relevant-directions (graphl-direction) (:inline t)
   (case graphl-direction
     (:accessible '(:forward :backward))
     (:forward '(:forward))

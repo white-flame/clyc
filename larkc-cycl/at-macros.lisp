@@ -42,21 +42,22 @@ and permission notice:
 (defun make-defn-col-history-table ()
   (make-hash-table :size *defn-col-history-default-size*))
 
-(defun-inline possibly-make-defn-fn-history-table ()
+(defun* possibly-make-defn-fn-history-table ()
+    (:inline t)
   (let ((val *defn-fn-history*))
     (if (uninitialized-p val)
         (make-defn-fn-history-table)
         val)))
 
-(defun-inline possibly-make-quoted-defn-fn-history-table ()
+(defun* possibly-make-quoted-defn-fn-history-table () (:inline t)
   (possibly-make-defn-fn-history-table))
 
-(defun-inline possibly-make-defn-col-history-table ()
+(defun* possibly-make-defn-col-history-table () (:inline t)
   (let ((val *defn-col-history*))
     (if (uninitialized-p val)
         (make-defn-col-history-table)
         val)))
 
-(defun-inline possibly-make-quoted-defn-col-history-table ()
+(defun* possibly-make-quoted-defn-col-history-table () (:inline t)
   (possibly-make-defn-col-history-table))
 

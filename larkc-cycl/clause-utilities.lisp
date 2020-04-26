@@ -46,11 +46,11 @@ and permission notice:
     (setf (nth 1 clause) pos-lits))
   clause)
 
-(defun-inline make-gaf-cnf (asent)
+(defun* make-gaf-cnf (asent) (:inline t)
   "[Cyc] Return a new cnf constructed from the true gaf ASENT."
   (make-cnf nil (list asent)))
 
-(defun-inline nmake-dnf (neg-lits pos-lits dnf)
+(defun* nmake-dnf (neg-lits pos-lits dnf) (:inline t)
   "[Cyc] Destructively modify DNF to have NEG-LITS and POS-LITS, and return DNF itself."
   (nmake-clause neg-lits pos-lits dnf))
 
@@ -65,11 +65,11 @@ and permission notice:
   (and (cnf-p cnf)
        (clause-with-lit-counts-p cnf 0 1)))
 
-(defun-inline pos-atomic-clause-p (clause)
+(defun* pos-atomic-clause-p (clause) (:inline t)
   "[Cyc] Return T iff CLAUSE is a clause representation of an atomic formula with exactly one poslit and no neglits."
   (clause-with-lit-counts-p clause 0 1))
 
-(defun-inline neg-atomic-clause-p (clause)
+(defun* neg-atomic-clause-p (clause) (:inline t)
   "[Cyc] Return T iff CLAUSE is a clause representation of an atomic formula with exactly one neglit and no poslits."
   (clause-with-lit-counts-p clause 1 0))
 
@@ -80,7 +80,7 @@ and permission notice:
            (asent-args (atomic-sentence-args asent)))
       (every-in-list #'cyc-var? asent-args))))
 
-(defun-inline gaf-cnf-literal (cnf)
+(defun* gaf-cnf-literal (cnf) (:inline t)
   (first (pos-lits cnf)))
 
 (defun atomic-cnf-asent (atomic-clause)
@@ -110,13 +110,13 @@ and permission notice:
        (singleton? object)
        (pos-atomic-clause-p (first object))))
 
-(defun-inline unmake-clause (clause)
+(defun* unmake-clause (clause) (:inline t)
   "[Cyc] Return 0: a list of the negative literals (neg-lits) in CLAUSE.
 Return 1: a list of the positive literals (pos-lits) in CLAUSE."
   (values (neg-lits clause)
           (pos-lits clause)))
 
-(defun-inline clause-number-of-literals (clause)
+(defun* clause-number-of-literals (clause) (:inline t)
   "[Cyc] Returns the number of literals (both positive and negative) in CLAUSE."
   (clause-literal-count clause))
 
@@ -152,10 +152,10 @@ Return 1: a list of the positive literals (pos-lits) in CLAUSE."
                       (when (eq sense :pos)
                         (list index))))
 
-(defun-inline ncanonicalize-literal-indices (indices)
+(defun* ncanonicalize-literal-indices (indices) (:inline t)
   (sort indices #'<))
 
-(defun-inline canonicalize-literal-indices (indices)
+(defun* canonicalize-literal-indices (indices) (:inline t)
   (ncanonicalize-literal-indices (copy-list indices)))
 
 (defun new-complement-subclause-spec (subclause-spec sample-clause)

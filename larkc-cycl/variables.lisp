@@ -55,7 +55,7 @@ and permission notice:
 
 (defglobal *variable-array* nil)
 
-(defun-inline get-variable (num)
+(defun* get-variable (num) (:inline t)
   "[Cyc] Return HL variable number NUM."
   (aref *variable-array* num))
 
@@ -68,16 +68,16 @@ and permission notice:
                                (setf (aref array i)
                                      (make-variable :id i)))))))
 
-(defun-inline variable-id (variable)
+(defun* variable-id (variable) (:inline t)
   "[Cyc] Return ID of HL variable VARIABLE."
   (var-id variable))
 
 ;; TODO - obsolete
-(defun-inline find-variable-by-id (id)
+(defun* find-variable-by-id (id) (:inline t)
   "[Cyc] Return the HL variable wiht ID, or NIL if not present."
   (get-variable id))
 
-(defun-inline variable-< (var1 var2)
+(defun* variable-< (var1 var2) (:inline t)
   (< (variable-id var1)
      (variable-id var2)))
 
@@ -86,10 +86,10 @@ and permission notice:
      :doc "[Cyc] Return a readable EL var from HL var VARIABLE.")
   (make-el-var (prin1-to-string variable)))
 
-(defun-inline sort-hl-variable-list (hl-variable-list)
+(defun* sort-hl-variable-list (hl-variable-list) (:inline t)
   (sort hl-variable-list #'variable-<))
 
-(defun-inline fully-bound-p (object)
+(defun* fully-bound-p (object) (:inline t)
   "[Cyc] Return T iff OBJECT contains no HL variables, and therefore is fully bound."
   (not (not-fully-bound-p object)))
 
@@ -104,6 +104,6 @@ and permission notice:
             (or (not-fully-bound-p next)
                 (variable-p (cdr rest)))))))
 
-(defun-inline cycl-ground-expression-p (expression)
+(defun* cycl-ground-expression-p (expression) (:inline t)
   (not (expression-find-if #'cyc-var? expression)))
 

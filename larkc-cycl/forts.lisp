@@ -41,12 +41,12 @@ and permission notice:
 (in-package :clyc)
 
 
-(defun-inline fort-p (object)
+(defun* fort-p (object) (:inline t)
   "[Cyc] Return T iff OBJECT is a first order reified term (FORT)."
   (or (constant-p object)
       (nart-p object)))
 
-(defun-inline non-fort-p (object)
+(defun* non-fort-p (object) (:inline t)
   (not (fort-p object)))
 
 (defun fort-count ()

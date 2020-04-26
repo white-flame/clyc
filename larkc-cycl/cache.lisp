@@ -46,7 +46,7 @@ and permission notice:
   map
   head-entry)
 
-(defun-inline cache-contains-key-p (cache key)
+(defun* cache-contains-key-p (cache key) (:inline t)
   "[Cyc] Checks whether the key is currently associated with an entry in the cache. Other than GET, this does not change the ordering of teh entries in the cache.
 CACHE: the cache within which to check for an association
 KEY: the key to be checked for association

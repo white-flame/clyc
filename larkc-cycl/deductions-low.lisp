@@ -59,16 +59,16 @@ and permission notice:
                       nil)))
     t))
 
-(defun-inline lookup-deduction-tv (id)
+(defun* lookup-deduction-tv (id) (:inline t)
   (d-content-tv (lookup-deduction-content id)))
 
-(defun-inline lookup-deduction-assertion (id)
+(defun* lookup-deduction-assertion (id) (:inline t)
   (d-content-assertion (lookup-deduction-content id)))
 
-(defun-inline lookup-deduction-supports (id)
+(defun* lookup-deduction-supports (id) (:inline t)
   (d-content-supports (lookup-deduction-content id)))
 
-(defun-inline se-deduction-tv (id new-tv)
+(defun* se-deduction-tv (id new-tv) (:inline t)
   (setf (d-content-tv (lookup-deduction-content id)) new-tv)
   (mark-deduction-content-as-muted id))
 
@@ -117,7 +117,7 @@ and permission notice:
       ((valid-assertion? support) (remove-assertion-dependent support deduction))
       ((valid-kb-hl-support? support) (kb-hl-support-remove-dependent support deduction)))))
 
-(defun-inline reset-deduction-tv (deduction new-tv)
+(defun* reset-deduction-tv (deduction new-tv) (:inline t)
   "[Cyc] Primitively change the tv of DEDUCTION to NEW-TV."
   (set-deduction-tv (deduction-id deduction) new-tv))
 
@@ -139,18 +139,18 @@ and permission notice:
        (eq truth (argument-truth deduction))
        (deduction-supports-equal supports (deduction-supports deduction))))
 
-(defun-inline deduction-assertion-internal (deduction)
+(defun* deduction-assertion-internal (deduction) (:inline t)
   (lookup-deduction-assertion (deduction-id deduction)))
 
-(defun-inline deduction-tv (deduction)
+(defun* deduction-tv (deduction) (:inline t)
   "[Cyc] Return the tv of DEDUCTION."
   (lookup-deduction-tv (deduction-id deduction)))
 
-(defun-inline deduction-supports-internal (deduction)
+(defun* deduction-supports-internal (deduction) (:inline t)
   (lookup-deduction-supports (deduction-id deduction)))
 
-(defun-inline deduction-truth-internal (deduction)
+(defun* deduction-truth-internal (deduction) (:inline t)
   (tv-truth (deduction-tv deduction)))
 
-(defun-inline deduction-strength-internal (deduction)
+(defun* deduction-strength-internal (deduction) (:inline t)
   (tv-strength (deduction-tv deduction)))

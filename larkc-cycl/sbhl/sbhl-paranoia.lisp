@@ -41,7 +41,7 @@ and permission notice:
 (defparameter *sbhl-object-type-checking-p* t
     "[Cyc] Parameter that governs whether we perform work within SBHL-CHECK-TYPE.")
 
-(defun-inline sbhl-object-type-checking-p ()
+(defun* sbhl-object-type-checking-p () (:inline t)
   ;; TODO - the cyc comments use "accessor" when they mean "reader" which goes against the CLHS definition.
   "[Cyc] The boolean value of *SBHL-OBJECT-TYPE-CHECKING-P*."
   (or *sbhl-object-type-checking-p*

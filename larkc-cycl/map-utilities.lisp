@@ -50,11 +50,11 @@ and permission notice:
                 map-get-without-values map-get)
 
 ;; Stuff that doesn't have a direction function that exactly matches the params
-(defun-inline map-put (map key value)
+(defun* map-put (map key value) (:inline t)
   (setf (gethash key map) value))
 
-(defun-inline map-get (map key default)
+(defun* map-get (map key default) (:inline t)
   (gethash key map default))
 
-(defun-inline map-remove (map key)
+(defun* map-remove (map key) (:inline t)
   (remhash key map))

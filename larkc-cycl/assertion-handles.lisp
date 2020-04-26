@@ -41,7 +41,7 @@ and permission notice:
   ;; This is an id-index
   "[Cyc] The ID -> ASSERTION mapping table.")
 
-(defun-inline do-assertions-table ()
+(defun* do-assertions-table () (:inline t)
   *assertion-from-id*)
 
 (defun setup-assertion-table (size exact?)
@@ -64,7 +64,7 @@ and permission notice:
       (id-index-count *assertion-from-id*)
       0))
 
-(defun-inline lookup-assertion (id)
+(defun* lookup-assertion (id) (:inline t)
   (id-index-lookup *assertion-from-id* id))
 
 (defun set-next-assertion-id (&optional max-assertion-id)
@@ -103,11 +103,11 @@ and permission notice:
         id
         23)))
 
-(defun-inline get-assertion ()
+(defun* get-assertion () (:inline t)
   "[Cyc] Make a new assertion shell, potentially in static space."
   (make-assertion))
 
-(defun-inline free-assertion (assertion)
+(defun* free-assertion (assertion) (:inline t)
   "[Cyc] Invalidate ASSERTION."
   (setf (as-id assertion) nil))
 
@@ -116,7 +116,7 @@ and permission notice:
   (and (assertion-p object)
        (assertion-handle-valid? object)))
 
-(defun-inline valid-assertion? (assertion &optional robust?)
+(defun* valid-assertion? (assertion &optional robust?) (:inline t)
   "[Cyc] Return T if ASSERTION is a valid assertion."
   (declare (ignore robust?))
   (valid-assertion-handle? assertion))
@@ -129,7 +129,7 @@ and permission notice:
     (register-assertion-id assertion id)
     assertion))
 
-(defun-inline create-sample-invalid-assertion ()
+(defun* create-sample-invalid-assertion () (:inline t)
   "[Cyc] Create a sample invalid-assertion."
   (get-assertion))
 
@@ -140,18 +140,18 @@ and permission notice:
   (clear-assertion-table)
   (clear-assertion-content-table)) 
 
-(defun-inline assertion-id (assertion)
+(defun* assertion-id (assertion) (:inline t)
   "[Cyc] Return the id of this ASSERTION."
   (as-id assertion))
 
-(defun-inline reset-assertion-id (assertion new-id)
+(defun* reset-assertion-id (assertion new-id) (:inline t)
   "[Cyc] Primitively change the assertion id for ASSERTION to NEW-ID."
   (setf (as-id assertion) new-id))
 
-(defun-inline assertion-handle-valid? (assertion)
+(defun* assertion-handle-valid? (assertion) (:inline t)
   (integerp (as-id assertion)))
 
-(defun-inline find-assertion-by-id (id)
+(defun* find-assertion-by-id (id) (:inline t)
   "[Cyc] Return the assertion with ID, or NIL if not present."
   (lookup-assertion id))
 

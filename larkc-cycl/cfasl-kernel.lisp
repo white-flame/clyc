@@ -37,7 +37,7 @@ and permission notice:
 (in-package :clyc)
 
 (defparameter *perform-cfasl-externalization* nil)
-(defun-inline cfasl-externalization-mode? ()
+(defun* cfasl-externalization-mode? () (:inline t)
   *perform-cfasl-externalization*)
 
 (defun cfasl-set-mode-externalized ()

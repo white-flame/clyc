@@ -26,16 +26,25 @@
            cl:defparameter
            cl:defconstant
            cl:sxhash
-           cl:variable))
+           cl:variable
+           cl:remf))
 
 (in-package :clyc)
 
 ;; TODO - code probably has some alexandria prefixes left in it
+;; Cherry pick from alexandria to minimize potential conflicts
 (import '(alexandria:symbolicate
           alexandria:when-let
           alexandria:when-let*
-          alexandria:if-let))
+          alexandria:if-let
+          alexandria:deletef))
 
+
+(cl:defvar *macro-helpers* nil
+  "a-list of defun name to macro name. There might be multiple entries for each defun name, if they're used by more than one macro.")
+
+(cl:defvar *obsolete-functions* nil
+  "List of function names marked as obsolete.")
 
 ;;------
 ;; Variable definitions
@@ -173,16 +182,25 @@
   (defun make-keyword (str)
     (intern (string str) package)))
 
-(defmacro defun-inline (name params &body body)
-  `(progn
-     (declaim (inline ,name))
-     (defun ,name ,params ,@body)))
+(defun register-macro-helper (funcname macro-names)
+  (dolist (macroname (if (listp macro-names)
+                         macro-names
+                         (list macro-names)))
+    (pushnew (cons funcname macroname) *macro-helpers* :test #'equal)))
 
-(defmacro defun-ignore (name params &body body)
-  "For filling around missing behavior in function bodies, this ignores params and just returns the body, usually T or NIL."
-  `(defun-inline ,name ,params
-     (declare (ignorable ,@params))
-     ,@body))
+(defmacro defun* (name params (&key inline ignore macro-helper obsolete) &body body)
+  "Ignore will ignore all params for empty bodies, usually for missing or default behavior."
+  `(progn
+     ,(when inline
+        `(declaim (inline ,name)))
+     ,(when macro-helper
+        `(register-macro-helper ',name ',macro-helper))
+     ,(when obsolete
+        `(pushnew ',name *obsolete-functions*))
+     (defun ,name ,params
+       ,@(when ignore
+           `((declare (ignore ,@params))))
+       ,@body)))
 
 (declaim (inline check-type))
 (defun check-type (obj type-symbol)
@@ -247,10 +265,11 @@
         do (progn ,@body)))
 
 (defmacro dohash ((key val hashtable) &body body)
-  `(maphash (lambda (,key ,val)
-              (declare (ignorable ,key ,val))
-              ,@body)
-            ,hashtable))
+  `(block nil
+     (maphash (lambda (,key ,val)
+                (declare (ignorable ,key ,val))
+                ,@body)
+              ,hashtable)))
 
 (defmacro dovector ((index val vector) &body body)
   ;; TODO - convert to DO, probably faster as this version maintains a hidden index anyway
@@ -284,9 +303,29 @@
   (declare (ignore rest))
   nil)
 
-(defmacro deletef (item place &rest params &key test key)
-  (declare (ignore test key))
-  `(setf ,place (delete ,item ,place ,@params)))
+(defun putf (plist indicator value)
+  "Destructively returns a list with the added/changed, instead of mutating a place."
+  (or (loop
+         for cell on plist by #'cddr
+         when (eq indicator (car cell))
+         return (progn
+                  (setf (car (cdr cell)) value)
+                  plist))
+      (cons indicator (cons value plist))))
+
+(defun remf (plist indicator)
+  "Destructively returns a plist without the given key/indicator."
+  (loop
+     for prev = nil then cell
+     for cell on plist by #'cddr
+     do (when (eq indicator (car cell))
+          (return-from remf
+            (if prev
+                (progn
+                  (setf (cdr (cdr prev)) (cdr (cdr cell)))
+                  plist)
+                (cdr (cdr cell))))))
+  plist)
 
 (defmacro symbol-mapping (&rest plist)
   `(progn

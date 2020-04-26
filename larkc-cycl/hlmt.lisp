@@ -39,7 +39,7 @@ and permission notice:
 (defvar *hlmts-supported?* t
   "[Cyc] Whether we allow non-atomic unreified MTs.")
 
-(defun-inline hlmts-supported? ()
+(defun* hlmts-supported? () (:inline t)
   *hlmts-supported?*)
 
 (defun disable-hlmts ()
@@ -83,23 +83,23 @@ and permission notice:
                                                     #$TimePoint)
   "[Cyc] Constants which are part of HLMT syntax and which therefore are not fully indexed, for pragmatic reasons.")
 
-(defun-inline possibly-mt-p (object)
+(defun* possibly-mt-p (object) (:inline t)
   (possibly-hlmt-p object))
 
-(defun-inline possibly-hlmt-p (object)
+(defun* possibly-hlmt-p (object) (:inline t)
   (or (possibly-fo-naut-p object)
       (hlmt-p object)))
 
-(defun-inline fort-or-chlmt-p (object)
+(defun* fort-or-chlmt-p (object) (:inline t)
   "[Cyc] Whether OBJECT is a fort-p or closed-hlmt-p."
   (or (fort-p object)
       (closed-hlmt-p object)))
 
-(defun-inline chlmt-p (object)
+(defun* chlmt-p (object) (:inline t)
   "[Cyc] Shorthand for closed-hlmt-p."
   (closed-hlmt-p object))
 
-(defun-inline closed-hlmt-p (object)
+(defun* closed-hlmt-p (object) (:inline t)
   "[Cyc] Return T iff OBJECT is an HLMT, and is closed."
   (ret (cand (hlmt-p object)
              (cycl-ground-expression-p object))))
@@ -132,7 +132,7 @@ NOTE: Returns true iff OBJECT actually is an HLMT."
   (and (possibly-naut-p object)
        (mt-union-function-p (naut-functor object))))
 
-(defun-inline mt-union-function-p (object)
+(defun* mt-union-function-p (object) (:inline t)
   (eq object #$MtUnionFn))
 
 (defun hlmt? (object)
@@ -245,8 +245,8 @@ NOTE: Result is destructible."
 (deflexical *temporal-dimension-predicates* (list #$mtTimeIndex
                                                   #$mtTimeParameter))
 
-(defun-inline anytime-psc-p (object)
+(defun* anytime-psc-p (object) (:inline t)
   (eq object *anytime-psc*))
 
-(defun-inline hlmt-temporal-mt (hlmt)
+(defun* hlmt-temporal-mt (hlmt) (:inline t)
   (get-hlmt-dimension :time hlmt))

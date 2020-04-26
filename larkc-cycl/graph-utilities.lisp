@@ -129,7 +129,7 @@ NAKED-GROUPS     -- list of island groups with single nodes and no links."
       (setf (nth 0 island-group) (sort-via-position nodes all-nodes #'eql))
       (setf (nth 1 island-group) (sort-via-position links all-links #'eql)))))
 
-(defun-inline length-first (object)
+(defun* length-first (object) (:inline t)
   (length (first object)))
 
 (defun sort-isolated-groups (isolated-groups all-nodes all-links &optional (test #'eql))

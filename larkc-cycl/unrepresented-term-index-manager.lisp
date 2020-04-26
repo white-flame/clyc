@@ -47,28 +47,28 @@ and permission notice:
                                                                   *unrepresented-term-index-lru-size-percentage*
                                                                   #'load-unrepresented-term-index-from-cache exact?)))
 
-(defun-inline clear-unrepresented-term-index-table ()
+(defun* clear-unrepresented-term-index-table () (:inline t)
   (clear-kb-object-content-table *unrepresented-term-index-manager*))
 
-(defun-inline cached-unrepresented-term-index-count ()
+(defun* cached-unrepresented-term-index-count () (:inline t)
   "[Cyc] Return the number of unrepresented-term-indices whose content is cached in memory."
   (cached-kb-object-count *unrepresented-term-index-manager*))
 
-(defun-inline lookup-unrepresented-term-index (id)
+(defun* lookup-unrepresented-term-index (id) (:inline t)
   (lookup-kb-object-content *unrepresented-term-index-manager* id))
 
-(defun-inline register-unrepresented-term-index (id unrepresented-term-index)
+(defun* register-unrepresented-term-index (id unrepresented-term-index) (:inline t)
   "[Cyc] Note that ID will be used as the id for UNREPRESENTED-TERM-INDEX."
   (register-kb-object-content *unrepresented-term-index-manager* id unrepresented-term-index))
 
-(defun-inline deregister-unrepresented-term-index (id)
+(defun* deregister-unrepresented-term-index (id) (:inline t)
   "[Cyc] Note that ID is not in use as an UNREPRESENTED-TERM-INDEX id."
   (deregister-kb-object-content *unrepresented-term-index-manager* id))
 
-(defun-inline mark-unrepresented-term-index-as-muted (id)
+(defun* mark-unrepresented-term-index-as-muted (id) (:inline t)
   (mark-kb-object-content-as-muted *unrepresented-term-index-manager* id))
 
-(defun-inline swap-out-all-pristine-unrepresented-term-indices ()
+(defun* swap-out-all-pristine-unrepresented-term-indices () (:inline t)
   (swap-out-all-pristine-kb-objects-int *unrepresented-term-index-manager*))
 
 (defun initialize-unrepresented-term-index-hl-store-cache ()

@@ -39,11 +39,11 @@ and permission notice:
 
 (defparameter *debug-sbhl-marking-spaces?* nil)
 
-(defun-inline average-genl-cardinality (&optional module)
+(defun* average-genl-cardinality (&optional module) (:inline t)
   (declare (ignore module))
   100)
 
-(defun-inline average-spec-cardinality (&optional module)
+(defun* average-spec-cardinality (&optional module) (:inline t)
   (declare (ignore module))
   3000)
 
@@ -77,11 +77,11 @@ and permission notice:
 (deflexical *default-resourced-sbhl-space-limit* 4
   "[Cyc] The default number of spaces to resource.")
 
-(defun-inline resourcing-sbhl-marking-spaces-p ()
+(defun* resourcing-sbhl-marking-spaces-p () (:inline t)
   "[Cyc] Determines whether to resource SBHL marking spaces."
   *resourcing-sbhl-marking-spaces-p*)
 
-(defun-inline possibly-new-marking-resource (resourcing-p)
+(defun* possibly-new-marking-resource (resourcing-p) (:inline t)
   (and resourcing-p
        *resourced-sbhl-marking-spaces*))
 
@@ -162,14 +162,14 @@ and permission notice:
 (defparameter *sbhl-suspend-new-spaces?* nil
   "[CYc] Toggle variable to suspend creation of new spaces during search.")
 
-(defun-inline sbhl-suspend-new-spaces? ()
+(defun* sbhl-suspend-new-spaces? () (:inline t)
   "[Cyc] Whether to suspend creation of new spaces during search."
   *sbhl-suspend-new-spaces?*)
 
 (defparameter *sbhl-goal-space* nil
   "[Cyc] The space var used when goal nodes are premarked.")
 
-(defun-inline get-sbhl-goal-space ()
+(defun* get-sbhl-goal-space () (:inline t)
   *sbhl-goal-space*)
 
 (defparameter *sbhl-target-space* nil
@@ -197,15 +197,15 @@ and permission notice:
                                                              #$genlPreds)
   "[Cyc] The marking for nodes accessed in both predicate argument-flipped modes and during search.")
 
-(defun-inline genl-preds-marking-p (marking) 
+(defun* genl-preds-marking-p (marking)  (:inline t)
   "[Cyc] Whether MARKING indicates access only in predicate mode."
   (eq marking *sbhl-genl-preds-marking*))
 
-(defun-inline genl-inverse-marking-p (marking)
+(defun* genl-inverse-marking-p (marking) (:inline t)
   "[Cyc] Whether MARKING indicates access only in argument-flipped mode."
   (eq marking *sbhl-genl-inverse-marking*))
 
-(defun-inline genl-preds-and-genl-inverse-marking-p (marking)
+(defun* genl-preds-and-genl-inverse-marking-p (marking) (:inline t)
   "[Cyc] Whether MARKING indicates access in both predicate and argument-flipped mode."
   (or (eq marking *sbhl-genl-preds-and-genl-inverse-marking*)
       (eq marking *sbhl-genl-inverse-and-genl-preds-marking*)))

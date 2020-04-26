@@ -41,7 +41,7 @@ and permission notice:
   (and (eq module (get-sbhl-module #$isa))
        (collection-supports-non-fort-instances? node)))
 
-(defun-inline collection-supports-non-fort-instances? (col)
+(defun* collection-supports-non-fort-instances? (col) (:inline t)
   t)
 
 (defun get-sbhl-accessible-modules (module)

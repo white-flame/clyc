@@ -55,26 +55,26 @@ and permission notice:
 (defun clear-assertion-content-table ()
   (clear-kb-object-content-table *assertion-content-manager*))
 
-(defun-inline cached-assertion-count ()
+(defun* cached-assertion-count () (:inline t)
   "[Cyc] Return the number of assertions whose content is cached in memory."
   (cached-kb-object-count *assertion-content-manager*))
 
-(defun-inline lookup-assertion-content (id)
+(defun* lookup-assertion-content (id) (:inline t)
   (arete-note-assertion-touched (find-assertion-by-id id))
   (lookup-kb-object-content *assertion-content-manager* id))
 
-(defun-inline register-assertion-content (id assertion-content)
+(defun* register-assertion-content (id assertion-content) (:inline t)
   "[Cyc] Note that ID will be used as the id for ASSERTION-CONTENT."
   (register-kb-object-content *assertion-content-manager* id assertion-content))
 
-(defun-inline deregister-assertion-content (id)
+(defun* deregister-assertion-content (id) (:inline t)
   "[Cyc] Note that ID is not in use as an ASSERTION-CONTENT id."
   (deregister-kb-object-content *assertion-content-manager* id))
 
-(defun-inline mark-assertion-content-as-muted (id)
+(defun* mark-assertion-content-as-muted (id) (:inline t)
   (mark-kb-object-content-as-muted *assertion-content-manager* id))
 
-(defun-inline swap-out-all-pristine-assertions ()
+(defun* swap-out-all-pristine-assertions () (:inline t)
   (swap-out-all-pristine-kb-objects-int *assertion-content-manager*))
 
 (defun initialize-assertion-hl-store-cache ()

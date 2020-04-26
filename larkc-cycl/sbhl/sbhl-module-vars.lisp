@@ -107,7 +107,7 @@ and permission notice:
 (defglobal *sbhl-modules* (make-hash-table :test *sbhl-module-key-test*)
   "[Cyc] Dictionary of SBHL modules, built up by module declaration.")
 
-(defun-inline sbhl-module-object-p (object)
+(defun* sbhl-module-object-p (object) (:inline t)
   "[Cyc] Whether OBJECT is a DICTIONARY-P."
   ;; TODO - hashtable comment
   (sbhl-module-p object))
@@ -115,7 +115,7 @@ and permission notice:
 (defun reset-sbhl-modules ()
   (setf *sbhl-modules* (make-hash-table :test *sbhl-module-key-test*)))
 
-(defun-inline get-sbhl-modules ()
+(defun* get-sbhl-modules () (:inline t)
   "[Cyc] Return a hashtable of the defined SBHL modules, which each correspond directly to a link table."
   *sbhl-modules*)
 
@@ -126,16 +126,16 @@ and permission notice:
   (sbhl-check-type module sbhl-module-object-p)
   (setf (gethash predicate *sbhl-modules*) module))
 
-(defun-inline get-sbhl-predicates-int ()
+(defun* get-sbhl-predicates-int () (:inline t)
   "[Cyc] Returns a list of the defined sbhl predicates."
   (hash-table-keys (get-sbhl-modules)))
 
-(defun-inline get-sbhl-module-list ()
+(defun* get-sbhl-module-list () (:inline t)
   "[Cyc] Return what the SBHL module structures that the predicates point to."
   ;; TODO - bad comment grammar
   (hash-table-values (get-sbhl-modules)))
 
-(defun-inline sbhl-predicate-object-p (object)
+(defun* sbhl-predicate-object-p (object) (:inline t)
   "[Cyc] Type test for candidate sbhl-predicates."
   (fort-p object))
 
@@ -146,27 +146,27 @@ and permission notice:
                                   :time)
   "[Cyc] Roles that SBHL modules play in the grand SBHL scheme.")
 
-(defun-inline sbhl-simple-reflexive-module-type-p (module-type)
+(defun* sbhl-simple-reflexive-module-type-p (module-type) (:inline t)
   "[Cyc] Returns whether MODULE-TYPE is of the simple transitive and reflexive variety."
   (eq module-type :simple-reflexive))
 
-(defun-inline sbhl-simple-non-reflexive-module-type-p (module-type)
+(defun* sbhl-simple-non-reflexive-module-type-p (module-type) (:inline t)
   "[Cyc] Returns whether MODULE-TYPE is of the simple transitive but irreflexive variety."
   (eq module-type :simple-non-reflexive))
 
-(defun-inline sbhl-transfers-through-module-type-p (module-type)
+(defun* sbhl-transfers-through-module-type-p (module-type) (:inline t)
   "[Cyc] Returns whether MODULE-TYPE is the keyword for transfers-through sbhl modules."
   (eq module-type :transfers-through))
 
-(defun-inline sbhl-disjoins-module-type-p (module-type)
+(defun* sbhl-disjoins-module-type-p (module-type) (:inline t)
   "[Cyc] Returns whether MODULE-TYPE is the keyword for disjoins sbhl modules."
   (eq module-type :disjoines))
 
-(defun-inline sbhl-time-module-type-p (module-type)
+(defun* sbhl-time-module-type-p (module-type) (:inline t)
   "[Cyc] Returns whether MODULE-TYPE is the keyword for sbhl time modules."
   (eq module-type :time))
 
-(defun-inline sbhl-transitive-module-type-p (module-type)
+(defun* sbhl-transitive-module-type-p (module-type) (:inline t)
   "[Cyc] Returns whether MODULE-TYPE is the keyword for simple sbhl modules, or for sbhl time modules."
   (case module-type
     ((:simple-reflexive :simple-non-reflexive :time) t)))

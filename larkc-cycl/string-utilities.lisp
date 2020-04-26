@@ -152,7 +152,8 @@ and permission notice:
   (and (greater-or-same-length-p w starting)
        (substring-match? w starting 0)))
 
-(defun-inline char-position (char string &optional (n 0))
+(defun* char-position (char string &optional (n 0))
+    (:inline t)
   "[Cyc] Return the number of the position of the first occurrence of CHAR in STRING, starting from position N in STRING."
   (declare (string string)
            (character char)
@@ -184,7 +185,8 @@ and permission notice:
 (defparameter *char-set* nil
   "[Cyc] Dynamic variable used only by CHAR-SET-POSITION.")
 
-(defun-inline char-type-position (char-type string &optional (start 0) (end (length string)))
+(defun* char-type-position (char-type string &optional (start 0) (end (length string)))
+    (:inline t)
   "[Cyc] Return the position of the first charcter satisfying the CHAR-TYPE in STRING. THe positions to start looking in STRING are delimited by START and END."
   (position-if char-type string :start start :end end))
 

@@ -44,7 +44,7 @@ and permission notice:
 (defglobal *nart-from-id* nil
     "[Cyc] The ID -> NART mapping table.")
 
-(defun-inline do-narts-table ()
+(defun* do-narts-table () (:inline t)
   *nart-from-id*)
 
 (defun setup-nart-table (size exact?)
@@ -58,7 +58,7 @@ and permission notice:
   (unless max-nart-id
     (missing-larkc 30878)))
 
-(defun-inline clear-nart-table ()
+(defun* clear-nart-table () (:inline t)
   (clear-id-index *nart-from-id*))
 
 (defun nart-count ()
@@ -67,10 +67,10 @@ and permission notice:
       (id-index-count *nart-from-id*)
       0))
 
-(defun-inline lookup-nart (id)
+(defun* lookup-nart (id) (:inline t)
   (id-index-lookup *nart-from-id* id))
 
-(defun-inline new-nart-id-threshold ()
+(defun* new-nart-id-threshold () (:inline t)
   "[Cyc] Return the internal ID where new NARTs started."
   (id-index-new-id-threshold *nart-from-id*))
 
@@ -100,7 +100,7 @@ and permission notice:
   (let ((id (n-id object)))
     (if (integerp id) id 0)))
 
-(defun-inline get-nart ()
+(defun* get-nart () (:inline t)
   "[Cyc] Make a new nart shell, potentially in static space."
   (make-nart))
 
@@ -124,10 +124,10 @@ and permission notice:
 '(defun free-all-narts ()
   )
 
-(defun-inline reset-nart-id (nart new-id)
+(defun* reset-nart-id (nart new-id) (:inline t)
   "[Cyc] Primitively change the internal id for NART to NEW-ID."
   (setf (n-id nart) new-id)
   nart)
 
-(defun-inline find-nart-by-id (id)
+(defun* find-nart-by-id (id) (:inline t)
   (lookup-nart id))

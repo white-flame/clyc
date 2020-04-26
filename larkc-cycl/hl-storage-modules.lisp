@@ -66,7 +66,7 @@ Returns whether the addition was successful."
 Returns whether the removal was successful."
   (try-hl-storage-modules-int hl-modules argument-spec cnf mt nil nil :remove))
     
-(defun-inline hl-storage-modules-for-predicate-and-argument-type (predicate argument-type)
+(defun* hl-storage-modules-for-predicate-and-argument-type (predicate argument-type) (:inline t)
   (fast-intersection (hl-storage-modules-for-predicate predicate)
                      (hl-storage-modules-for-argument-type argument-type)))
 
@@ -172,40 +172,40 @@ Result is destructible"
                    (alist-push dispreferred-hl-modules dispreferred-hl-module hl-module))))))))
   (values applicable-hl-modules dispreferred-hl-modules))
 
-(defun-inline sort-hl-storage-modules-by-cost (hl-modules argument-spec cnf mt direction variable-map)
+(defun* sort-hl-storage-modules-by-cost (hl-modules argument-spec cnf mt direction variable-map) (:inline t)
   (declare (ignore argument-spec cnf mt direction variable-map))
   hl-modules)
 
-(defun-inline hl-storage-module-add (hl-module argument-spec cnf mt direction variable-map &optional default)
+(defun* hl-storage-module-add (hl-module argument-spec cnf mt direction variable-map &optional default) (:inline t)
   "[Cyc] If HL-MODULE has an :ADD property, the specified function is applied to ARGUMENT-SPEC, CNF, MT, DIRECTION, and VARIABLE-MAP. Otherwise, DEFAULT is returned."
   (if-let ((add-func (get-hl-storage-module-property hl-module :add)))
     (funcall add-func argument-spec cnf mt direction variable-map)
     default))
 
-(defun-inline hl-storage-module-remove (hl-module argument-spec cnf mt &optional default)
+(defun* hl-storage-module-remove (hl-module argument-spec cnf mt &optional default) (:inline t)
   "[Cyc] If HL-MODULE has a :REMOVE property, the specified function is applied to ARGUMENT-SPEC, CNF, and MT. Otherwise, DEFAULT is returned."
   (if-let ((remove-func (get-hl-storage-module-property hl-module :remove)))
     (funcall remove-func argument-spec cnf mt)
     default))
 
-(defun-inline hl-storage-module-argument-type (hl-module)
+(defun* hl-storage-module-argument-type (hl-module) (:inline t)
   (get-hl-storage-module-property hl-module :argument-type))
 
-(defun-inline hl-storage-module-predicate (hl-module)
+(defun* hl-storage-module-predicate (hl-module) (:inline t)
   (get-hl-storage-module-property hl-module :predicate))
 
-(defun-inline hl-storage-module-applicability-func (hl-module)
+(defun* hl-storage-module-applicability-func (hl-module) (:inline t)
   (multiple-value-bind (applicability-func default?) (get-hl-storage-module-property hl-module :applicability)
     (unless default?
       applicability-func)))
 
-(defun-inline hl-storage-module-exclusive-func (hl-module)
+(defun* hl-storage-module-exclusive-func (hl-module) (:inline t)
   (get-hl-storage-module-property hl-module :exclusive))
   
-(defun-inline hl-storage-module-preferred-over-info (hl-module)
+(defun* hl-storage-module-preferred-over-info (hl-module) (:inline t)
   (get-hl-storage-module-property hl-module :preferred-over))
 
-(defun-inline get-hl-storage-module-property (hl-module indicator)
+(defun* get-hl-storage-module-property (hl-module indicator) (:inline t)
   (hl-module-property hl-module indicator))
 
 (defun reclassify-hl-storage-modules ()
@@ -274,14 +274,14 @@ Result is destructible"
 
 (defglobal *solely-specific-hl-storage-module-predicate-store* (new-set #'eq))
 
-(defun-inline rebuild-solely-specific-hl-storage-module-predicate-store ()
+(defun* rebuild-solely-specific-hl-storage-module-predicate-store () (:inline t)
   (set-rebuild *solely-specific-hl-storage-module-predicate-store*))
 
-(defun-inline register-solely-specific-hl-storage-module-predicate (predicate)
+(defun* register-solely-specific-hl-storage-module-predicate (predicate) (:inline t)
   "[Cyc] If you want the specific hl-storage modules for PREDICATE to supplant ALL generic hl-storage modules, then register this property."
   (set-add predicate *solely-specific-hl-storage-module-predicate-store*))
 
-(defun-inline solely-specific-hl-storage-module-predicate? (predicate)
+(defun* solely-specific-hl-storage-module-predicate? (predicate) (:inline t)
   (set-member? predicate *solely-specific-hl-storage-module-predicate-store*))
 
 (defstruct (hl-assertion-spec (:type list)
@@ -359,13 +359,13 @@ Result is destructible"
       (:remove-all (missing-larkc 31650))
       (otherwise (error "Unexpected HL storage action ~a" action)))))
 
-(defun-inline hl-assert (cnf mt strength direction &optional variable-map)
+(defun* hl-assert (cnf mt strength direction &optional variable-map) (:inline t)
   "[Cyc] Returns NIL if CNF was not stored at the HL in some fashion, and non-NIL otherwise.  If CNF is stored as an as assertion object, that assertion object (assertion-p) will be returned, but there is no guarantee that CNF will be stored as an assertion."
   (hl-add-argument (create-asserted-argument-spec strength)
                    cnf mt direction variable-map))
 
 (defglobal *dummy-asserted-argument-spec* (create-asserted-argument-spec :unspecified))
 
-(defun-inline hl-unassert (cnf mt)
+(defun* hl-unassert (cnf mt) (:inline t)
   (hl-remove-argument *dummy-asserted-argument-spec* cnf mt))
 

@@ -40,22 +40,22 @@ and permission notice:
 (defvar *wff-properties-table* (make-hash-table :test #'eq)
   "[Cyc] A dictionary mapping WFF property keywords to a list of the form (<corresponding variable> <default value>). Initialized via DEFPARAMETER-WFF.")
 
-(defun-inline wff-properties-table ()
+(defun* wff-properties-table () (:inline t)
   *wff-properties-table*)
 
-(defun-inline wff-expansion-formula ()
+(defun* wff-expansion-formula () (:inline t)
   *wff-expansion-formula*)
 
-(defun-inline wff-debug? ()
+(defun* wff-debug? () (:inline t)
   *wff-debug?*)
 
-(defun-inline wff-violation-data-terse? ()
+(defun* wff-violation-data-terse? () (:inline t)
   *wff-violation-data-terse?*)
 
-(defun-inline wff-original-formula ()
+(defun* wff-original-formula () (:inline t)
   *wff-original-formula*)
 
-(defun-inline note-wff-property (keyword variable default)
+(defun* note-wff-property (keyword variable default) (:inline t)
   (setf (gethash keyword (wff-properties-table)) (list variable default)))
 
 (defparameter *wff-properties* nil
@@ -133,16 +133,16 @@ and permission notice:
                               :lenient)
   "[Cyc] See *wff-mode*")
 
-(defun-inline wff-mode ()
+(defun* wff-mode () (:inline t)
   *wff-mode*)
 
-(defun-inline wff-lenient? ()
+(defun* wff-lenient? () (:inline t)
   (eq :lenient (wff-mode)))
 
 (defparameter *wff-formula* nil
   "[Cyc] Formula being appraised by WFF module.")
 
-(defun-inline wff-formula ()
+(defun* wff-formula () (:inline t)
   *wff-formula*)
 
 (defparameter *wff-original-formula* nil
@@ -172,11 +172,11 @@ and permission notice:
 (defparameter *validating-expansion?* nil
   "[Cyc] Within WFF tests applied to expansion (in addition to given form)?")
 
-(defun-inline validating-expansion? ()
+(defun* validating-expansion? () (:inline t)
   *validating-expansion?*)
 
 (defparameter *unexpanded-formula* nil
   "[Cyc] Original formula whose expansion is being considered?")
 
-(defun-inline unexpanded-formula ()
+(defun* unexpanded-formula () (:inline t)
   *unexpanded-formula*)

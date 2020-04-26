@@ -44,7 +44,7 @@ and permission notice:
       (and (deduction-p argument)
            (valid-deduction argument robust))))
 
-(defun-inline argument-spec-type (argument-spec)
+(defun* argument-spec-type (argument-spec) (:inline t)
   "[Cyc] Returns the type of the argument specified by ARGUMENT-SPEC."
   (car argument-spec))
 
@@ -65,7 +65,7 @@ Hardcodes the type hierarchy:
             /
   ASSERTED-ARGUMENT")
 
-(defun-inline argument-type-hierarchy ()
+(defun* argument-type-hierarchy () (:inline t)
   "[Cyc] A list of pairs of the form (ARGUMENT-TYPE list-of-proper-genls)."
   *argument-type-hierarchy*)
 
@@ -76,7 +76,7 @@ Hardcodes the type hierarchy:
            (recursive-proper-genls (mapcan #'argument-type-proper-genls immediate-proper-genls)))
       (append immediate-proper-genls recursive-proper-genls))))
 
-(defun-inline argument-type-genls (argument-type)
+(defun* argument-type-genls (argument-type) (:inline t)
   "[Cyc] Returns the genls of ARGUMENT-TYPE in the hard-coded hierarchy."
   (cons argument-type (argument-type-proper-genls argument-type)))
 
@@ -106,37 +106,37 @@ Hardcodes the type hierarchy:
       (remove-belief argument assertion)
       (kb-remove-deduction argument)))
 
-(defun-inline belief-p (object)
+(defun* belief-p (object) (:inline t)
   "[Cyc] Return T iff OBJECT is an HL belief structure."
   (asserted-argument-p object))
 
 
-(defun-inline remove-belief (belief assertion)
+(defun* remove-belief (belief assertion) (:inline t)
   (kb-remove-asserted-argument assertion belief))
 
-(defun-inline belief-truth (belief)
+(defun* belief-truth (belief) (:inline t)
   (asserted-argument-truth belief))
 
-(defun-inline belief-tv (belief)
+(defun* belief-tv (belief) (:inline t)
   (asserted-argument-tv belief))
 
-(defun-inline asserted-argument-p (object)
+(defun* asserted-argument-p (object) (:inline t)
   "[Cyc] Return T iff OBJECT is an HL asserted argumen tstructure."
   (asserted-argument-token-p object))
 
-(defun-inline create-asserted-argument (assertion tv)
+(defun* create-asserted-argument (assertion tv) (:inline t)
   "[Cyc] Create an asserted argument for ASSERTION with TV."
   (declare (ignore assertion))
   ;; TODO - doesn't this need the assertion?
   (asserted-argument-token-from-tv tv))
 
-(defun-inline create-asserted-argument-spec (strength-spec)
+(defun* create-asserted-argument-spec (strength-spec) (:inline t)
   (list :asserted-argument strength-spec))
 
-(defun-inline asserted-argument-spec-strength-spec (asserted-argument-spec)
+(defun* asserted-argument-spec-strength-spec (asserted-argument-spec) (:inline t)
   (second asserted-argument-spec))
 
-(defun-inline kb-remove-asserted-argument-internal (asserted-argument)
+(defun* kb-remove-asserted-argument-internal (asserted-argument) (:inline t)
   (declare (ignore asserted-argument))
   nil)
 
@@ -150,23 +150,23 @@ Hardcodes the type hierarchy:
 (deflexical *asserted-arguments* (mapcar #'first *asserted-argument-tv-table*)
   "[Cyc] Tokens representing the possible asserted arguments.")
 
-(defun-inline asserted-argument-tokens ()
+(defun* asserted-argument-tokens () (:inline t)
   *asserted-arguments*)
 
-(defun-inline asserted-argument-token-p (object)
+(defun* asserted-argument-token-p (object) (:inline t)
   (member? object *asserted-arguments* :test #'eq))
 
-(defun-inline asserted-argument-token-from-tv (tv)
+(defun* asserted-argument-token-from-tv (tv) (:inline t)
   (car (find tv *asserted-argument-tv-table* :test #'eq :key #'second)))
 
-(defun-inline tv-from-asserted-argument-token (asserted-argument)
+(defun* tv-from-asserted-argument-token (asserted-argument) (:inline t)
   (second (find asserted-argument *asserted-argument-tv-table* :test #'eq :key #'first)))
 
 (defun asserted-argument-tv (asserted-argument)
   (when (asserted-argument-token-p asserted-argument)
     (tv-from-asserted-argument-token asserted-argument)))
 
-(defun-inline asserted-argument-truth (asserted-argument)
+(defun* asserted-argument-truth (asserted-argument) (:inline t)
   (tv-truth (asserted-argument-tv asserted-argument)))
 
 (defun support-p (object)
@@ -235,7 +235,7 @@ Hardcodes the type hierarchy:
     ((kb-hl-support-p support) (kb-hl-support-sentence support))
     (t (hl-support-sentence support))))
 
-(defun-inline support-formula (support)
+(defun* support-formula (support) (:inline t)
   (support-sentence support))
 
 (defun support-mt (support)
@@ -245,7 +245,7 @@ Hardcodes the type hierarchy:
     ((kb-hl-support-p support) (missing-larkc 11039))
     (t (hl-support-mt support))))
 
-(defun-inline support-strength (support)
+(defun* support-strength (support) (:inline t)
   "[Cyc] Return the strength of SUPPORT."
   (tv-strength (support-tv support)))
 
@@ -303,8 +303,8 @@ Hardcodes the type hierarchy:
   (and (proper-list-p object)
        (every-in-list #'support-p object)))
 
-(defun-inline justification-equal (justification1 justification2)
+(defun* justification-equal (justification1 justification2) (:inline t)
   (multisets-equal? justification1 justification2 #'support-equal))
 
-(defun-inline canonicalize-hl-justification (hl-justification)
+(defun* canonicalize-hl-justification (hl-justification) (:inline t)
   (sort (copy-list hl-justification) #'support-<))

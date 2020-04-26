@@ -65,7 +65,7 @@ and permission notice:
 
 ;; TODO - all these readers dereference the ID
 (macrolet ((define-reader (field)
-             `(defun-inline ,(symbolicate 'lookup-assertion- field) (id)
+             `(defun* ,(symbolicate 'lookup-assertion- field) (id) (:inline t)
                 (when-let ((contents (lookup-assertion id)))
                   (,(symbolicate 'as-content- field) contents)))))
 
@@ -77,7 +77,7 @@ and permission notice:
 
 (macrolet ((define-writer (field)
              (let ((data-var (symbolicate 'new- field)))
-               `(defun-inline ,(symbolicate 'set-assertion- field) (id ,data-var)
+               `(defun* ,(symbolicate 'set-assertion- field) (id ,data-var) (:inline t)
                   (setf (,(symbolicate 'as-content- field) (lookup-assertion-content id))
                         ,data-var)
                   (mark-assertion-content-as-muted id)))))
@@ -117,7 +117,7 @@ and permission notice:
 
 ;; TODO - and this is where we look up info by assertion ID for each field accessor.  That seems kind of nuts.  Cache the assertion-content struct on the assertion handle itself.
 
-(defun-inline assertion-mt-internal (assertion)
+(defun* assertion-mt-internal (assertion) (:inline t)
   (lookup-assertion-mt (assertion-id assertion)))
 
 (defun assertion-gaf-hl-formula-internal (assertion)
@@ -142,7 +142,7 @@ and permission notice:
   "[Cyc] Return the HL TV of ASSERTION."
   (decode-tv (assertion-flags-tv-decode (assertion-flags assertion))))
 
-(defun-inline assertion-variable-names-internal (assertion)
+(defun* assertion-variable-names-internal (assertion) (:inline t)
   "[Cyc] Return the list of names for the variables in ASSERTION."
   (get-assertion-prop assertion :variable-names))
 
@@ -163,10 +163,10 @@ and permission notice:
        (assert-info-second (assertion-assert-info assertion))))
 
 ;; TODO - assertion lookup by id
-(defun-inline assertion-arguments-internal (assertion)
+(defun* assertion-arguments-internal (assertion) (:inline t)
   (lookup-assertion-arguments (assertion-id assertion)))
 
-(defun-inline assertion-dependents-internal (assertion)
+(defun* assertion-dependents-internal (assertion) (:inline t)
   (get-assertion-prop assertion :dependents))
 
 ;; TODO - assertion lookup by id
@@ -226,7 +226,7 @@ This will either be a clause struc containing a cnf, or a cnf. GAF formulas are 
   (set-assertion-gaf-p assertion t))
 
 ;; TODO - assertion lookup by id
-(defun-inline assertion-flags (assertion)
+(defun* assertion-flags (assertion) (:inline t)
   "[Cyc] Return the bit-flags for ASSERTION."
   (lookup-assertion-flags (assertion-id assertion)))
 
@@ -244,19 +244,19 @@ This will either be a clause struc containing a cnf, or a cnf. GAF formulas are 
 
 ;; TODO - fixnum declarations for speedup
 
-(defun-inline set-assertion-flags-gaf-code (flags code)
+(defun* set-assertion-flags-gaf-code (flags code) (:inline t)
   (dpb code (byte 1 0) flags))
 
-(defun-inline assertion-flags-direction-code (flags)
+(defun* assertion-flags-direction-code (flags) (:inline t)
   (ldb (byte 2 1) flags))
 
-(defun-inline assertion-flags-tv-code (flags)
+(defun* assertion-flags-tv-code (flags) (:inline t)
   (ldb (byte 3 3) flags))
 
-(defun-inline set-assertion-flags-tv-code (flags code)
+(defun* set-assertion-flags-tv-code (flags code) (:inline t)
   (dpb code (byte 3 3) flags))
 
-(defun-inline assertion-flags-gaf-p (assertion)
+(defun* assertion-flags-gaf-p (assertion) (:inline t)
   "[Cyc] Return T iff ASSERTION is a GAF according to its internal flag bits."
   (oddp (assertion-flags assertion)))
 
@@ -295,7 +295,7 @@ This will either be a clause struc containing a cnf, or a cnf. GAF formulas are 
         (set-add assertion *rule-set*)))
   (set-assertion-flags-gaf-p assertion gaf?))
 
-(defun-inline determine-cnf-gaf-p (cnf)
+(defun* determine-cnf-gaf-p (cnf) (:inline t)
   "[Cyc] Return the recomputed value for the gaf flag of ASSERTION."
   (gaf-cnf? cnf))
 
@@ -308,11 +308,11 @@ This will either be a clause struc containing a cnf, or a cnf. GAF formulas are 
   (setf *rule-set* (cfasl-input stream))
   (set-size *rule-set*))
 
-(defun-inline gaf-formula-to-cnf (gaf)
+(defun* gaf-formula-to-cnf (gaf) (:inline t)
   "[Cyc] Converts a gaf formula to a CNF clause."
   (make-gaf-cnf gaf))
 
-(defun-inline cnf-to-gaf-formula (cnf)
+(defun* cnf-to-gaf-formula (cnf) (:inline t)
   "[Cyc] Converts a CNF representation of a gaf formula to a gaf formula."
   (gaf-cnf-literal cnf))
 
@@ -344,17 +344,15 @@ This will either be a clause struc containing a cnf, or a cnf. GAF formulas are 
   (lookup-assertion-plist (assertion-id assertion)))
 
 ;; TODO - assertion lookup by id
-(defun-inline reset-assertion-plist (assertion plist)
+(defun* reset-assertion-plist (assertion plist) (:inline t)
   (set-assertion-plist (assertion-id assertion) plist))
 
-(defun-inline get-assertion-prop (assertion indicator &optional default)
+(defun* get-assertion-prop (assertion indicator &optional default) (:inline t)
   (getf (assertion-plist assertion) indicator default))
 
-;; TODO - these actually mutate the returned plist form assertion-plist.  Is this correct?
 (defun set-assertion-prop (assertion indicator value)
   (reset-assertion-plist assertion
-                         (setf (getf (assertion-plist assertion) indicator)
-                               value)))
+                         (putf (assertion-plist assertion) indicator value)))
 
 (defun rem-assertion-prop (assertion indicator)
   (let ((old-plist (assertion-plist assertion)))
@@ -368,7 +366,7 @@ This will either be a clause struc containing a cnf, or a cnf. GAF formulas are 
       (set-assertion-prop assertion :variable-names new-variable-names)
       (rem-assertion-prop assertion :variable-names)))
 
-(defun-inline assertion-index (assertion)
+(defun* assertion-index (assertion) (:inline t)
   "[Cyc] Return the indexing structure for ASSERTION."
   (assertion-indexing-store-get assertion))
 
@@ -379,7 +377,7 @@ This will either be a clause struc containing a cnf, or a cnf. GAF formulas are 
       (missing-larkc 31913)
       (assertion-indexing-store-set assertion new-index)))
 
-(defun-inline asertion-assert-info (assertion)
+(defun* asertion-assert-info (assertion) (:inline t)
   "[Cyc] Return the assert timestamping info for ASSERTION."
   (get-assertion-prop assertion :assert-info))
 

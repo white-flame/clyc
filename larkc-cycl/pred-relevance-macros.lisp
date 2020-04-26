@@ -41,26 +41,26 @@ and permission notice:
 (declaim ((or null function) *relevant-pred-function*))
 (defparameter *relevant-pred-function* nil)
 
-(defun-inline relevant-pred-is-eq (pred)
+(defun* relevant-pred-is-eq (pred) (:inline t)
   (eq *pred* pred))
 
-(defun-inline relevant-pred-is-spec-pred (pred)
+(defun* relevant-pred-is-spec-pred (pred) (:inline t)
   (or (relevant-pred-is-eq pred)
       (cached-spec-pred? *pred pred)))
 
-(defun-inline relevant-pred-is-spec-inverse (pred)
+(defun* relevant-pred-is-spec-inverse (pred) (:inline t)
   (cached-spec-inverse? *pred* pred))
 
-(defun-inline relevant-pred? (pred)
+(defun* relevant-pred? (pred) (:inline t)
   "[Cyc] Return T iff PRED is a relevant predicate at this point."
   (or (pred-relevant-undefined-p)
       ;; TODO - skipped the large case test to directly call various function names. This skips over various missing-larkc reports, and would end up in a 'Function X is undefined' style error instead.
       (funcall *relevant-pred-function* pred)))
 
-(defun-inline pred-relevance-undefined-p ()
+(defun* pred-relevance-undefined-p () (:inline t)
   (null *relevant-pred-function))
 
-(defun-inline all-preds-are-relevant? ()
+(defun* all-preds-are-relevant? () (:inline t)
   (or (pred-relevant-undefined-p)
       (eq #'relevant-pred-is-everything *relevant-pred-function*)))
 

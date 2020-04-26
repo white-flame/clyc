@@ -50,11 +50,11 @@ and permission notice:
                                                         #'load-constant-index-from-cache
                                                         exact?)))
 
-(defun-inline cached-constant-index-count ()
+(defun* cached-constant-index-count () (:inline t)
   "[Cyc] Return the number of constant-indices whose content is cached in memory."
   (cached-kb-object-count *constant-index-manager*))
 
-(defun-inline lookup-constant-index (id)
+(defun* lookup-constant-index (id) (:inline t)
   (lookup-kb-object-content *constant-index-manager* id))
 
 (defun register-constant-index (id constant-index)

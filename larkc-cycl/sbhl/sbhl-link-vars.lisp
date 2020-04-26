@@ -69,32 +69,32 @@ and permission notice:
   (or (eq direction *sbhl-forward-directed-direction*)
       (eq direction *sbhl-backward-directed-direction*)))
 
-(defun-inline get-sbhl-directed-directions ()
+(defun* get-sbhl-directed-directions () (:inline t)
   "[Cyc] *sbhl-directed-directions*"
   *sbhl-directed-directions*)
 
-(defun-inline get-sbhl-forward-directed-direction ()
+(defun* get-sbhl-forward-directed-direction () (:inline t)
   "[Cyc] The keyword for the forward direction of *SBHL-DIRECTED-DIRECTIONS*."
   *sbhl-forward-directed-direction*)
 
-(defun-inline sbhl-forward-directed-direction-p (direction)
+(defun* sbhl-forward-directed-direction-p (direction) (:inline t)
   "[Cyc] Whether DIRECTION is the GET-SBHL-FORWARD-DIRECTED-DIRECTION."
   (eq direction (get-sbhl-forward-directed-direction)))
 
-(defun-inline get-sbhl-backward-directed-direction ()
+(defun* get-sbhl-backward-directed-direction () (:inline t)
   "[Cyc] The keyword for the backward direction of *SBHL-DIRECTED-DIRECTIONS*."
   *sbhl-backward-directed-direction*)
 
-(defun-inline get-sbhl-undirected-direction ()
+(defun* get-sbhl-undirected-direction () (:inline t)
   *sbhl-undirected-direction*)
 
-(defun-inline get-sbhl-undirected-direction-as-list ()
+(defun* get-sbhl-undirected-direction-as-list () (:inline t)
   *sbhl-undirected-direction-as-list*)
 
 (defparameter *sbhl-link-direction* nil
   "[Cyc] Used to specify SBHL-LINK-DIRECTION.")
 
-(defun-inline get-sbhl-link-direction ()
+(defun* get-sbhl-link-direction () (:inline t)
   *sbhl-link-direction*)
 
 (defun get-sbhl-opposite-link-direction ()
@@ -145,30 +145,30 @@ and permission notice:
   "[Cyc] Whether TRUTH is a member of *SBHL-LINK-TRUTH-VALUES*."
   (member? truth *sbhl-link-truth-values*))
 
-(defun-inline sbhl-node-object-p (object)
+(defun* sbhl-node-object-p (object) (:inline t)
   "[Cyc] Whether OBJECT has valid structure to be an SBHL node."
   (fort-p object))
 
-(defun-inline sbhl-mt-object-p (object)
+(defun* sbhl-mt-object-p (object) (:inline t)
   "[Cyc] Whether OBJECT has valid structure to be an SBHL MT."
   (chlmt-p object))
 
 (defparameter *sbhl-randomize-lists-p* nil
   "[Cyc] Determines whether to iterate over SBHL links in random order.")
 
-(defun-inline sbhl-randomize-lists-p ()
+(defun* sbhl-randomize-lists-p () (:inline t)
   *sbhl-randomize-lists-p*)
 
 (defparameter *sbhl-link-mt* nil
   "[Cyc] Parameter for link MT, rebound during link iteration.")
 
-(defun-inline get-sbhl-link-mt () 
+(defun* get-sbhl-link-mt ()  (:inline t)
   *sbhl-link-mt*)
 
 (defparameter *sbhl-link-tv* nil
   "[Cyc] Parameter for link tv, rebound during link iteration.")
 
-(defun-inline get-sbhl-link-tv ()
+(defun* get-sbhl-link-tv () (:inline t)
   *sbhl-link-tv*)
 
 (defparameter *sbhl-link-generator* nil

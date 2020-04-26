@@ -49,25 +49,25 @@ and permission notice:
 (defun clear-deduction-content-table ()
   (clear-kb-object-content-table *deduction-content-manager*))
 
-(defun-inline cached-deduction-count ()
+(defun* cached-deduction-count () (:inline t)
   "[Cyc] Return the number of deductions whose content is cached in memory."
   (cached-kb-object-count *deduction-content-manager*))
 
-(defun-inline deduction-content-completely-cached? ()
+(defun* deduction-content-completely-cached? () (:inline t)
   (= (deduction-count) (cached-deduction-count)))
 
-(defun-inline lookup-deduction-content (id)
+(defun* lookup-deduction-content (id) (:inline t)
   (lookup-kb-object-content *deduction-content-manager* id))
 
-(defun-inline register-deduction-content (id deduction-content)
+(defun* register-deduction-content (id deduction-content) (:inline t)
   "[Cyc] Note that ID will be used as the id for DEDUCTION-CONTENT."
   (register-kb-object-content *deduction-content-manager* id deduction-content))
 
-(defun-inline deregister-deduction-content (id)
+(defun* deregister-deduction-content (id) (:inline t)
   "[Cyc] Note that ID is not in use as a NART id, i.e. points to no hl-formula."
   (deregister-kb-object-content *deduction-content-manager* id))
 
-(defun-inline mark-deduction-content-as-muted (id)
+(defun* mark-deduction-content-as-muted (id) (:inline t)
   (mark-kb-object-content-as-muted *deduction-content-manager* id))
 
 (defun swap-out-all-pristine-deductions ()

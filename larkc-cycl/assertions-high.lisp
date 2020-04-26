@@ -122,27 +122,27 @@ Note: Result is not destructible.")
   (and (rule-assertion? assertion)
        (forward-assertion? assertion)))
 
-(defun-inline assertion-type (assertion)
+(defun* assertion-type (assertion) (:inline t)
   "[Cyc] Return the current type of ASSERTION -- either :GAF or :RULE."
   (if (gaf-assertion? assertion)
       :gaf
       :rule))
 
-(defun-inline assertion-has-type? (assertion type)
+(defun* assertion-has-type? (assertion type) (:inline t)
   "[Cyc] Return T iff ASSERTION's current type is TYPE."
   (eq type (assertion-type assertion)))
 
-(defun-inline gaf-formula (assertion)
+(defun* gaf-formula (assertion) (:inline t)
   "[Cyc] Return the formula for ASSERTION, which must be a gaf.
 Does not put a #$not around negated gafs."
   (gaf-hl-formula assertion))
 
-(defun-inline gaf-hl-formula (assertion)
+(defun* gaf-hl-formula (assertion) (:inline t)
   "[Cyc] Return the formula for ASSERTION, which must be a gaf.
 Does not put a #$not around negated gafs."
   (assertion-gaf-hl-formula assertion))
 
-(defun-inline gaf-el-formula (assertion)
+(defun* gaf-el-formula (assertion) (:inline t)
   "[Cyc] Return the formula for ASSERTION, which must be a gaf.
 Puts a #$not around negated gafs.
 Does not do any uncanonicalization or conversion of HL terms in args to EL."
@@ -160,32 +160,32 @@ This will return (#$not <blah>) for negated gafs."
   "[Cyc] Returnargs of the gaf ASSERTION."
   (formula-args (gaf-formula assertion)))
 
-(defun-inline gaf-arg (assertion n)
+(defun* gaf-arg (assertion n) (:inline t)
   "[Cyc] Return arg N of the gaf ASSERTION."
   (nth n (gaf-formula assertion)))
 
-(defun-inline gaf-predicate (assertion)
+(defun* gaf-predicate (assertion) (:inline t)
   "[Cyc] Return the predicate of gaf ASSERTION."
   (formula-arg0 (gaf-hl-formula assertion)))
 
-(defun-inline gaf-arg1 (assertion)
+(defun* gaf-arg1 (assertion) (:inline t)
   "[Cyc] Return arg 1 of the gaf ASSERTION."
   (gaf-arg assertion 1))
 
-(defun-inline gaf-arg2 (assertion)
+(defun* gaf-arg2 (assertion) (:inline t)
   "[Cyc] Return arg 2 of the gaf ASSERTION."
   (gaf-arg assertion 2))
 
-(defun-inline gaf-arg3 (assertion)
+(defun* gaf-arg3 (assertion) (:inline t)
   "[Cyc] Return arg 3 of the gaf ASSERTION."
   (gaf-arg assertion 3))
 
-(defun-inline assertion-has-direction? (assertion direction)
+(defun* assertion-has-direction? (assertion direction) (:inline t)
   "[Cyc] Return T iff ASSERTION has DIRECTION as its direction."
   (eq direction (assertion-direction assertion)))
 
 ;; TODO - deprecate
-(defun-inline assertion-has-direction (assertion direction)
+(defun* assertion-has-direction (assertion direction) (:inline t)
   (assertion-has-direction? assertion direction))
 
 (defun forward-assertion? (assertion)
@@ -193,15 +193,15 @@ This will return (#$not <blah>) for negated gafs."
   (and (assertion-p assertion)
        (eq :forward (assertion-direction assertion))))
 
-(defun-inline assertion-has-truth? (assertion truth)
+(defun* assertion-has-truth? (assertion truth) (:inline t)
   "[Cyc] Return T iff ASSERTION's current truth is TRUTH."
   (eq (assertion-truth assertion) truth))
 
 ;; TODO - deprecate
-(defun-inline assertion-has-truth (assertion truth)
+(defun* assertion-has-truth (assertion truth) (:inline t)
   (assertion-has-truth? assertion truth))
 
-(defun-inline assertion-el-variables (assertion)
+(defun* assertion-el-variables (assertion) (:inline t)
   "[Cyc] Return a list of the EL variables, for ASSERTION."
   (mapcar #'intern-el-var (assertion-variable-names assertion)))
 
@@ -229,11 +229,11 @@ TL assertion -> HL assertion.")
        (not (valid-assertion? assertion))))
 
 ;; TODO - deprecate
-(defun-inline valid-assertion (assertion &optional robust?)
+(defun* valid-assertion (assertion &optional robust?) (:inline t)
   (declare (ignore robust?))
   (valid-assertion? assertion))
 
-(defun-inline create-assertion (cnf mt &optional var-names (direction :backward))
+(defun* create-assertion (cnf mt &optional var-names (direction :backward)) (:inline t)
   "[Cyc] Create a new assertion with CNF in MT."
   (create-assertion-int cnf mt var-names direction))
 
@@ -249,7 +249,7 @@ TL assertion -> HL assertion.")
       (kb-set-assertion-direction assertion direction))
     assertion))
 
-(defun-inline remove-assertion (assertion)
+(defun* remove-assertion (assertion) (:inline t)
   "[Cyc] Remove ASSERTION."
   (kb-remove-assertion assertion))
 
@@ -271,6 +271,6 @@ TL assertion -> HL assertion.")
 
 (defparameter *assertion-dump-id-table* nil)
 
-(defun-inline find-assertion-by-dump-id (dump-id)
+(defun* find-assertion-by-dump-id (dump-id) (:inline t)
   "[Cyc] Return the assertion with DUMP-ID during a KB load."
   (find-assertion-by-id dump-id))

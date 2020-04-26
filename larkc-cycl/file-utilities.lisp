@@ -69,12 +69,12 @@ DIRECTORY-STRING should include the appropriate directory separator character at
 (deflexical *temp-directory* "/tmp/"
     "[Cyc] A directory to which Cyc can write temporary files.")
 
-(defun-inline temp-directory ()
+(defun* temp-directory () (:inline t)
   *temp-directory*)
 
 (deflexical *random-path-chars* "0123456789abcdefghijklmnopqrstuvwxyz")
 
-(defun-inline file-exists? (filename)
+(defun* file-exists? (filename) (:inline t)
   "[Cyc] Like probe-file except does not error on an invalid filename."
   (ignore-errors
     (probe-file filename)

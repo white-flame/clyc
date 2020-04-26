@@ -53,7 +53,8 @@ Returns KEY."
           key)
         (error "Corrupted dictionary; attempting to push values on a non-LISTP ~a." current-val))))
 
-(defun-inline dictionary-pushnew (dictionary key val &optional (test #'eql) (key-accessor #'identity))
+(defun* dictionary-pushnew (dictionary key val &optional (test #'eql) (key-accessor #'identity))
+    (:inline t)
   "[Cyc] Push VALUE onto the current value at KEY in DICTIONARY. Ensures that the current value at KEY is a LISTP and that VALUE is not yet a member of the list. If the number of entries would exceed the limit, revamp the dictionary to the next better representation. TEST is a predicate that tests elements for equality and KEY-ACCESSOR is a function that represents the key field of the element.
 Returns KEY."
   (let ((current-val (gethash key dictionary)))
@@ -104,15 +105,15 @@ Treats NIL a 0."
 (defun new-synchronized-dictionary (&optional (test #'eql) (size 0))
   (make-hash-table :test test :size size :synchronized t))
 
-(defun-inline clear-synchronized-dictionary (dictionary)
+(defun* clear-synchronized-dictionary (dictionary) (:inline t)
   (clrhash dictionary))
-(defun-inline synchronized-dictionary-enter (dictionary key value)
+(defun* synchronized-dictionary-enter (dictionary key value) (:inline t)
   (setf (gethash key dictionary) value))
-(defun-inline synchronized-dictionary-remove (dictionary key)
+(defun* synchronized-dictionary-remove (dictionary key) (:inline t)
   (remhash key dictionary))
-(defun-inline synchronized-dictionary-lookup (dictionary key &optional default)
+(defun* synchronized-dictionary-lookup (dictionary key &optional default) (:inline t)
   (gethash key dictionary default))
-(defun-inline synchronized-dictionary-keys (dictionary)
+(defun* synchronized-dictionary-keys (dictionary) (:inline t)
   "[Cyc] Returns a list of the given SYNCHRONIZED-DICTIONARY's keys."
   (sb-ext:with-locked-hash-table (dictionary)
     (hash-table-keys dictionary)))

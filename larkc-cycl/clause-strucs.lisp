@@ -73,19 +73,19 @@ and permission notice:
                              (make-clause-struc)))
       (missing-larkc 11349)))
 
-(defun-inline reset-clause-struc-id (clause-struc new-id)
+(defun* reset-clause-struc-id (clause-struc new-id) (:inline t)
   "[Cyc] Primitively change the clause-struc id for CLAUSE-STRUC to NEW-ID."
   (setf (cls-id clause-struc) new-id))
 
-(defun-inline clause-struc-cnf (clause-struc)
+(defun* clause-struc-cnf (clause-struc) (:inline t)
   "[Cyc] Return the CNF of CLAUSE-STRUC."
   (cls-cnf clause-struc))
 
-(defun-inline reset-clause-struc-assertions (clause-struc new-assertions)
+(defun* reset-clause-struc-assertions (clause-struc new-assertions) (:inline t)
   "[Cyc] Primitively set the assertions for CLAUSE-STRUC to NEW-ASSERTIONS."
   (setf (cls-assertions clause-struc) new-assertions))
 
-(defun-inline find-clause-struc-by-id (id)
+(defun* find-clause-struc-by-id (id) (:inline t)
   "[Cyc] Return the clause-struc with ID, or NIL if not present."
   (lookup-clause-struc id))
 
@@ -97,14 +97,14 @@ and permission notice:
     (setf (cls-cnf clause-struc) cnf)
     clause-struc))
 
-(defun-inline create-sample-invalid-clause-struc ()
+(defun* create-sample-invalid-clause-struc () (:inline t)
   "[Cyc] Create a sample invalid clause-struc."
   (get-clause-struc))
 
 (defglobal *clause-struc-from-id* nil
     "[Cyc] The ID -> CLAUSE-STRUC mapping table.")
 
-(defun-inline clause-struc-table ()
+(defun* clause-struc-table () (:inline t)
   *clause-struc-from-id*)
 
 (defun setup-clause-struc-table (size exact?)
@@ -122,7 +122,7 @@ and permission notice:
     (missing-larkc 11347))
   (clear-clause-struc-table))
 
-(defun-inline clear-clause-struc-table ()
+(defun* clear-clause-struc-table () (:inline t)
   (clear-id-index *clause-struc-from-id*))
 
 (defun set-next-clause-struc-id (&optional max-clause-struc-id)
@@ -137,7 +137,7 @@ and permission notice:
   (reset-clause-struc-id clause-struc id)
   (id-index-enter *clause-struc-from-id* id clause-struc))
 
-(defun-inline lookup-clause-struc (id)
+(defun* lookup-clause-struc (id) (:inline t)
   (id-index-lookup *clause-struc-from-id* id))
 
 ;; TODO - these dump-id-tables are scattered around, but unused.  Part of serialization identity?

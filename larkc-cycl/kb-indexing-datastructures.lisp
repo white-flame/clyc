@@ -45,10 +45,10 @@ and permission notice:
 (defglobal *assertion-indexing-store* nil
   "[Cyc] The mapping between assertions and their indices.")
 
-(defun-inline assertion-indexing-store ()
+(defun* assertion-indexing-store () (:inline t)
   *assertion-indexing-store*)
 
-(defun-inline assertion-indexing-store-reset (store)
+(defun* assertion-indexing-store-reset (store) (:inline t)
   (setf *assertion-indexing-store* store))
 
 (deflexical *meta-assertion-frequency* 0.015
@@ -67,7 +67,7 @@ and permission notice:
   ;; TODO - meaningful return value?
   *assertion-indexing-store*)
 
-(defun-inline assertion-indexing-store-get (assertion)
+(defun* assertion-indexing-store-get (assertion) (:inline t)
   (gethash assertion *assertion-indexing-store* (new-simple-index)))
 
 (defun assertion-indexing-store-set (assertion index)
@@ -90,7 +90,7 @@ and permission notice:
   (or (reified-term-p object)
       (indexed-unrepresented-term-p object)))
 
-(defun-inline indexed-unrepresented-term-p (object)
+(defun* indexed-unrepresented-term-p (object) (:inline t)
   "[Cyc] Returns T iff OBJECT is an indexed unrepresented CycL term, e.g., a string or number."
   (cycl-unrepresented-term-p object))
 
@@ -148,34 +148,34 @@ and permission notice:
   (and (listp object)
        (not (complex-index-p object))))
 
-(defun-inline simple-indexed-term-p (term)
+(defun* simple-indexed-term-p (term) (:inline t)
   (simple-index-p (term-index term)))
 
-(defun-inline new-simple-index ()
+(defun* new-simple-index () (:inline t)
   "[Cyc] Returns a new empty simple index."
   nil)
 
-(defun-inline simple-num-index (term)
+(defun* simple-num-index (term) (:inline t)
   (length (term-index term)))
 
-(defun-inline simple-term-assertion-list (term)
+(defun* simple-term-assertion-list (term) (:inline t)
   "[Cyc] Returns the list of all assertions referencing TERM.
 Note: result is NOT destructible!"
   (term-index term))
 
-(defun-inline do-simple-index-term-assertion-list (term)
+(defun* do-simple-index-term-assertion-list (term) (:inline t)
   (simple-term-assertion-list term))
 
-(defun-inline reset-term-simple-index (term simple-index)
+(defun* reset-term-simple-index (term simple-index) (:inline t)
   (reset-term-index term simple-index))
 
-(defun-inline complex-index-p (object)
+(defun* complex-index-p (object) (:inline t)
   (subindex-p object))
 
-(defun-inline complex-index-leaf-count (complex-index)
+(defun* complex-index-leaf-count (complex-index) (:inline t)
   (subindex-leaf-count complex-index))
 
-(defun-inline complex-index-lookup (complex-index key)
+(defun* complex-index-lookup (complex-index key) (:inline t)
   "[Cyc] Returns NIL or subindex-p or indexing-leaf-p."
   (subindex-lookup complex-index key))
 
@@ -184,7 +184,7 @@ Note: result is NOT destructible!"
   (when-let ((index (term-index term)))
     (complex-index-lookup index key)))
 
-(defun-inline initialize-term-complex-index (term)
+(defun* initialize-term-complex-index (term) (:inline t)
   "[Cyc] Initializes a complex index for TERM. Clobbers any existing indexing for TERM."
   (initialize-term-subindex term))
 
@@ -208,7 +208,7 @@ Note: result is NOT destructible!"
       (intermediate-index-leaf-count subindex)
       (final-index-leaf-count subindex)))
 
-(defun-inline initialize-term-subindex (term)
+(defun* initialize-term-subindex (term) (:inline t)
   "[Cyc]Initializes a subindex for TERM. Clobbers any existing indexing for TERM."
   (initialize-term-intermediate-index term))
 
@@ -223,18 +223,18 @@ Note: result is NOT destructible!"
        (integerp (car object))
        (hash-table-p (cdr object))))
 
-(defun-inline new-intermediate-index (test-function)
+(defun* new-intermediate-index (test-function) (:inline t)
   (cons 0 (make-hash-table :test test-function)))
 
-(defun-inline do-intermediate-index-valid-index-p (object)
+(defun* do-intermediate-index-valid-index-p (object) (:inline t)
   ;; TODO - Tests for non-NILness, which should be okay to just pass through.
   object)
 
-(defun-inline intermediate-index-lookup (intermediate-index key)
+(defun* intermediate-index-lookup (intermediate-index key) (:inline t)
   "[Cyc] Returns NIL or subindex-p."
   (gethash key (intermediate-index-dictionary intermediate-index)))
 
-(defun-inline intermediate-index-keys (intermediate-index)
+(defun* intermediate-index-keys (intermediate-index) (:inline t)
   "[Cyc] Returns a list of keys for INTERMEDIATE-INDEX."
   (hash-table-keys (intermediate-index-dictionary intermediate-index)))
 
@@ -248,7 +248,7 @@ Note: result is NOT destructible!"
   ;; TODO - useful return value?
   intermediate-index)
 
-(defun-inline intermediate-index-insert (intermediate-index keys leaf)
+(defun* intermediate-index-insert (intermediate-index keys leaf) (:inline t)
   "[Cyc] Returns whether it actually inserted (NIL if it was already there)."
   (intermediate-index-insert-int intermediate-index keys leaf nil))
 
@@ -290,19 +290,19 @@ Note: result is NOT destructible!"
           (when (zerop (subindex-leaf-count subindex))
             (intermediate-index-delete-key intermediate-index key)))))))
 
-(defun-inline intermediate-index-delete-key (intermediate-index key)
+(defun* intermediate-index-delete-key (intermediate-index key) (:inline t)
   "[Cyc] Delete any mapping from KEY to a subindex in INTERMEDIATE-INDEX."
   (intermediate-index-dictionary-delete-key intermediate-index key))
 
-(defun-inline initialize-term-intermediate-index (term)
+(defun* initialize-term-intermediate-index (term) (:inline t)
   "[Cyc] Initializes a top-level intermediate index for TERM. Clobbers any existing indexing for TERM."
   (reset-term-index term (new-intermediate-index #'eq)))
 
-(defun-inline free-intermediate-index (intermediate-index)
+(defun* free-intermediate-index (intermediate-index) (:inline t)
   "[Cyc] Frees all resources consumed by INTERMEDIATE-INDEX."
   (clrhash (intermediate-index-dictionary intermediate-index)))
 
-(defun-inline intermediate-index-leaf-count-reset (intermediate-index new-count)
+(defun* intermediate-index-leaf-count-reset (intermediate-index new-count) (:inline t)
   (rplaca intermediate-index new-count))
 
 (defun intermediate-index-leaf-count-inc (intermediate-index delta)
@@ -325,34 +325,34 @@ If not found, create a new intermediate index for KEY, with an equality test det
         (intermediate-index-set intermediate-index key subindex)
         subindex)))
 
-(defun-inline intermediate-index-dictionary (intermediate-index)
+(defun* intermediate-index-dictionary (intermediate-index) (:inline t)
   "[Cyc] Assumes INTERMEDIATE-INDEX is dictionary-style."
   (cdr intermediate-index))
 
-(defun-inline intermediate-index-dictionary-set (intermediate-index key value)
+(defun* intermediate-index-dictionary-set (intermediate-index key value) (:inline t)
   (setf (gethash key (intermediate-index-dictionary intermediate-index)) value))
 
-(defun-inline intermediate-index-dictionary-delete-key (intermediate-index key)
+(defun* intermediate-index-dictionary-delete-key (intermediate-index key) (:inline t)
   (remhash key (intermediate-index-dictionary intermediate-index)))
 
-(defun-inline final-index-p (object)
+(defun* final-index-p (object) (:inline t)
   (set-p object))
 
-(defun-inline new-final-index ()
+(defun* new-final-index () (:inline t)
   (new-set #'eq))
 
-(defun-inline final-index-leaf-count (final-index)
+(defun* final-index-leaf-count (final-index) (:inline t)
   "[Cyc] Returns the number of indexing leaves in FINAL-INDEX."
   (set-size (final-index-set final-index)))
 
-(defun-inline final-index-insert (final-index leaf)
+(defun* final-index-insert (final-index leaf) (:inline t)
   "[Cyc] Is not required to check for membership before insertion."
   (set-add leaf (final-index-set final-index)))
 
-(defun-inline final-index-delete (final-index leaf)
+(defun* final-index-delete (final-index leaf) (:inline t)
   "[Cyc] Is not required to check for multiple elements to delete."
   (set-remove leaf (final-index-set final-index)))
 
-(defun-inline final-index-set (final-index)
+(defun* final-index-set (final-index) (:inline t)
   "[Cyc] Returns the set datastructure in FINAL-INDEX. Currently a final index _is_ a set, so this is the identity function."
   final-index)

@@ -42,25 +42,25 @@ and permission notice:
 ;; hl-support
 ;; hl-support-content
 
-(defun-inline find-kb-hl-support (hl-support)
+(defun* find-kb-hl-support (hl-support) (:inline t)
   (or (find-kb-hl-support-during-creation hl-support)
       (lookup-kb-hl-support hl-support)))
 
-(defun-inline find-kb-hl-support-by-id (id)
+(defun* find-kb-hl-support-by-id (id) (:inline t)
   (lookup-kb-hl-support-by-id id))
 
-(defun-inline 9find-kb-hl-supports-mentioning-term (term)
+(defun* 9find-kb-hl-supports-mentioning-term (term) (:inline t)
   (lookup-kb-hl-supports-mentioning-term term))
 
-(defun-inline kb-hl-support-count ()
+(defun* kb-hl-support-count () (:inline t)
   (if *kb-hl-supports-from-ids*
       (id-index-count *kb-hl-supports-from-ids*)
       0))
 
-(defun-inline kb-hl-support-id (kb-hl-support)
+(defun* kb-hl-support-id (kb-hl-support) (:inline t)
   (kb-hl-support-get-id kb-hl-support))
 
-(defun-inline do-kb-hl-support-dependents-helper (kb-hl-support)
+(defun* do-kb-hl-support-dependents-helper (kb-hl-support) (:inline t)
   (kb-hl-support-content-get-dependents (kb-hl-support-content kb-hl-support)))
 
 (defun kb-hl-support-hl-support (kb-hl-support)
@@ -80,7 +80,7 @@ and permission notice:
     (when (hl-support-p hl-support)
       (hl-support-tv hl-support))))
 
-(defun-inline find-or-possibly-create-kb-hl-support (hl-support)
+(defun* find-or-possibly-create-kb-hl-support (hl-support) (:inline t)
   (or (find-kb-hl-support hl-support)
       (possibly-create-kb-hl-support hl-support)))
 
@@ -109,16 +109,16 @@ and permission notice:
   (setf (kb-hlsc-dependents kb-hl-support-content) nil))
 
 ;; TODO - spurious accessors?
-(defun-inline kb-hl-support-content-get-argument (kb-hl-support-content)
+(defun* kb-hl-support-content-get-argument (kb-hl-support-content) (:inline t)
   (kb-hlsc-argument kb-hl-support-content))
 
-(defun-inline kb-hl-support-content-get-dependents (kb-hl-support-content)
+(defun* kb-hl-support-content-get-dependents (kb-hl-support-content) (:inline t)
   (kb-hlsc-dependents kb-hl-support-content))
 
-(defun-inline kb-hl-support-content-set-argument (kb-hl-support-content deduction)
+(defun* kb-hl-support-content-set-argument (kb-hl-support-content deduction) (:inline t)
   (setf (kb-hlsc-argument kb-hl-support-content) deduction))
 
-(defun-inline kb-hl-support-content-set-dependents (kb-hl-support-content dependents)
+(defun* kb-hl-support-content-set-dependents (kb-hl-support-content dependents) (:inline t)
   (setf (kb-hlsc-dependents kb-hl-support-content) dependents))
 
 (defun make-kb-hl-support-shell (id)
@@ -126,7 +126,7 @@ and permission notice:
     (register-kb-hl-support-id id kb-hl-support)
     kb-hl-support))
 
-(defun-inline kb-hl-support-content (kb-hl-support)
+(defun* kb-hl-support-content (kb-hl-support) (:inline t)
   (lookup-kb-hl-support-content (kb-hl-support-get-id kb-hl-support)))
 
 (defun kb-hl-support-add-dependent (kb-hl-support deduction)
@@ -151,7 +151,7 @@ and permission notice:
     (free-kb-hl-support kb-hl-support)
     (free-kb-hl-support-content content)))
 
-(defun-inline hl-justify-for-kb-hl-support (hl-support)
+(defun* hl-justify-for-kb-hl-support (hl-support) (:inline t)
   (remove hl-support (hl-support-justify hl-support) :test #'equal))
 
 (defun valid-kb-hl-support? (object &optional robust?)
@@ -163,7 +163,7 @@ and permission notice:
   (and (kb-hl-support-p object)
        (kb-hl-support-handle-valid? object)))
 
-(defun-inline kb-hl-support-handle-valid? (kb-hl-support)
+(defun* kb-hl-support-handle-valid? (kb-hl-support) (:inline t)
   ;; TODO - assuming the not-integerp is just integer or nil
   (kb-hl-support-get-id kb-hl-support))
 
@@ -186,7 +186,7 @@ and permission notice:
 
 (defglobal *kb-hl-supports-from-ids* nil)
 
-(defun-inline do-kb-hl-supports-table ()
+(defun* do-kb-hl-supports-table () (:inline t)
   *kb-hl-supports-from-ids*)
 
 (defun setup-kb-hl-support-id-tables (size exact?)
@@ -194,16 +194,16 @@ and permission notice:
     (setf *kb-hl-supports-from-ids* (new-id-index size 0)))
   (setup-kb-hl-support-content-table size exact?))
 
-(defun-inline lookup-kb-hl-support-by-id (id)
+(defun* lookup-kb-hl-support-by-id (id) (:inline t)
   (id-index-lookup *kb-hl-supports-from-ids* id))
 
-(defun-inline next-kb-hl-support-id ()
+(defun* next-kb-hl-support-id () (:inline t)
   (id-index-next-id *kb-hl-supports-from-ids*))
 
-(defun-inline register-kb-hl-support-id (id kb-hl-support)
+(defun* register-kb-hl-support-id (id kb-hl-support) (:inline t)
   (id-index-enter *kb-hl-supports-from-ids* id kb-hl-support))
 
-(defun-inline deregister-kb-hl-support-id (id)
+(defun* deregister-kb-hl-support-id (id) (:inline t)
   (id-index-remove *kb-hl-supports-from-ids* id))
 
 (defun set-next-kb-hl-support-id (&optional max-kb-hl-support-id)
@@ -239,7 +239,7 @@ and permission notice:
                                                         #$TheList
                                                         #$TheSet))
 
-(defun-inline kb-hl-support-index-unindexed-term? (term)
+(defun* kb-hl-support-index-unindexed-term? (term) (:inline t)
   (member term *kb-hl-support-index-unindexed-terms* :test #'equal))
 
 (defun kb-hl-support-index-indexed-term-p (term)
@@ -376,7 +376,7 @@ and permission notice:
                   (when (hash-table-empty-p mt-index)
                     (remhash module *kb-hl-support-index*)))))))))))
 
-(defun-inline clear-kb-hl-support-index ()
+(defun* clear-kb-hl-support-index () (:inline t)
   (clrhash *kb-hl-support-index*))
 
 (defglobal *kb-hl-supports-being-created* nil)
@@ -434,7 +434,7 @@ and permission notice:
 
 (defparameter *tms-kb-hl-support-queue* nil)
 
-(defun-inline enqueue-kb-hl-supports-for-tms? ()
+(defun* enqueue-kb-hl-supports-for-tms? () (:inline t)
   ;; TODO - assuming it's nil or queue-p
   *tms-kb-hl-support-queue*)
 
@@ -457,7 +457,7 @@ and permission notice:
 
 (defparameter *kb-hl-support-dump-id-table* nil)
 
-(defun-inline find-kb-hl-support-by-dump-id (dump-id)
+(defun* find-kb-hl-support-by-dump-id (dump-id) (:inline t)
   (find-kb-hl-support-by-id dump-id))
 
 (defun load-kb-hl-support-content (kb-hl-support stream)

@@ -423,7 +423,7 @@ and permission notice:
 
   (defun nadd-clock-time-to-process-resource-timing-info (clock-time timing-info)
     "[Cyc] @hack until with-process-resource-tracking supports wall clock time"
-    (setf (getf timing-info :wall-clock-time) clock-time)))
+    (putf timing-info :wall-clock-time clock-time)))
 
 (defglobal *kb-var-initializations* nil
     "[Cyc] Store of (var init-func) pairs that specify kb-variables and their kb-dependent initialization")

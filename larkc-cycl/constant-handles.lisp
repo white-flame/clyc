@@ -60,7 +60,7 @@ and permission notice:
 (defglobal *constant-from-suid* nil
   "[Cyc] The SUID->CONSTANT mapping table.")
 
-(defun-inline do-constants-table ()
+(defun* do-constants-table () (:inline t)
   *constant-from-suid*)
 
 (defun setup-constant-suid-table (size exact?)

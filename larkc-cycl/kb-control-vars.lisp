@@ -63,11 +63,11 @@ and permission notice:
 (defglobal *planner-kb-loaded?* nil)
 (defglobal *kct-kb-loaded?* nil)
 
-(defun-inline kct-kb-loaded-p ()
+(defun* kct-kb-loaded-p () (:inline t)
   "[Cyc] Is the portion of the KB necessary for KCTs loaded? There is currently no code analogue of this KB feature."
   *kct-kb-loaded?*)
 
-(defun-inline unset-kct-kb-loaded ()
+(defun* unset-kct-kb-loaded () (:inline t)
   (setf *kct-kb-loaded?* nil))
 
 (defparameter *forward-inference-enabled?* t)
@@ -77,7 +77,7 @@ and permission notice:
   "[Cyc] Do we allow conclusion of negated fags in forward propagation.")
 (defparameter *within-forward-inference?* nil)
 
-(defun-inline within-forward-inference? ()
+(defun* within-forward-inference? () (:inline t)
   *within-forward-inference?*)
 
 (defparameter *within-assertion-forward-propagation?* nil)

@@ -94,10 +94,10 @@ and permission notice:
            (declare (ignorable ,@all-lambda-list-terms))
            (vector ,@ (mapcar #'second slots)))
 
-         (defun-inline ,fn-quiesce-one-step (state)
+         (defun* ,fn-quiesce-one-step (state) (:inline t)
            (,with state ,quiesce-step))
          
-         (defun-inline ,fn-quiesce (state)
+         (defun* ,fn-quiesce (state) (:inline t)
            ;; TODO - there is no <name>-current-keylist as the comments originally referenced
            "[Cyc] Iterates over the keys in STATE until it ends up with its current keylist being valid and relevant, with validity and relevance being determined by :RELEVANT-KEYLIST. It may not need to iterate over any keys in STATE, in which case STATE is left unchanged.
 Return 0: The relevant final-index-spec list thus formed, if any.
@@ -191,7 +191,7 @@ Return 1: Whether quiescence terminated early due to running out of keys."
 
 
 
-(defun-inline do-gaf-arg-index-key-validator (term argnum predicate)
+(defun* do-gaf-arg-index-key-validator (term argnum predicate) (:inline t)
   "[Cyc] Return T iff TERM, ARGUM, and PREDICATE are valid keys for DO-GAF-ARG-INDEX."
   ;; TODO - this is in kb-indexing?  move it here
   (gaf-arg-index-key-validator term argnum predicate))
@@ -249,7 +249,7 @@ Return 1: Whether quiescence terminated early due to running out of keys."
                       (and (relevant-mt? mt)
                            (list mt))))
 
-(defun-inline do-predicate-extent-index-key-validator (predicate)
+(defun* do-predicate-extent-index-key-validator (predicate) (:inline t)
   "[Cyc] Return T iff PREDICATE is a valid key for DO-PREDICATE-EXTENT-INDEX."
   (fort-p predicate))
 
@@ -289,7 +289,30 @@ Return 1: Whether quiescence terminated early due to running out of keys."
        (or (not function)
            (fort-p function))))
 
-
+;; Implementation taken from kb-mapping.lisp/map-nart-arg-index
+(defmacro do-nart-arg-index ((var term &key index function done) &body body)
+  `(when (do-nart-arg-index-key-validator ,term ,index ,function)
+     (let ((iterator-var (new-nart-final-index-spec-iterator ,term ,index ,function))
+           (done-var nil)
+           (token-var nil))
+       (until done-var
+         (let* ((final-index-spec (iteration-next-wtihout-values-macro-helper iterator-var token-var))
+                (valid (not (eq token-var final-index-spec))))
+           (when valid
+             (let ((final-index-iterator nil))
+               (unwind-protect (progn
+                                 (setf final-index-iterator (new-final-index-iterator final-index-spec :gaf nil nil))
+                                 (let ((done-var2 nil)
+                                       (token-var2 nil))
+                                   (until done-var2
+                                     (let* ((,var (iteration-next-without-values-macro-helper final-index-iterator token-var2))
+                                            (valid2 (not eq token-var2 ,var)))
+                                       (when valid2
+                                         ,@body)
+                                       (setf done-var2 (not valid2))))))
+                 (when final-index-iterator
+                   (destroy-final-index-iterator final-index-iterator)))))
+           (setf done-var (not valid)))))))
 
 
 
@@ -297,7 +320,7 @@ Return 1: Whether quiescence terminated early due to running out of keys."
 
 ;; FUNCTION-EXTENT
 
-(defun-inline do-function-extent-index-key-validator (function)
+(defun* do-function-extent-index-key-validator (function) (:inline t)
   "[Cyc] Return T iff FUNCTION is a valid key for DO-FUNCTION-EXTENT-INDEX."
   (fort-p function))
 
@@ -547,8 +570,7 @@ Return 1: Whether quiescence terminated early due to running out of keys."
                       (cond
                         ((not mt-keys) (pred-arg2-rule-final-index-spec-iterator-refill-mt-keys state))
                         ((not direction-keys) (pred-arg2-rule-final-index-spec-iterator-refill-direction-keys state))
-                        (t (error "PRED-ARG2-RULE iterator quiescense failed with ~s" state)))))
-  )
+                        (t (error "PRED-ARG2-RULE iterator quiescense failed with ~s" state))))))
 
 (defun do-pred-arg2-rule-index-key-validator (arg2 sense direction)
   (and (fort-p arg2)
@@ -687,12 +709,12 @@ Return 1: Whether quiescence terminated early due to running out of keys."
       (new-assertion-simple-final-index-spec term #'other-index-assertion-match-p)
       (list term :other)))
 
-(defun-inline other-simple-final-index-spec-p (object)
+(defun* other-simple-final-index-spec-p (object) (:inline t)
   (and (eq (car object) :simple)
        ;; TODO - symbol vs function of final-index-spec
        (eq (fourth object) #'other-index-assertion-match-p)))
 
-(defun-inline other-complex-final-index-spec-p (object)
+(defun* other-complex-final-index-spec-p (object) (:inline t)
   (eq :other (second object)))
 
 (defun other-final-index-spec-p (final-index-spec)
@@ -840,7 +862,7 @@ If FINAL-INDEX-SPEC is complex, then get the list from the other side. This list
         (t (error "Unexpected type ~s in simple final index spec ~s" type simple-final-index-spec)))
       t)))
 
-(defun-inline destroy-final-index-iterator (final-index-iterator)
+(defun* destroy-final-index-iterator (final-index-iterator) (:inline t)
   (iteration-finalize final-index-iterator))
 
 (defun final-index-iterator-filtered (final-index-spec type-spec truth-spec direction-spec)
@@ -896,7 +918,7 @@ ASSERTION-FUNC: We will (funcall ASSERTION-FUNC assertion term), and the asserti
   (when-let ((cs *simple-term-assertion-list-filtered-caching-state*))
     (caching-state-clear cs)))
 
-(defun-inline simple-term-assertion-list-filtered-internal (simple-final-index-spec type truth direction)
+(defun* simple-term-assertion-list-filtered-internal (simple-final-index-spec type truth direction) (:inline t)
   "[Cyc] Returns the list of all assertions referencing the TERM in FINAL-INDEX-SPEC which match TYPE, TRUTH, DIRECTION, and the syntactic constraints expressed in FINAL-INDEX-SPEC."
   (let ((result nil)
         (term (simple-final-index-spec-term simple-final-index-spec)))

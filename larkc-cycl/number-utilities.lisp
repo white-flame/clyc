@@ -42,28 +42,28 @@ and permission notice:
 
 ;; A ton of these functions are very simplistic.  I wonder if they're used to pass around as lambdas.  Else, it's a lot easier to just type out their effects than remember which fiddly bits are in here under what name.
 
-(defun-inline 2* (number)
+(defun* 2* (number) (:inline t)
   "[Cyc] Return (* NUMBER 2)."
   (* 2 number))
 
-(defun-inline onep (object)
+(defun* onep (object) (:inline t)
   "[Cyc] Return T iff OBJECT is 1."
   (eql 1 object))
 
-(defun-inline encode-boolean (object)
+(defun* encode-boolean (object) (:inline t)
   "[Cyc] Convert any object to either 1 or 0."
   (if object 1 0))
 
-(defun-inline decode-boolean (integer)
+(defun* decode-boolean (integer) (:inline t)
   "[Cyc] Convert 1 or 0 to T or NIL."
   (not (eq 0 integer)))
 
-(defun-inline get-bit (bits bit-number)
+(defun* get-bit (bits bit-number) (:inline t)
   "[Cyc] Return the boolean value encoded in BIT-NUMBER of BITS."
   (declare (fixnum bits bit-number))
   (decode-boolean (ldb (byte 1 bit-number) bits)))
   
-(defun-inline set-bit (bits bit-number &optional (boolean t))
+(defun* set-bit (bits bit-number &optional (boolean t)) (:inline t)
   (declare (fixnum bits bit-number))
   (dpb (encode-boolean boolean) (byte 1 bit-number) bits))
 
@@ -74,10 +74,10 @@ and permission notice:
 (defconstant *e* 2.718281828459045d0
   "[Cyc] exp1, what a silly name for e.")
 
-(defun-inline bytep (object)
+(defun* bytep (object) (:inline t)
   (typep object '(integer 0 255)))
 
-(defun-inline zero-number-p (object)
+(defun* zero-number-p (object) (:inline t)
   "[Cyc] Like ZEROP, but doesn't error on non-numbers."
   (or (eq object 0)
       (eql object 0.0d0)))
@@ -136,7 +136,8 @@ and permission notice:
                 (setf tersest-float candidate-float))))
       tersest-float)))
 
-(defun-inline percent (numerator &optional (denominator 1) significant-digits)
+(defun* percent (numerator &optional (denominator 1) significant-digits)
+    (:inline t)
   "[Cyc] Express NUMERATOR/DENOMINATOR as a percent.
 The answer is limited to SIGNIFICANT-DIGITS, when non-NIL."
   (let ((result (* 100 (/ numerator denominator))))
@@ -147,24 +148,24 @@ The answer is limited to SIGNIFICANT-DIGITS, when non-NIL."
 ;; TODO DESIGN - SBCL does support infinite numbers in sb-ext:, including math operators, numeric comparisons, and predicates.  The serialization process, however, would need to be extended to support it, if these are ever asserted.  It's a tossup which way to go, but I'm hoping that the potentially-infinite-* functions aren't the norm and thus these manual implementations won't have too much of a burden.
 ;; TODO - instrument or deprecate these to measure their presence.
 
-(defun-inline potentially-infinite-number-p (object)
+(defun* potentially-infinite-number-p (object) (:inline t)
   (or (numberp object)
       (infinite-number-p object)))
 
-(defun-inline positive-infinity ()
+(defun* positive-infinity () (:inline t)
   :positive-infinity)
 
-(defun-inline negative-infinity-p (object)
+(defun* negative-infinity-p (object) (:inline t)
   (eq object :negative-infinity))
 
-(defun-inline positive-infinity-p (object)
+(defun* positive-infinity-p (object) (:inline t)
   (eq object :positive-infinity))
 
-(defun-inline infinite-number-p (object)
+(defun* infinite-number-p (object) (:inline t)
   (or (negative-infinity-p object)
       (positive-infinity-p object)))
 
-(defun-inline potentially-infinite-number-= (num1 num2)
+(defun* potentially-infinite-number-= (num1 num2) (:inline t)
   (eql num1 num2))
 
 (defun potentially-infinite-number-< (num1 num2)
@@ -175,7 +176,7 @@ The answer is limited to SIGNIFICANT-DIGITS, when non-NIL."
     ((positive-infinity-p num1) nil)
     (t (< num1 num2))))
 
-(defun-inline potentially-infinite-number-> (num1 num2)
+(defun* potentially-infinite-number-> (num1 num2) (:inline t)
   (not (potentially-infinite-number-< num1 num2)))
 
 (defun potentially-infinite-number-plus (num1 num2)
@@ -206,34 +207,34 @@ The answer is limited to SIGNIFICANT-DIGITS, when non-NIL."
     ((positive-infinity-p num2) (missing-larkc 31689))
     (t (/ num1 num2))))
 
-(defun-inline potentially-infinite-number-max (num1 num2)
+(defun* potentially-infinite-number-max (num1 num2) (:inline t)
   "[Cyc] Returns the potentially-infinite-number-p max value between NUM1 and NUM2."
   (if (potentially-infinite-number-> num1 num2)
       num1
       num2))
 
-(defun-inline potentially-infinite-number-min (num1 num2)
+(defun* potentially-infinite-number-min (num1 num2) (:inline t)
   "[Cyc] Returns the potentially-infinite-number-p min value between NUM1 and NUM2."
   (if (potentially-infinite-number-< num1 num2)
       num1
       num2))
 
-(defun-inline potentially-infinite-integer-= (int1 int2)
+(defun* potentially-infinite-integer-= (int1 int2) (:inline t)
   (eql int1 int2))
 
-(defun-inline potentially-infinite-integer-< (int1 int2)
+(defun* potentially-infinite-integer-< (int1 int2) (:inline t)
   (potentially-infinite-number-< int1 int2))
 
-(defun-inline potentially-infinite-integer-> (int1 int2)
+(defun* potentially-infinite-integer-> (int1 int2) (:inline t)
   (potentially-infinite-integer-< int2 int1))
 
-(defun-inline potentially-infinite-integer-<= (int1 int2)
+(defun* potentially-infinite-integer-<= (int1 int2) (:inline t)
   (not (potentially-infinite-integer-> int1 int2)))
 
-(defun-inline potentially-infinite-integer-plus (int1 int2)
+(defun* potentially-infinite-integer-plus (int1 int2) (:inline t)
   (potentially-infinite-number-plus int1 int2))
 
-(defun-inline potentially-infinite-integer-times (int1 int2)
+(defun* potentially-infinite-integer-times (int1 int2) (:inline t)
   (potentially-infinite-number-times int1 int2))
 
 ;; Cool, SBCL detects the infinite number paths as unreachable from the -times and -divided routines.

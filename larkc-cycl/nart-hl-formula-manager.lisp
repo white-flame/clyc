@@ -53,7 +53,7 @@ and permission notice:
 (defun clear-nart-hl-formula-table ()
   (clear-kb-object-content-table *nart-hl-formula-manager*))
 
-(defun-inline cached-nart-hl-formula-count ()
+(defun* cached-nart-hl-formula-count () (:inline t)
   "[Cyc] Return the number of nart-hl-formulas whose content is cached in memory."
   (cached-kb-object-count *nart-hl-formula-manager*))
 

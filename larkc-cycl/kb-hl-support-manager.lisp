@@ -51,27 +51,27 @@ and permission notice:
                                #'load-kb-hl-support-def-from-cache
                                exact?)))
 
-(defun-inline clear-kb-hl-support-content-table ()
+(defun* clear-kb-hl-support-content-table () (:inline t)
   (clear-kb-object-content-table *kb-hl-support-content-manager*))
 
-(defun-inline cached-kb-hl-support-count ()
+(defun* cached-kb-hl-support-count () (:inline t)
   "[Cyc] Return the number of kb-hl-supports whose content is cached in memory."
   (cached-kb-object-count *kb-hl-support-content-manager*))
 
-(defun-inline lookup-kb-hl-support-content (id)
+(defun* lookup-kb-hl-support-content (id) (:inline t)
   (lookup-kb-object-content *kb-hl-support-content-manager* id))
 
-(defun-inline register-kb-hl-supoprt-content (id kb-hl-support-content)
+(defun* register-kb-hl-supoprt-content (id kb-hl-support-content) (:inline t)
   "[Cyc] Note that ID will be used as the id for KB-HL-SUPPORT-CONTENT."
   (register-kb-object-content *kb-hl-support-content-manager* id kb-hl-support-content))
 
-(defun-inline deregister-kb-hl-support-content (id)
+(defun* deregister-kb-hl-support-content (id) (:inline t)
   (deregister-kb-object-content *kb-hl-support-content-manager* id))
 
-(defun-inline mark-kb-hl-support-content-as-muted (id)
+(defun* mark-kb-hl-support-content-as-muted (id) (:inline t)
   (mark-kb-object-content-as-muted *kb-hl-support-content-manager* id))
 
-(defun-inline swap-out-all-pristine-kb-hl-supports ()
+(defun* swap-out-all-pristine-kb-hl-supports () (:inline t)
   (swap-out-all-pristine-kb-objects-int *kb-hl-support-content-manager*))
 
 (defun initialize-kb-hl-support-hl-store-cache ()

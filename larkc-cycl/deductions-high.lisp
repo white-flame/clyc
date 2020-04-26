@@ -36,10 +36,10 @@ and permission notice:
 
 (in-package :clyc)
 
-(defun-inline create-deduction-spec (supports)
+(defun* create-deduction-spec (supports) (:inline t)
   (cons :deduction (canonicalize-supports supports t)))
 
-(defun-inline deduction-spec-supports (deduction-spec)
+(defun* deduction-spec-supports (deduction-spec) (:inline t)
   "[Cyc] Returns the list of supports specified by DEDUCTION-SPEC."
   (cdr deduction-spec))
 
@@ -52,16 +52,16 @@ and permission notice:
                             justification
                             (hl-support-tv hl-support)))
 
-(defun-inline create-deduction (assertion supports truth)
+(defun* create-deduction (assertion supports truth) (:inline t)
   (kb-create-deduction assertion supports truth))
 
-(defun-inline remove-deduction (deduction)
+(defun* remove-deduction (deduction) (:inline t)
   (kb-remove-deduction deduction))
 
-(defun-inline set-deduction-strength (deduction new-strength)
+(defun* set-deduction-strength (deduction new-strength) (:inline t)
   (kb-set-deduction-strength deduction new-strength))
 
-(defun-inline find-deduction (assertion supports &optional (truth :true))
+(defun* find-deduction (assertion supports &optional (truth :true)) (:inline t)
   "[Cyc] Find the deduction that justifies ASSERTION via SUPPORTS having TRUTH.
 Return NIL if not present."
   (kb-lookup-deduction assertion supports truth))
@@ -71,7 +71,7 @@ Return NIL if not present."
   (and (length= supports1 (length supports2))
        (sets-equal? supports1 supports2 #'support-equal)))
 
-(defun-inline deduction-assertion (deduction)
+(defun* deduction-assertion (deduction) (:inline t)
   "[Cyc] Return the support for which DEDUCTION is a deduction."
   (and (deduction-handle-valid? deduction)
        (kb-deduction-assertion deduction)))
@@ -88,5 +88,5 @@ Return NIL if not present."
 
 (defparameter *deduction-dump-id-table* nil)
 
-(defun-inline find-deduction-by-dump-id (dump-id)
+(defun* find-deduction-by-dump-id (dump-id) (:inline t)
   (find-deduction-by-id dump-id))

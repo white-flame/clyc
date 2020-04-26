@@ -59,7 +59,7 @@ Hmm, there doesn't seem to be any place in the struct or index file to hold the 
   data-stream
   index-stream)
 
-(defun-inline get-file-vector-data-stream (fvector)
+(defun* get-file-vector-data-stream (fvector) (:inline t)
   (fvector-data-stream fvector))
 
 (defun new-fvector (data-stream index-stream)
@@ -97,7 +97,7 @@ Hmm, there doesn't seem to be any place in the struct or index file to hold the 
   (with-open-file (stream index-filename)
     (fvector-raw-byte-size-to-length (file-length stream))))
 
-(defun-inline fvector-raw-byte-size-to-length (bytes)
+(defun* fvector-raw-byte-size-to-length (bytes) (:inline t)
   (declare (fixnum bytes))
   (ash bytes -2))
 

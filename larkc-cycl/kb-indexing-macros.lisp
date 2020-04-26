@@ -36,21 +36,18 @@ and permission notice:
 
 (in-package :clyc)
 
-(defun* within-wff? () (:inline t)
-  "[Cyc] Return T iff currently within wff checking."
-  *within-wff?*)
 
-(defun* possibly-new-wff-memoization-state () (:inline t)
-  (or *wff-memoization-state*
-      (new-memoization-state)))
 
-(defun new-wff-special-variable-state (properties)
-  (check-wff-properties properties)
-  (let ((svs (new-special-variable-state nil)))
-    (dohash (indicator data (wff-properties-table))
-      (destructuring-bind (var default) data
-        (when var
-          (let ((desired-value (getf properties indicator default)))
-            (unless (equal desired-value default)
-              (missing-larkc 31672))))))
-    svs))
+(defun* number-has-reached-cutoff? (number cutoff) (:inline t)
+  (>= number cutoff))
+
+(defun number-of-non-null-args-in-order (&optional arg1 arg2 arg3 arg4 arg5)
+  "[Cyc] Stops counting if it hits a null one."
+  (cond
+    ((not arg1) 0)
+    ((not arg2) 1)
+    ((not arg3) 2)
+    ((not arg4) 3)
+    ((not arg5) 4)
+    (t 5)))
+

@@ -60,13 +60,13 @@ and permission notice:
 
 (defvar *within-quote-form* nil)
 
-(defun-inline grammar-permits-hl? ()
+(defun* grammar-permits-hl? () (:inline t)
   *grammar-permits-hl?*)
 
-(defun-inline grammar-permits-list-as-terminal? ()
+(defun* grammar-permits-list-as-terminal? () (:inline t)
   *grammar-permits-list-as-terminal?*)
 
-(defun-inline grammar-permits-non-ascii-strings? ()
+(defun* grammar-permits-non-ascii-strings? () (:inline t)
   *grammar-permits-non-ascii-strings?*)
 
 (defun grammar-uses-kb? ()
@@ -276,7 +276,7 @@ and permission notice:
   (or (cyc-const-logical-operator-p object)
       (missing-larkc 30706)))
 
-(defun-inline cycl-regular-quantifier-p (object)
+(defun* cycl-regular-quantifier-p (object) (:inline t)
   (or (cyc-const-regular-quantifier-p object)))
 
 (defun cycl-bounded-existential-quantifier-p (object)
@@ -366,7 +366,7 @@ and permission notice:
   (or (cycl-denotational-term-p object)
       (missing-larkc 30093)))
 
-(defun-inline cycl-term-p (object)
+(defun* cycl-term-p (object) (:inline t)
   (cycl-expression-p object))
 
 (defun cycl-denotational-term-p (object)
@@ -504,20 +504,20 @@ Use this when we know object is syntactically well formed"
        (cyc-const-generalized-tense-operator-p (literal-predicate obj))
        (cycl-literal-p obj)))
 
-(defun-inline cycl-constant-p (object)
+(defun* cycl-constant-p (object) (:inline t)
   (constant-p object))
 
-(defun-inline subl-string-p (object)
+(defun* subl-string-p (object) (:inline t)
   ;; DESIGN - we're always going to be full unicode, so eliminated the checks & flags for ascii
   (stringp object))
 
-(defun-inline subl-real-number-p (object)
+(defun* subl-real-number-p (object) (:inline t)
   (realp object))
 
-(defun-inline subl-float-p (object)
+(defun* subl-float-p (object) (:inline t)
   (floatp object))
 
-(defun-inline subl-integer-p (object)
+(defun* subl-integer-p (object) (:inline t)
   (integerp object))
 
 (defun cycl-variable-p (object)
@@ -526,12 +526,12 @@ Use this when we know object is syntactically well formed"
       (and (grammar-permits-hl?)
             (hl-variable-p object))))
 
-(defun-inline meta-variable-p (object)
+(defun* meta-variable-p (object) (:inline t)
   (keyword-var? object))
 
-(defun-inline el-variable-p (object)
+(defun* el-variable-p (object) (:inline t)
   (el-var? object))
 
-(defun-inline hl-variable-p (object)
+(defun* hl-variable-p (object) (:inline t)
   (variable-p object))
 

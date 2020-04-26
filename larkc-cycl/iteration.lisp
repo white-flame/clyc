@@ -109,7 +109,7 @@ FINALIZE is a unary function which is applied to STATE when the iterator is dest
   "[Cyc] Return NIL iff ITERATOR has not yet been exhausted."
   (funcall (it-done iterator) (it-state iterator)))
 
-(defun-inline iteration-next-funcall (next-func next-state)
+(defun* iteration-next-funcall (next-func next-state) (:inline t)
   ;; This dispatched on next-func symbols to direct distant forward-referencing calls,
   ;; likely in an optimization attempt.
   ;; Simplified this to calling next-func directly, as it should be more performant

@@ -74,11 +74,11 @@ and permission notice:
 (deflexical *remote-hl-store-connection-pool-lock* (bt:make-lock "Remote HL Store Connection Pool Lock"))
 (deflexical *remote-hl-store-connection-pool-max-size* 9)
 
-(defun-inline define-hl-modifier-preamble ()
+(defun* define-hl-modifier-preamble () (:inline t)
   "[Cyc] Code to execute before the internals of the hl-modifier (or hl-creator)."
   (clear-hl-store-dependent-caches))
 
-(defun-inline define-hl-modifier-postamble ()
+(defun* define-hl-modifier-postamble () (:inline t)
   "[Cyc] Code to execute before the internals of the hl-modifier (or hl-creator)."
   ;; probably should be "after" in the comment?
   (clear-hl-store-dependent-caches))
@@ -116,7 +116,7 @@ and permission notice:
 (declaim (fixnum *next-hl-store-iterator-id*))
 (defglobal *next-hl-store-iterator-id* 0)
 
-(defun-inline candidate-next-hl-store-iterator-id ()
+(defun* candidate-next-hl-store-iterator-id () (:inline t)
   (let* ((retval *next-hl-store-iterator-id*)
          (next (1+ retval)))
     (declare (fixnum retval next))
