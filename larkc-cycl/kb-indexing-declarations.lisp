@@ -76,9 +76,9 @@ KEYS: a list of keys, starting from the top level."
     (let ((index (find-index-by-top-level-key top-level-key)))
       (must index
             "Could not find an index with top-level key ~s" top-level-key)
-      (let ((key-info-list (get-index-prop index :keys))
-            (levels-deep (length rest-keys))
-            (key-info-for-this-level (nth levels-deep key-info-list))
-            (equal-test (get-index-key-prop key-info-for-this-level :equal-test
-                                            *default-intermediate-index-equal-test*)))
+      (let* ((key-info-list (get-index-prop index :keys))
+             (levels-deep (length rest-keys))
+             (key-info-for-this-level (nth levels-deep key-info-list))
+             (equal-test (get-index-key-prop key-info-for-this-level :equal-test
+                                             *default-intermediate-index-equal-test*)))
         equal-test))))
