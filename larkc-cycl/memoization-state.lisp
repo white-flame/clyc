@@ -40,6 +40,8 @@ and permission notice:
 
 (in-package :clyc)
 
+;; TODO - I think I screwed up here, in making a combined interface.  "Memoization" seems to be local to a dynamic state binding, while "Caching" is a singular global cache.  I probably can ignore all the actual implementation guts of these 2 (which spends most its complexity juggling multiple return values, optional params, etc) and just reimplement the exposed interfaces.  But, search for all instances of defun-memoized and check the java to see if it has calls involving "global" in its lazy cache state initialization to distinguish which one is actually being used.
+
 
 (defconstant *global-caching-lock* (bt:make-lock "global-caching-lock"))
 (defglobal *caching-mode-should-monitor* nil

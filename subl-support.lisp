@@ -264,6 +264,13 @@
   `(loop for (,key ,val) on ,list by #'cddr
         do (progn ,@body)))
 
+(defmacro do-alist ((key val list) &body body)
+  (alexandria:with-gensyms (cell)
+    `(dolist (,cell ,list)
+       (let ((,key (car ,cell))
+             (,val (cdr ,cell)))
+         ,@body))))
+
 (defmacro dohash ((key val hashtable) &body body)
   `(block nil
      (maphash (lambda (,key ,val)

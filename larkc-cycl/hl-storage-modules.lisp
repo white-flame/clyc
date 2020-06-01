@@ -328,10 +328,10 @@ Result is destructible"
                             (argument-spec-type argument-spec)))
         (*successful-hl-storage-modules* (new-set)))
     (when (atomic-clause-p cnf)
-      (let ((predicate (atomic-cnf-predicate cnf))
-            (predicate-specific-modules (if argument-type
-                                            (hl-storage-modules-for-predicate-and-argument-type predicate argument-type)
-                                            (hl-storage-modules-for-predicate predicate))))
+      (let* ((predicate (atomic-cnf-predicate cnf))
+             (predicate-specific-modules (if argument-type
+                                             (hl-storage-modules-for-predicate-and-argument-type predicate argument-type)
+                                             (hl-storage-modules-for-predicate predicate))))
         (setf solely-specific? (solely-specific-hl-storage-module-predicate? predicate))
         (when predicate-specific-modules
           (setf success? (hl-perform-action-with-storage-modules-int action predicate-specific-modules argument-spec cnf mt direction variable-map)))))

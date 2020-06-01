@@ -230,6 +230,14 @@ Note: result is NOT destructible!"
   ;; TODO - Tests for non-NILness, which should be okay to just pass through.
   object)
 
+;; Taken from kb-indexing.lisp relevant-mt-subindex-count-with-cutoff
+(defmacro do-intermediate-index ((key-var subindex-var intermediate-index) &body body)
+  `(let ((index ,intermediate-index))
+     (when (do-intermediate-index-valid-index-p index)
+       (block do-intermediate-index
+         (dohash (,key-var ,subindex-var (intermediate-index-dictionary index))
+           ,@body)))))
+
 (defun* intermediate-index-lookup (intermediate-index key) (:inline t)
   "[Cyc] Returns NIL or subindex-p."
   (gethash key (intermediate-index-dictionary intermediate-index)))

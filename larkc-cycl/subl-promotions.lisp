@@ -73,8 +73,10 @@ and permission notice:
   "[Cyc] Convert PATHNAME to a physical pathname (performing any logical pathname translations)"
   (truename pathname))
 
-(defmacro member? (&rest rest)
-  `(member ,@rest))
+(defmacro member? (item list &optional (test '#'eql) (key '#'identity))
+  `(member ,item ,list
+           ,@(and test `(:test ,test))
+           ,@(and key `(:key ,key))))
 
 ;; PERFORMANCE - do we assume fixnum for subl-level code?
 (defun* positive-integer-p (obj)

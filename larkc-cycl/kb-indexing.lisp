@@ -77,16 +77,13 @@ and permission notice:
                                        (if subindex
                                            (min cutoff (subindex-leaf-count subindex))
                                            0)))
-   (t (let ((count 0)
-            ;; TODO - macroexpansion
-            (index mt-subindex))
-        (when (do-intermediate-index-valid-index-p index)
-          (dohash (mt subindex (intermediate-index-dictionary index))
-            (when (number-has-reached-cutoff? count cutoff)
-              (return))
-            (when (relevant-mt? mt)
-              (incf count (subindex-leaf-count subindex))))
-          (min cutoff count))))))
+    (t (let ((count 0))
+         (do-intermediate-index (mt subindex mt-subindex)
+           (if (number-has-reached-cutoff? count cutoff)
+               (return-from do-intermediate-index)
+               (when (relevant-mt? mt)
+                 (incf count (subindex-leaf-count subindex)))))
+         (min cutoff count)))))
 
 (defun mark-term-index-as-muted (term)
   (cond
@@ -96,51 +93,76 @@ and permission notice:
     ((kb-unrepresented-term-p term) (when-let ((id (unrepresented-term-suid term)))
                                       (mark-unrepresented-term-index-as-muted id)))))
 
+
+
+
+;; GAF arg index
+
 (defun num-gaf-arg-index (term &optional argnum pred mt)
   "[Cyc] Return the number of gafs indexed off of TERM ARGNUM PRED MT."
-  (if (simple-indexed-term-p term)
-      (let ((count 0))
-        (dolist (ass (do-simple-index-term-assertion-list term))
-          (when (matches-gaf-arg-index ass term argnum pred mt)
-            (incf count)))
-        count)
-      (if-let ((subindex (get-gaf-arg-subindex term argnum pred mt)))
-        (subindex-leaf-count subindex)
-        0)))
-
+  (let ((num 0))
+    ;; TODO - this pattern is clearly a macro that should be passing in NUM as a place directly
+    (if (simple-indexed-term-p term)
+        (let ((count 0))
+          (dolist (ass (do-simple-index-term-assertion-list term))
+            (when (matches-gaf-arg-index ass term argnum pred mt)
+              (incf count)))
+          (setf num count))
+        (setf num
+              (if-let ((subindex (get-gaf-arg-subindex term argnum pred mt)))
+                (subindex-leaf-count subindex)
+                0)))
+    num))
 
 (defun relevant-num-gaf-arg-index (term &optional argnum pred)
   "[Cyc] Return the assertion count at relevant mts under TERM ARGNUM PRED."
-  (cond
-    ((all-mt-subindex-keys-relevant-p) (num-gaf-arg-index term argnum pred))
-    ((simple-indexed-term-p term) (let ((num 0))
-                                    (dolist (ass (do-simple-index-term-assertion-list term))
-                                      (when (and (matches-gaf-arg-index ass term argnum pred)
-                                                 (relevant-mt? (assertion-mt ass)))
-                                        (incf num)))
-                                    num))
-    ((= 2 (number-of-non-null-args-in-order argnum pred)) (if (get-gaf-arg-subindex term argnum pred)
-                                                              (missing-larkc 12807)
-                                                              0))
-    (t (missing-larkc 12807))))
+  (let ((num 0))
+    ;; TODO - might be the same as num-gaf-arg-index, but uses NUM as a place directly, instead of just returning straight from the COND
+    (cond
+      ((all-mt-subindex-keys-relevant-p)
+       (setf num (num-gaf-arg-index term argnum pred)))
+      
+      ((simple-indexed-term-p term)
+       (dolist (ass (do-simple-index-term-assertion-list term))
+         (when (and (matches-gaf-arg-index ass term argnum pred)
+                    (relevant-mt? (assertion-mt ass)))
+           (incf num))))
+
+      (t (let ((good-key-count (number-of-non-null-args-in-order argnum pred)))
+           ;; TODO - macro usage, subtracting constants
+           (if (= good-key-count (- 3 1))
+               (when-let ((mt-subindex (get-gaf-arg-subindex term argnum pred)))
+                 (missing-larkc 12807))
+               (missing-larkc 4718)))))
+    num))
 
 (defun relevant-num-gaf-arg-index-with-cutoff (term cutoff &optional argnum pred)
   "[Cyc] Return the assertion count at relevant mts under TERM ARGNUM PRED.
-CUTOFF: A number beyond which to stop counting relevant assertions and just return CUTOFF."
-  (cond
-    ((all-mt-subindex-keys-relevant-p) (min cutoff (num-gaf-arg-index term argnum pred)))
-    ((simple-indexed-term-p term) (let ((num 0))
-                                    (dolist (ass (do-simple-index-term-assertion-list term))
-                                      (unless (number-has-reached-cutoff? num cutoff)
-                                        (when (and (matches-gaf-arg-index ass term argnum pred)
-                                                   (relevant-mt? (assertion-mt ass)))
-                                          (incf num))))
-                                    num))
-    ((= 2 (number-of-non-null-args-in-order argnum pred))
-     (if-let ((mt-subindex (get-gaf-arg-subindex term argnum pred)))
-       (relevant-mt-subindex-count-with-cutoff mt-subindex cutoff)
-       0))
-    (t (missing-larkc 4719))))
+CUTOFF: non-negative-integer-p; a number beyond which to stop counting relevant assertions and just return CUTOFF."
+  (let ((num 0))
+    ;; TODO - suspicion of macro like num-gaf-arg-index & relevant-num-gaf-arg-index
+    (cond
+      ((all-mt-subindex-keys-relevant-p)
+       ;; TODO - optimize check to a single write, but probably reveals structure of macro
+       (setf num (num-gaf-arg-index term argnum pred))
+       (when (number-has-reached-cutoff? num cutoff)
+         (setf num cutoff)))
+
+      ((simple-indexed-term-p term)
+       (dolist (ass (do-simple-index-term-assertion-list term))
+         ;; TODO - should abort the dolist if this is true instead
+         (unless (number-has-reached-cutoff? num cutoff)
+           (when (and (matches-gaf-arg-index ass term argnum pred)
+                      (relevant-mt? (assertion-mt ass)))
+             (incf num)))))
+
+      (t (let ((good-key-count (number-of-non-null-args-in-order argnum pred)))
+           ;; TODO - macro substracting constants
+           (if (= good-key-count (- 3 1))
+               (when-let ((mt-subindex (get-gaf-arg-subindex term argnum pred)))
+                 (setf num (relevant-mt-subindex-count-with-cutoff mt-subindex cutoff)))
+               (missing-larkc 4719)))))
+    num))
 
 (defun clear-key-gaf-arg-index-cached ()
   (when-let ((cs *key-gaf-arg-index-cached-caching-state*))
@@ -149,22 +171,27 @@ CUTOFF: A number beyond which to stop counting relevant assertions and just retu
 ;; TODO HACK - this requires the last 2 args to be optional, but I don't think we can currently express that!
 (defun-memoized key-gaf-arg-index-cached (term #|&optional|#argnum pred)
     (:capacity 5000 :test eq :clear-when :hl-store-modified)
+  "[Cyc] Return a list of the keys to the next index level below TERM ARGNUM PRED."
   (key-gaf-arg-index term argnum pred))
 
 (defun key-gaf-arg-index (term &optional argnum pred)
-  "[Cyc] Return a destructible list of the keys to the next index level below TERM ARGNUM PRED."
-  (cond
-    ((simple-indexed-term-p term) (let ((keys-accum nil))
-                                    (dolist (ass (do-simple-index-term-assertion-list term))
-                                      (setf keys-accum (simple-key-gaf-arg-index ass keys-accum
-                                                                                 term argnum pred)))
-                                    keys-accum))
-    (t (let ((next-level-subindex (get-gaf-arg-subindex term argnum pred)))
-         (and (intermediate-index-p next-level-subindex)
-              (intermediate-index-keys next-level-subindex))))))
+  "[Cyc] Return a list of the keys to the next index level below TERM ARGNUM PRED.
+@note destructible"
+  (let ((keys nil))
+    ;; TODO - definintely a macro, passing keys-accum to keys
+    (if (simple-indexed-term-p term)
+        (let ((keys-accum nil))
+          (dolist (ass (do-simple-index-term-assertion-list term))
+            (setf keys-accum (simple-key-gaf-arg-index ass keys-accum term argnum pred)))
+          (setf keys keys-accum))
+        (let ((next-level-subindex (get-gaf-arg-subindex term argnum pred)))
+          (setf keys (if (intermediate-index-p next-level-subindex)
+                         (intermediate-index-keys next-level-subindex)
+                         nil))))
+    keys))
 
 (defun gaf-arg-index-key-validator (term &optional argnum predicate mt)
-  "[Cyc] Return T iff TERM, ARGNUM, PREDICATE, and MT are valid keys for the :GAF-ARG-INDEX."
+  "[Cyc] Return T iff TERM, ARGNUM, PREDICATE, and MT are valid keys for the :GAF-ARG INDEX."
   (and (indexed-term-p term)
        (or (not argnum) (positive-integer-p argnum))
        (or (not predicate) (fort-p predicate))
@@ -180,67 +207,106 @@ CUTOFF: A number beyond which to stop counting relevant assertions and just retu
 (defun rem-gaf-arg-index (term argnum pred mt assertion)
   (term-rem-indexing-leaf term (list :gaf-arg argnum pred mt) assertion))
 
+
+
+
+;; NART arg index
+
 (defun num-nart-arg-index (term &optional argnum func)
   "[Cyc] Return the number of #$termOfUnit gafs indexed off of TERM ARGNUM FUNC."
-  (cond
-    ((simple-indexed-term-p term) (loop for ass in (do-simple-index-term-assertion-list term)
-                                     count (matches-nart-arg-index ass term argnum func)))
-    (t (if-let ((subindex (get-nart-arg-subindex term argnum func)))
-         (subindex-leaf-count subindex)
-         0))))
+  (let ((num 0))
+    ;; TODO - macro, similar to num-gaf-arg-index but different inc tests. Doesn't refer to macro helpers, so not sure exactly what the input here is supposed to be, and which of these usages share a macro.
+    (if (simple-indexed-term-p term)
+        (let ((count 0))
+          (dolist (ass (do-simple-index-term-assertion-list term))
+            (when (matches-nart-arg-index ass term argnum func)
+              (incf count)))
+          (setf num count))
+        (setf num (if-let ((subindex (get-nart-arg-subindex term argnum func)))
+                    (subindex-leaf-count subindex)
+                    0)))
+    num))
 
 (defun key-nart-arg-index (term &optional argnum func)
   "[Cyc] Return a list of the keys to the next index level below TERM ARGNUM FUNC."
-  (cond
-    ((simple-indexed-term-p term) (let ((keys-accum nil))
-                                    (dolist (ass (do-simple-index-term-assertion-list term))
-                                      (setf keys-accum (simple-key-nart-arg-index ass keys-accum
-                                                                                  term argnum func)))
-                                    keys-accum))
-    (t (let ((next-level-subindex (get-nart-arg-subindex term argnum func)))
-         (when (intermediate-index-p next-level-subindex)
-           (intermediate-index-keys next-level-subindex))))))
+  (let ((keys nil))
+    ;; TODO - macro
+    (if (simple-indexed-term-p term)
+        (let ((keys-accum nil))
+          (dolist (ass (do-simple-index-term-assertion-list term))
+            (setf keys-accum (simple-key-nart-arg-index ass keys-accum term argnum func)))
+          (setf keys keys-accum))
+        (setf keys (let ((next-level-subindex (get-nart-arg-subindex term argnum func)))
+                     (if (intermediate-index-p next-level-subindex)
+                         (intermediate-index-keys next-level-subindex)
+                         nil))))
+    keys))
 
 (defun get-nart-arg-subindex (term &optional argnum func)
-  "[Cyc] Return the subindex at TERM ARGNUM FUNCT MT. Return NIL if none present."
+  "[Cyc] Return the subindex at TERM ARGNUM FUNC MT. Return NIL if none present."
   (get-subindex term (list :nart-arg argnum func)))
+
+
+
+
+;; Predicate extent index
 
 (defun num-predicate-extent-index (pred &optional mt)
   "[Cyc] Return the assertion count at PRED MT."
-  (cond
-    ((simple-indexed-term-p pred) (loop for ass in (do-simple-index-term-assertion-list pred)
-                                     count (matches-predicate-extent-index ass pred mt)))
-    (t (if-let ((subindex (get-predicate-extent-subindex pred mt)))
-         (subindex-leaf-count (subindex-leaf-count subindex))
-         0))))
+  (let ((num 0))
+    ;; TODO - macro, as above
+    (if (simple-indexed-term-p pred)
+        (let ((count 0))
+          (dolist (ass (do-simple-index-term-assertion-list pred))
+            (when (matches-predicate-extent-index ass pred mt)
+              (incf count)))
+          (setf num count))
+        (setf num (if-let ((subindex (get-predicate-extent-subindex pred mt)))
+                    (subindex-leaf-count subindex)
+                    0)))
+    num))
 
 (defun relevant-num-predicate-extent-index-with-cutoff (pred cutoff)
   "[Cyc] Compute the assertion count at relevant mts under PRED.
-CUTOFF: a number beyond which to stop counting relevant assertions and just return CUTOFF."
-  (cond
-    ((all-mt-subindex-keys-relevant-p) (min cutoff (num-predicate-extent-index pred)))
-    ((simple-indexed-term-p pred) (loop for ass in (do-simple-index-term-assertion-list pred)
-                                     for num from 0
-                                     ;; TODO - cutoff check reeks of macroexpansion
-                                     count (if (and (not (number-has-reached-cutoff? 0 cutoff))
-                                                    (matches-predicate-extent-index ass pred)
-                                                    (relevant-mt? (assertion-mt ass)))
-                                               (incf num))))
-    ;; TODO - these are definitely macroexpansions, but I'm not seeing enough commonality in form of all these functions in this file.
-    ((= 0 (number-of-non-null-args-in-order)) (if-let ((mt-subindex (get-predicate-extent-subindex pred)))
-                                                (relevant-mt-subindex-count-with-cutoff mt-subindex cutoff)
-                                                0))
-    (t (missing-larkc 4722))))
+CUTOFF: non-negative-integer-p; a number beyond which to stop counting relevant assertions and just return CUTOFF."
+  (let ((num 0))
+    ;; TODO - macro, as above
+    (cond
+      ((all-mt-subindex-keys-relevant-p)
+       (setf num (num-predicate-extent-index pred))
+       (when (number-has-reached-cutoff? num cutoff)
+         (setf num cutoff)))
+
+      ((simple-indexed-term-p pred)
+       (dolist (ass (do-simple-index-term-assertion-list pred))
+         (unless (number-has-reached-cutoff? num cutoff)
+           (when (and (matches-predicate-extent-index ass pred)
+                      (relevant-mt? (assertion-mt ass)))
+             (incf num)))))
+
+      ;; TODO - degenerate constructs from macrogen
+      (t (let ((good-key-count (number-of-non-null-args-in-order)))
+           (if (= good-key-count (- 1 1))
+               (when-let ((mt-subindex (get-predicate-extent-subindex pred)))
+                 (setf num (relevant-mt-subindex-count-with-cutoff mt-subindex cutoff)))
+               (missing-larkc 4722)))))
+    num))
 
 (defun key-predicate-extent-index (pred)
   "[Cyc] Return a list of the keys to the next predicate-extent index level below PRED."
-  (cond
-    ((simple-indexed-term-p pred) (dolist (ass (do-simple-index-term-assertion-list pred))
-                                    (declare (ignore ass))
-                                    (missing-larkc 30241)))
-    (t (let ((next-level-subindex (get-predicate-extent-subindex pred)))
-         (when (intermediate-index-p next-level-subindex)
-           (intermediate-index-keys next-level-subindex))))))
+  (let ((keys nil))
+    ;; TODO - macro as above
+    (if (simple-indexed-term-p pred)
+        (let ((keys-accum nil))
+          (dolist (ass (do-simple-index-term-assertion-list pred))
+            (declare (ignore ass))
+            (missing-larkc 30241))
+          (setf keys keys-accum))
+        (setf keys (let ((next-level-subindex (get-predicate-extent-subindex pred)))
+                     (if (intermediate-index-p next-level-subindex)
+                         (intermediate-index-keys next-level-subindex)
+                         nil))))
+    keys))
 
 (defun* predicate-extent-top-level-key () (:inline t)
   :predicate-extent)
@@ -255,38 +321,58 @@ CUTOFF: a number beyond which to stop counting relevant assertions and just retu
   "[Cyc] Return the subindex at PRED MT, or NIL if none present."
   (get-subindex pred (list (predicate-extent-top-level-key) mt)))
 
+
+
+;; Predicate rule index
+
 (defun num-predicate-rule-index (pred &optional sense mt direction)
   "[Cyc] Return the raw assertion count at PRED SENSE MT DIRECTION."
-  (cond
-    ((simple-indexed-term-p pred) (loop for ass in (do-simple-index-term-assertion-list pred)
-                                     count (matches-predicate-rule-index ass pred sense mt direction)))
-    (t (if-let ((subindex (get-predicate-rule-subindex pred sense mt direction)))
-         (subindex-leaf-count subindex)
-         0))))
+  (let ((num 0))
+    ;; TODO - macro as above. Starting to simplify, though, because it's annoying
+    (if (simple-indexed-term-p pred)
+        (dolist (ass (do-simple-index-term-assertion-list pred))
+          (when (matches-predicate-rule-index ass pred sense mt direction)
+            (incf num)))
+        (when-let ((subindex (get-predicate-rule-subindex pred sense mt direction)))
+          (setf num (subindex-leaf-count subindex))))
+    num))
 
-(defun relative-num-predicate-rule-index (pred &optional sense)
+(defun relevant-num-predicate-rule-index (pred &optional sense)
   "[Cyc] Return the raw assertion count at relevant mts under PRED SENSE."
-  (cond
-    ((all-mt-subindex-keys-relevant-p) (num-predicate-rule-index pred sense))
-    ((simple-indexed-term-p pred) (loop for ass in (do-simple-index-term-assertion-list pred)
-                                     count (and (matches-predicate-rule-index ass pred sense)
-                                                (relevant-mt? (assertion-mt ass)))))
-    ((= 1 (number-of-non-null-args-in-order sense)) (if (get-predicate-rule-subindex pred sense)
-                                                        (missing-larkc 12809)
-                                                        0))
-    (t (missing-larkc 4724))))
+  (let ((num 0))
+    ;; TODO - macro, simplified
+    (cond
+      ((all-mt-subindex-keys-relevant-p)
+       (setf num (num-predicate-rule-index pred sense)))
+
+      ((simple-indexed-term-p pred)
+       (dolist (ass (do-simple-index-term-assertion-list pred))
+         (when (and (matches-predicate-rule-index ass pred sense)
+                    (relevant-mt? (assertion-mt ass)))
+           (incf num))))
+
+      (t (let ((good-key-count (number-of-non-null-args-in-order sense)))
+           (if (= good-key-count (- 2 1))
+               (when-let ((mt-subindex (get-predicate-rule-subindex pred sense)))
+                 (missing-larkc 12809))
+               (missing-larkc 4724)))))
+    num))
 
 (defun key-predicate-rule-index (pred &optional sense mt)
   "[Cyc] Return a list of the keys to the next index level below PRED SENSE MT."
-  (cond
-    ((simple-indexed-term-p pred) (dolist (ass (do-simple-index-term-assertion-list pred))
-                                    (declare (ignore ass))
-                                    (missing-larkc 30242)))
-    (t (let ((next-level-subindex (get-predicate-rule-subindex pred sense mt)))
-         (when (intermediate-index-p next-level-subindex)
-           (intermediate-index-keys next-level-subindex))))))
+  (let ((keys nil))
+    ;; TODO - macro
+    (if (simple-indexed-term-p pred)
+        (dolist (ass (do-simple-index-term-assertion-list pred))
+          (declare (ignore ass))
+          (missing-larkc 30242))
+        (let ((next-level-subindex (get-predicate-rule-subindex pred sense mt)))
+          (when (intermediate-index-p next-level-subindex)
+            (setf keys (intermediate-index-keys next-level-subindex)))))
+    keys))
 
 (defun get-predicate-rule-subindex (pred &optional sense mt direction)
+  "[Cyc] Return NIL or subindex-p"
   (get-subindex pred (list :predicate-rule sense mt direction)))
 
 (defun add-predicate-rule-index (pred sense mt direction assertion)
@@ -295,58 +381,83 @@ CUTOFF: a number beyond which to stop counting relevant assertions and just retu
 (defun rem-predicate-rule-index (pred sense mt direction assertion)
   (term-rem-indexing-leaf pred (list :predicate-rule sense mt direction) assertion))
 
+
+
+
+;; Leftover pieces of others
+
 (defun key-decontextualized-ist-predicate-rule-index (pred &optional sense)
   "[Cyc] Return a list of the keys to the next index level below PRED SENSE."
-  (cond
-    ((simple-indexed-term-p pred) (dolist (ass (do-simple-index-term-assertion-list pred))
-                                    (declare (ignore ass))
-                                    (missing-larkc 30235)))
-    (t (let ((next-level-subindex (get-decontextualized-ist-predicate-rule-subindex pred sense)))
-         (when (intermediate-index-p next-level-subindex)
-           (intermediate-index-keys next-level-subindex))))))
+  (let ((keys nil))
+    ;; TODO - macro
+    (if (simple-indexed-term-p pred)
+        (dolist (ass (do-simple-index-term-assertion-list pred))
+          (declare (ignore ass))
+          (missing-larkc 30235))
+        (let ((next-level-subindex (get-decontextualized-ist-predicate-rule-subindex pred sense)))
+          (when (intermediate-index-p next-level-subindex)
+            (setf keys (intermediate-index-keys next-level-subindex)))))
+    keys))
 
 (defun get-decontextualized-ist-predicate-rule-subindex (pred &optional sense direction)
+  "[Cyc] Return NIL or subindex-p"
   (get-subindex pred (list :decontextualized-ist-predicate-rule sense direction)))
 
 (defun key-isa-rule-index (col &optional sense mt)
-  (cond
-    ((simple-indexed-term-p col) (dolist (ass (do-simple-index-term-assertion-list col))
-                                   (declare (ignore ass))
-                                   (missing-larkc 30239)))
-    (t (let ((next-level-subindex (get-isa-rule-subindex col sense mt)))
-         (when (intermediate-index-p next-level-subindex)
-           (intermediate-index-keys next-level-subindex))))))
+  "[Cyc] Return a list of the keys to the next index level below COL SENSE MT."
+  (let ((keys nil))
+    ;; TODO - macro
+    (if (simple-indexed-term-p col)
+        (dolist (ass (do-simple-index-term-assertion-list col))
+          (declare (ignore ass))
+          (missing-larkc 30239))
+        (let ((next-level-subindex (get-isa-rule-subindex col sense mt)))
+          (when (intermediate-index-p next-level-subindex)
+            (setf keys (intermediate-index-keys next-level-subindex)))))
+    keys))
 
 (defun get-isa-rule-subindex (col &optional sense mt direction)
+  "[Cyc] Return NIL or SUBINDEX-P"
   (get-subindex col (list :isa-rule sense mt direction)))
 
 (defun num-quoted-isa-rule-index (col &optional sense mt direction)
   "[Cyc] Return the raw assertion count at COL SENSE MT DIRECTION."
-  (cond
-    ((simple-indexed-term-p col) (loop for ass in (do-simple-index-term-assertion-list col)
-                                    count (matches-quoted-isa-rule-index ass col sense mt direction)))
-    (t (missing-larkc 12741))))
+  (let ((num 0))
+    ;; TODO - macro
+    (if (simple-indexed-term-p col)
+        (dolist (ass (do-simple-index-term-assertion-list col))
+          (when (matches-quoted-isa-rule-index ass col sense mt direction)
+            (incf num)))
+        (missing-larkc 12641))
+    num))
 
 (defun num-genls-rule-index (col &optional sense mt direction)
   "[Cyc] Return the raw assertion count at COL SENSE MT DIRECTION."
-  (cond
-    ((simple-indexed-term-p col) (loop for ass in (do-simple-index-term-assertion-list col)
-                                    count (matches-genls-rule-index ass col sense mt direction)))
-    (t (if-let ((subindex (get-genls-rule-subindex col sense mt direction)))
-         (subindex-leaf-count subindex)
-         0))))
+  (let ((num 0))
+    ;; TODO - macro
+    (if (simple-indexed-term-p col)
+        (dolist (ass (do-simple-index-term-assertion-list col))
+          (when (matches-genls-rule-index ass col sense mt direction)
+            (incf num)))
+        (when-let ((subindex (get-genls-rule-subindex col sense mt direction)))
+          (setf num (subindex-leaf-count subindex))))
+    num))
 
 (defun key-genls-rule-index (col &optional sense mt)
   "[Cyc] Return a list of the keys to the next index level below COL SENSE MT."
-  (cond
-    ((simple-indexed-term-p col) (dolist (ass (do-simple-index-term-assertion-list col))
-                                   (declare (ignore ass))
-                                   (missing-larkc 30238)))
-    (t (let ((next-level-subindex (get-genls-rule-subindex col sense mt)))
-         (when (intermediate-index-p next-level-subindex)
-           (intermediate-index-keys next-level-subindex))))))
+  (let ((keys nil))
+    ;; TODO - macro
+    (if (simple-indexed-term-p col)
+        (dolist (ass (do-simple-index-term-assertion-list col))
+          (declare (ignore ass))
+          (missing-larkc 30238))
+        (let ((next-level-subindex (get-genls-rule-subindex col sense mt)))
+          (when (intermediate-index-p next-level-subindex)
+            (setf keys (intermediate-index-keys next-level-subindex)))))
+    keys))
 
 (defun get-genls-rule-subindex (col &optional sense mt direction)
+  "[Cyc] Returns NIL or SUBINDEX-P"
   (get-subindex col (list :genls-rule sense mt direction)))
 
 (defun add-genls-rule-index (col sense mt direction assertion)
@@ -357,59 +468,80 @@ CUTOFF: a number beyond which to stop counting relevant assertions and just retu
 
 (defun key-genl-mt-rule-index (col &optional sense mt)
   "[Cyc] Return a list of the keys to the next index level below COL SENSE MT."
-  (cond
-    ((simple-indexed-term-p col) (dolist (ass (do-simple-index-term-assertion-list col))
-                                   (declare (ignore ass))
-                                   (missing-larkc 30237)))
-    (t (let ((next-level-subindex (get-genl-mt-rule-subindex col sense mt)))
-         (when (intermediate-index-p next-level-subindex)
-           (intermediate-index-keys next-level-subindex))))))
+  (let ((keys nil))
+    ;; TODO - macro
+    (if (simple-indexed-term-p col)
+        (dolist (ass (do-simple-index-term-assertion-list col))
+          (declare (ignore ass))
+          (missing-larkc 30237))
+        (let ((next-level-subindex (get-genl-mt-rule-subindex col sense mt)))
+          (when (intermediate-index-p next-level-subindex)
+            (setf keys (intermediate-index-keys next-level-subindex)))))
+    keys))
 
 (defun get-genl-mt-rule-subindex (col &optional sense mt direction)
+  "[Cyc] Returns NIL or SUBINDEX-P."
   (get-subindex col (list :genl-mt-rule sense mt direction)))
 
 (defun key-function-rule-index (func &optional mt)
-  "[Cyc] Return a list of the keys to the next index level below FUNC MT."
-  (cond
-    ((simple-indexed-term-p func) (dolist (ass (do-simple-index-term-assertion-list func))
-                                    (declare (ignore ass))
-                                    (missing-larkc 30236)))
-    (t (let ((next-level-subindex (get-function-rule-subindex func mt)))
-         (when (intermediate-index-p next-level-subindex)
-           (intermediate-index-keys next-level-subindex))))))
-
-(defun get-function-rule-subindex (func &optional mt direction)
-  (get-subindex func (list (function-rule-top-level-key) mt direction)))
+  "[Cyc] Return a list of the keys to the inext index level below FUNC MT."
+  (let ((keys nil))
+    ;; TODO - macro
+    (if (simple-indexed-term-p func)
+        (dolist (ass (do-simple-index-term-assertion-list func))
+          (declare (ignore ass))
+          (missing-larkc 30236))
+        (let ((next-level-subindex (get-function-rule-subindex func mt)))
+          (when (intermediate-index-p next-level-subindex)
+            (setf keys (intermediate-index-keys next-level-subindex)))))
+    keys))
 
 (defun* function-rule-top-level-key () (:inline t)
   :function-rule)
 
+(defun get-function-rule-subindex (func &optional mt direction)
+  "[Cyc] Return NIL or SUBINDEX-P."
+  (get-subindex func (list (function-rule-top-level-key) mt direction)))
+
 (defun relevant-num-pragma-rule-index (rule)
   "[Cyc] Return the raw assertion count at relevant mts under RULE."
-  (cond
-    ((all-mt-subindex-keys-relevant-p) (missing-larkc 12801))
-    ((simple-indexed-term-p rule) (loop for ass in (do-simple-index-term-assertion-list rule)
-                                     count (and (matches-pragma-rule-index ass rule)
-                                                (relevant-mt? (assertion-mt ass)))))
-    ((= 0 (number-of-non-null-args-in-order)) (missing-larkc 12737))
-    (t (missing-larkc 4745))))
+  (let ((num 0))
+    ;; TODO - macro
+    (cond
+      ((all-mt-subindex-keys-relevant-p) (missing-larkc 12801))
+
+      ((simple-indexed-term-p rule)
+       (dolist (ass (do-simple-index-term-assertion-list rule))
+         (when (and (matches-pragma-rule-index ass rule)
+                    (relevant-mt? (assertion-mt ass)))
+           (incf num))))
+
+      (t (let ((good-key-count (number-of-non-null-args-in-order)))
+           (if (= good-key-count (- 1 1))
+               (missing-larkc 12737)
+               (missing-larkc 4745)))))
+    num))
 
 (defun add-mt-index (term assertion)
   (unless (broad-mt? term)
-    (add-mt-index-internal term assertion)))
+    (add-mt-index-internal term assertion))
+  ;; TODO - necessary return value?
+  assertion)
 
 (defun rem-mt-index (term assertion)
   (unless (broad-mt? term)
-    (rem-mt-index-internal term assertion)))
+    (rem-mt-index-internal term assertion))
+  ;; TODO - return value?
+  assertion)
+
+(defun* mt-top-level-key () (:inline t)
+  :ist)
 
 (defun add-mt-index-internal (term assertion)
   (term-add-indexing-leaf term (list (mt-top-level-key)) assertion))
 
 (defun rem-mt-index-internal (term assertion)
   (term-rem-indexing-leaf term (list (mt-top-level-key)) assertion))
-
-(defun* mt-top-level-key () (:inline t)
-  :ist)
 
 (defun broad-mt? (mt)
   (let ((monad (hlmt-monad-mt mt)))
@@ -418,12 +550,18 @@ CUTOFF: a number beyond which to stop counting relevant assertions and just retu
 
 (defun num-other-index (term)
   "[Cyc] Return the number of assertions at the other index for TERM."
-  (cond
-    ((simple-indexed-term-p term) (loop for ass in (do-simple-index-term-assertion-list term)
-                                     count (matches-other-index ass term)))
-    (t (if-let ((subindex (get-other-subindex term)))
-         (subindex-leaf-count subindex)
-         0))))
+  (let ((num 0))
+    ;; TODO - macro
+    (if (simple-indexed-term-p term)
+        (dolist (ass (do-simple-index-term-assertion-list term))
+          (when (matches-other-index ass term)
+            (incf num)))
+        (when-let ((subindex (get-other-subindex term)))
+          (setf num (subindex-leaf-count subindex))))
+    num))
+
+(defun* other-top-level-key () (:inline t)
+  :other)
 
 (defun get-other-subindex (term)
   (term-complex-index-lookup term (other-top-level-key)))
@@ -434,8 +572,13 @@ CUTOFF: a number beyond which to stop counting relevant assertions and just retu
 (defun rem-other-index (term assertion)
   (term-rem-indexing-leaf term (list (other-top-level-key)) assertion))
 
-(defun* other-top-level-key () (:inline t)
-  :other)
+
+
+
+
+
+
+;; Higher level interface?
 
 (defun num-index (term)
   "[Cyc] The total number of assertions indexed from TERM."
@@ -454,13 +597,17 @@ CUTOFF: a number beyond which to stop counting relevant assertions and just retu
   (noting-terms-to-toggle-indexing-mode
     (if (gaf-assertion? assertion)
         (remove-gaf-indices assertion term)
-        (remove-rule-indices assertion term))))
+        (remove-rule-indices assertion term)))
+  ;; TODO - return value?
+  assertion)
 
 ;; TODO - this gathers lists and then calls tms-remove-assertion-list, instead of iterating without consing up that intermediate list. Look into it.
 (defun remove-term-indices (term)
   "[Cyc] Remove all assertions about TERM from the KB. Return the TERM."
-  (with-all-mts
-    ;; TODO - original deliberately ignores warnings in here, probably really hackish
+  (let ((*relevant-mt-function* #'relevant-mt-is-everything)
+        (*mt* #$EverythingPSC)
+        ;;(*ignore-warns?* t) ;; TODO - need this?
+        )
     (tms-remove-assertion-list (gather-other-index term))
     (when (hlmt-p term)
       (tms-remove-assertion-list (gather-mt-index term)))
@@ -512,8 +659,8 @@ CUTOFF: a number beyond which to stop counting relevant assertions and just retu
   term)
 
 (defun determine-formula-indices (formula)
-  "Return 0: A list of (argnum . term) pairs.
-Return 1: A list of terms not indexed by any other argnum."
+  "[Cyc] Return 0: alist-p, a list of (argnum . term) pairs
+Return 1: listp, a list of terms not indexed by any other argnum."
   (setf formula (ignore-sequence-vars formula))
   (let ((others nil)
         (pairs nil)
@@ -521,21 +668,19 @@ Return 1: A list of terms not indexed by any other argnum."
     (dolistn (argnum arg terms)
       (if (valid-indexed-term? arg)
           (push (cons argnum arg) pairs)
-          (setf others (nunion (tree-gather arg #'valid-fully-indexed-term-p)
-                               others))))
+          (setf others (nunion (tree-gather arg #'valid-fully-indexed-term-p) others))))
     (when others
-      (setf others (remove-if (lambda (other)
-                                (member? other pairs :test #'equal :key #'cdr))
-                              others)))
+      (setf others (loop for other in (fast-delete-duplicates others #'equal)
+                      unless (member? other pairs #'equal #'cdr)
+                      collect other)))
     (values (nreverse pairs) others)))
 
 (defun determine-gaf-indices (formula mt)
-  "Return 0: A list of (argnum . term) pairs.
-Return1 : A list of terms not indexed by any other argnum."
+  "[Cyc] Return 0: alist-p, a list of (argnum . term) pairs
+Return 1: listp, a listof terms not indexed by any other argnum"
   (multiple-value-bind (argnum-pairs others) (determine-formula-indices formula)
     (unless (fort-p mt)
-      (setf others (nunion (formula-gather mt #'fully-indexed-hlmt-term-p)
-                           others)))
+      (setf others (nunion (formula-gather mt #'fully-indexed-hlmt-term-p) others)))
     (values argnum-pairs others)))
 
 (defun add-gaf-indices (assertion &optional term)
@@ -553,13 +698,12 @@ Return1 : A list of terms not indexed by any other argnum."
         (when (or (not term)
                   (eq term pred))
           (add-predicate-extent-index pred mt assertion))
-        (dolist (pair alist)
-          (destructuring-bind (argnum . arg) pair
-            (when (and (plusp argnum)
-                       arg
-                       (or (not term)
-                           (equal term arg)))
-              (add-gaf-arg-index arg argnum pred mt assertion))))
+        (do-alist (argnum arg alist)
+          (when (and (plusp argnum)
+                     arg
+                     (or (not term)
+                         (equal term arg)))
+            (add-gaf-arg-index arg argnum pred mt assertion)))
         (cond
           ((eq pred #$termOfUnit) (missing-larkc 12694))
           (t (dolist (fort others)
@@ -583,20 +727,19 @@ Return1 : A list of terms not indexed by any other argnum."
         (when (or (not term)
                   (eq term pred))
           (rem-predicate-extent-index pred mt assertion))
-        (dolist (pair alist)
-          (destructuring-bind (argnum . arg) pair
-            (when (and (plusp argnum)
-                       arg
-                       (or (not term)
-                           (equal term arg)))
-              (rem-gaf-arg-index arg argnum pred mt assertion))))
-        (cond
-          ((eq pred #$termOfUnit) (missing-larkc 12831))
-          (t (dolist (fort others)
-               (when (and (fully-indexed-term-p fort)
-                          (or (not term)
-                              (equal term fort)))
-                 (rem-other-index fort assertion)))))))))
+        (do-alist (argnum arg alist)
+          (when (and (plusp argnum)
+                     arg
+                     (or (not term)
+                         (equal term arg)))
+            (rem-gaf-arg-index arg argnum pred mt assertion)))
+        (if (eq pred #$termOfUnit)
+            (missing-larkc 12831)
+            (dolist (fort others)
+              (when (and (fully-indexed-term-p fort)
+                         (or (not term)
+                             (equal term fort)))
+                (rem-other-index fort assertion))))))))
 
 (defun determine-rule-indices-int (asents sense)
   "[Cyc] Return 0: A list of pairs. The first element of each pair is the type of indexing (:pred, :ist-pred, :func, :isa, :genls, :genl-mt, :exception, or :pragma) and the second element of each pair is the term to be indexed with that type of indexing.
@@ -650,6 +793,8 @@ Return 2: A list of terms to be indexed via 'other' indexing."
                                      pos-terms)))
         (values neg-pairs pos-pairs other)))))
 
+;; TODO - all this stuff might be better handled via defmethod?
+
 (defun add-rule-indices (assertion &optional term)
   (let ((cnf (assertion-cnf assertion))
         (mt (assertion-mt assertion))
@@ -657,7 +802,7 @@ Return 2: A list of terms to be indexed via 'other' indexing."
     (multiple-value-bind (neg-pairs pos-pairs other) (determine-rule-indices cnf)
       (dolist (neg-pair neg-pairs)
         (destructuring-bind (neg-indexing-type neg-term) neg-pair
-          (when (and (fully-indexed-term neg-term)
+          (when (and (fully-indexed-term-p neg-term)
                      (or (not term)
                          (equal neg-term term)))
             (case neg-indexing-type
@@ -690,7 +835,7 @@ Return 2: A list of terms to be indexed via 'other' indexing."
               (:func (cerror "So don't!" "Can't index a function rule as a pos-lit ~s" assertion))
               (otherwise (cerror "So don't!" "Don't know how to handle indexing type ~s" pos-indexing-type))))))
       (dolist (other-term other)
-        (when (and (fully-indexed-term other-term)
+        (when (and (fully-indexed-term-p other-term)
                    (or (not term)
                        (equal other-term term)))
           (add-other-index other-term assertion)))
@@ -730,9 +875,10 @@ Return 2: A list of terms to be indexed via 'other' indexing."
                          (equal pos-term term)))
             (case pos-indexing-type
               (:pred (rem-predicate-rule-index pos-term :pos mt dir assertion))
+              (:genls (rem-genls-rule-index pos-term :pos mt dir assertion))
               (:ist-pred (missing-larkc 12828))
               (:isa (missing-larkc 12836))
-              (:genls (rem-genls-rule-index pos-term :pos mt dir assertion))
+              (:quoted-isa (missing-larkc 12839))
               (:genl-mt (missing-larkc 12834))
               (:exception (missing-larkc 12829))
               (:pragma (missing-larkc 12837))
@@ -751,65 +897,16 @@ Return 2: A list of terms to be indexed via 'other' indexing."
       (rem-unbound-rule-indices assertion))))
 
 (defun dependent-narts (fort)
+  "[Cyc] Return a list of all current NARTs which are functions of FORT< or which have FORT as their functor."
   (let ((answer nil))
-    ;; TODO - all of these are from mt_relevance-macros in the java
-    (let* ((mt-var (with-inference-mt-relevance-validate *tou-mt*))
-           (*mt* (update-inference-mt-relevance-mt mt-var))
-           (*relevant-mt-function* (update-inference-mt-relevance-function mt-var))
-           (*relevant-mts* (update-inference-mt-relevance-mt-list mt-var)))
-      ;; TODO - iteration macro
-      (when (do-nart-arg-index-key-validator fort nil nil)
-        (let ((iterator-var (new-nart-arg-final-index-spec-iterator fort nil nil))
-              (done-var nil)
-              (token-var nil))
-          (while (not done-var)
-            (let* ((final-index-spec (iteration-next-without-values-macro-helper iterator-var token-var))
-                   (valid (not (eq token-var final-index-spec))))
-              (unless valid
-                (let ((final-index-iterator nil))
-                  ;; TODO - finalizers are missing-larkc, so the expense of the unwind-protect is wasted
-                  (unwind-protect (let ((done-var-9 nil)
-                                        (token-var-10 nil))
-                                    (setf final-index-iterator (new-final-index-iterator final-index-spec :gaf nil nil))
-                                    (while (not done-var-9)
-                                      (let* ((assertion (iteration-next-without-values-macro-helper final-index-iterator token-var-10))
-                                             (valid-11 (not (eq token-var-10 assertion))))
-                                        (when valid-11
-                                          (push (gaf-arg1 assertion) answer))
-                                        (setf done-var-9 (not valid-11)))))
-                    (when final-index-iterator
-                      (destroy-final-index-iterator final-index-iterator)))))
-              (setf done-var (not valid))))))
-      ;; TODO - iteration macro
-      (when (do-function-extent-index-key-validator fort)
-        (let ((final-index-spec (function-extent-final-index-spec fort))
-              (final-index-iterator nil))
-          (unwind-protect (let ((done-var nil)
-                                (token-var nil))
-                            (setf final-index-iterator (new-final-index-iterator final-index-spec :gaf nil nil))
-                            (while (not done-var)
-                              (let* ((assertion (iteration-next-without-values-macro-helper final-index-iterator token-var))
-                                     (valid (not (eq token-var assertion))))
-                                (when valid
-                                  (push (gaf-arg1 assertion) answer))
-                                (setf done-var (not valid)))))
-            (when final-index-iterator
-              (destroy-final-index-iterator final-index-iterator)))))
-      ;; TODO - iteration macro
-      (when (do-other-index-key-validator fort nil)
-        (let ((final-index-spec (other-final-index-spec fort))
-              (final-index-iterator nil))
-          (unwind-protect (let ((done-var nil)
-                                (token-var nil))
-                            (setf final-index-iterator (new-final-index-iterator final-index-spec nil nil nil))
-                            (while (not done-var)
-                              (let* ((assertion (iteration-next-without-values-macro-helper final-index-iterator token-var))
-                                     (valid (not (eq token-var assertion))))
-                                (when valid
-                                  (missing-larkc 30388))
-                                (setf done-var (not valid)))))
-            (when final-index-iterator
-              (destroy-final-index-iterator final-index-iterator))))))
+    (do-nart-arg-index (assertion fort)
+      (push (gaf-arg1 assertion) answer))
+    (do-function-extent-index (assertion fort)
+      (push (gaf-arg1 assertion) answer))
+    (do-other-index (assertion fort)
+      (when (and (tou-assertion? assertion)
+                 (expression-find fort (gaf-arg2 assertion) t))
+        (push (gaf-arg1 assertion) answer)))
     (fast-delete-duplicates answer)))
 
 (defun decent-rule-index (rule-cnf)
@@ -854,24 +951,25 @@ Return 1: The term to be indexed with that type of indexing."
             (let ((total (case neg-indexing-type
                            ;; Reordered
                            (:pred (num-predicate-rule-index neg-term :neg))
-                           (:ist-pred (missing-larkc 12774))
-                           (:isa (missing-larkc 12796))
                            (:quoted-isa (num-quoted-isa-rule-index neg-term :neg))
                            (:genls (num-genls-rule-index neg-term :neg))
+                           (:ist-pred (missing-larkc 12774))
+                           (:isa (missing-larkc 12796))
                            (:genl-mt (missing-larkc 12792))
                            (:func (missing-larkc 12787))
-                           (otherwise (cerror "So don't!" "Don't know how to handle indexing type ~s" neg-indexing-type)))))
-              (if (< total best-total)
-                  (setf best-total total
-                        best-term neg-term
-                        best-type (case neg-indexing-type
-                                    (:pred :pred-neg)
-                                    (:ist-pred :ist-pred-neg)
-                                    (:isa :isa-neg)
-                                    (:quoted-isa :quoted-isa-neg)
-                                    (:genls :genls-neg)
-                                    (:genl-mt :genl-mt-neg)
-                                    (otherwise neg-indexing-type))))))))
+                           (otherwise (cerror "So don't!" "Don't know how to handle indexing type ~s" neg-indexing-type)
+			              most-positive-fixnum))))
+              (when (< total best-total)
+                (setf best-total total)
+                (setf best-term neg-term)
+                (setf best-type (case neg-indexing-type
+                                  (:pred :pred-neg)
+                                  (:ist-pred :ist-pred-neg)
+                                  (:isa :isa-neg)
+                                  (:quoted-isa :quoted-isa-neg)
+                                  (:genls :genls-neg)
+                                  (:genl-mt :genl-mt-neg)
+                                  (otherwise neg-indexing-type))))))))
       (dolist (other-term other)
         (when (indexed-term-p other-term)
           (let ((total (num-other-index other-term)))
@@ -900,7 +998,7 @@ Return 2: predicate"
           (lookup-index-get-property lookup-index :argnum)
           (lookup-index-get-property lookup-index :predicate)))
 
-;; TODO - this sort of traversal could be simplified into a macro, if there are many more of them
+;; TODO - probably a macro to expand these lookup-index-set-property chains, but there's only 2 uses so far, so whatever.
 
 (defun lookup-index-for-predicate-extent (predicate)
   (let* ((lookup-index (lookup-index-set-property nil :index-type :predicate-extent))
@@ -915,6 +1013,7 @@ Return 2: predicate"
     lookup-index))
 
 (defun lookup-methods-include? (index-type methods)
+  "[Cyc] Return T iff INDEX-TYPE is allowable, according to METHODS."
   (or (not methods)
       ;; TODO - probably :test #'eq since they're all keywords?
       (member index-type methods)))
@@ -926,14 +1025,21 @@ METHODS: The allowable methods (index-types) that the function can return. If NI
     ((or (lookup-methods-include? :predicate-extent methods)
          (lookup-methods-include? :gaf-arg methods))
      (best-gaf-lookup-index-try-all-allowed asent truth methods))
-    (t (missing-larkc 12767))))
+    
+    ((missing-larkc 12767))
+    ;;(missing-larkc 12754)
+    ))
 
 (defun num-best-gaf-lookup-index (asent truth &optional methods)
   (cond
     ((or (lookup-methods-include? :predicate-extent methods)
          (lookup-methods-include? :gaf-arg methods))
      (num-best-gaf-lookup-index-try-all-allowed asent truth methods))
-    (t (missing-larkc 12768))))
+
+    ((missing-larkc 12768))
+    ;;(missing-larkc 5114)
+    ;;(t 0)
+    ))
 
 (defun best-gaf-lookup-index-try-all-allowed (asent truth methods)
   (multiple-value-bind (best-fort
@@ -1006,34 +1112,28 @@ First look for mt-insensitive counts, then, if not all mts are relevant, try to 
                 best-count (num-predicate-extent-index pred)
                 best-argnum 0)
           (setf pred nil))
-      (dolist (cons argnum-pairs)
-        (let ((argnum (car cons))
-              (arg (cdr cons)))
-          (when (plusp argnum)
-            (let ((num nil))
-              (when (indexed-term-p arg)
-                ;; TODO - num-gaf-arg-index defaults pred to NIL, so eliminate the check?
-                (setf num (if pred
-                              (num-gaf-arg-index arg argnum pred)
-                              (num-gaf-arg-index arg argnum)))
-                (when (or (not best-fort)
-                          ;; TODO - a lot of these numeric comparisons in this whole file can be declared fixnum
-                          (< num best-count))
-                  (setf best-count num
-                        best-fort arg
-                        best-argnum argnum)))))))
+      (do-alist (argnum arg argnum-pairs)
+        (when (plusp argnum)
+          (let ((num nil))
+            (when (indexed-term-p arg)
+              (setf num (if pred
+                            (num-gaf-arg-index arg argnum pred)
+                            (num-gaf-arg-index arg argnum)))
+              (when (or (not best-fort)
+                        (< num best-count))
+                (setf best-count num)
+                (setf best-fort arg)
+                (setf best-argnum argnum))))))
       (unless (any-or-all-mts-are-relevant?)
         (when pred
-          (dolist (cons argnum-pairs)
-            (let ((argnum (car cons))
-                  (arg (cdr cons)))
-              (when (and (plusp argnum)
-                         (indexed-term-p arg))
-                (let ((arg-count (relevant-num-gaf-arg-index-with-cutoff arg best-count argnum pred)))
-                  (when (< arg-count best-count)
-                    (setf best-count arg-count
-                          best-fort arg
-                          best-argnum argnum)))))))
+          (do-alist (argnum arg argnum-pairs)
+            (when (and (plusp argnum)
+                       (indexed-term-p arg))
+              (let ((arg-count (relevant-num-gaf-arg-index-with-cutoff arg best-count argnum pred)))
+                (when (< arg-count best-count)
+                  (setf best-count arg-count)
+                  (setf best-fort arg)
+                  (setf best-argnum argnum))))))
         (when (fort-p pred)
           (let ((pred-count (relevant-num-predicate-extent-index-with-cutoff pred best-count)))
             (when (< pred-count best-count)
@@ -1054,30 +1154,35 @@ First look for mt-insensitive counts, then, if not all mts are relevant, try to 
   (kb-lookup-assertion cnf mt))
 
 (defun find-assertion-internal (cnf mt)
-  ;; TODO - macro from mt-relevance-macros
+  ;; TODO - MT macro? find all occurrences where *mt* is bound and compare to the java macro names
   (let ((*relevant-mt-function* #'relevant-mt-is-eq)
         (*mt* mt))
     (find-cnf cnf)))
 
 (defun find-assertion-any-mt (cnf)
   "[Cyc] Find any assertion in any mt with CNF. Return NIL if none are present."
-  (with-all-mts
+  ;; TODO - mt macro
+  (let ((*relevant-mt-function* #'relevant-mt-is-everything)
+        (*mt* #$EverythingPSC))
     (find-cnf cnf)))
 
 (defun find-gaf (gaf-formula mt)
   "[Cyc] Find the assertion in MT with GAF-FORMULA as its formula. Return NIL if not present."
-  ;; TODO - macro from mt-relevance-macros
+  ;; TODO - mt macro
   (let ((*relevant-mt-function* #'relevant-mt-is-eq)
         (*mt* mt))
     (find-gaf-formula gaf-formula)))
 
 (defun find-gaf-any-mt (gaf-formula)
   "[Cyc] Find any assertion in any mt with GAF-FORMULA as its formula. Return NIL if not present."
-  (with-all-mts
+  ;; TODO - mt macro
+  (let ((*relevant-mt-function* #'relevant-mt-is-everything)
+        (*mt* #$EverythingPSC))
     (find-gaf-formula gaf-formula)))
 
 (defun* find-gaf-in-relevant-mt (gaf-formula) (:inline t)
   "[Cyc] Find any assertion in any currently relevant with GAF-FORMULA as its formula. Return NIL if not present."
+  ;; TODO - supposed to be "in any currently relevant MT"?
   (find-gaf-formula gaf-formula))
 
 (defun find-cnf (cnf)
@@ -1106,21 +1211,17 @@ First look for mt-insensitive counts, then, if not all mts are relevant, try to 
           (:other (map-other-index #'find-cnf-internal term nil nil))
           (:pred-neg (map-predicate-rule-index #'find-cnf-internal term :neg))
           (:pred-pos (map-predicate-rule-index #'find-cnf-internal term :pos))
-          ;; TODO - There's no OTHERWISE clause, so I guess need to manually check for the problematic symbols and let everything else pass through
-          ((:ist-pred-neg
-            :ist-pred-pos
-            :isa-neg
-            :isa-pos
-            :quoted-isa-neg
-            :quoted-isa-pos
-            :genls-neg
-            :genls-pos
-            :genl-mt-neg
-            :genl-mt-pos
-            :func
-            :exception
-            :pragma)
-           (missing-larkc 9446))))
+          (:ist-pred-neg (missing-larkc 9446))
+          (:ist-pred-pos (missing-larkc 9447))
+          (:isa-neg (missing-larkc 9463))
+          (:isa-pos (missing-larkc 9464))
+          (:genls-neg (missing-larkc 9460))
+          (:genls-pos (missing-larkc 9461))
+          (:genl-mt-neg (missing-larkc 9458))
+          (:genl-mt-pos (missing-larkc 9459))
+          (:func (missing-larkc 9451))
+          (:exception (missing-larkc 9448))
+          (:pragma (missing-larkc 9468))))
       *mapping-answer*)))
 
 (defun find-cnf-internal (assertion)
@@ -1128,14 +1229,14 @@ First look for mt-insensitive counts, then, if not all mts are relevant, try to 
              (valid-assertion assertion))
     (let ((cnf (assertion-cnf assertion))
           (*candidate-assertion* assertion))
-      (when (funcall *gaf-matching-predicate* cnf *mapping-target*)
+      (when (funcall *cnf-matching-predicate* cnf *mapping-target*)
         (setf *mapping-answer* assertion)
         ;; TODO - macro from utilities-macros?
         (mapping-finished)))))
 
 (defun find-gaf-formula (gaf-formula)
   "[Cyc] Use the gaf indexing to find any assertion whose gaf formula is GAF-FORMULA, regardless of truth. If there are more than one, it will return an arbitrary one."
-  ;; TODO - lots of kb-mapping-macros in here, just blindly transposing for now
+  ;; TODO - this is a bunch of nested macro helpers, which expands to quite a large java tree.  grepping seems to indicate it's used often enough to go through and break it all out.  just blindly transposed for now.
   (let* ((result nil)
          (l-index (best-gaf-lookup-index gaf-formula nil nil))
          (method (do-gli-extract-method l-index)))

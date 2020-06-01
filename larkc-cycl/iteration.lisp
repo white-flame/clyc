@@ -129,7 +129,7 @@ The second value returned is non-NIL iff the value returned is valid."
       (values nil nil)))
 
 (defun iteration-next-without-values (iterator &optional invalid-token)
-  "[Cyc] Return the next item in the iteration of ITERATOR or INVALID-TOKEN if the return value is invalid.  Unlike ITERATION-nEXT, only 1 value is returned."
+  "[Cyc] Return the next item in the iteration of ITERATOR or INVALID-TOKEN if the return value is invalid.  Unlike ITERATION-NEXT, only 1 value is returned."
   (if (not (funcall (it-done iterator) (it-state iterator)))
       (multiple-value-bind (raw-item raw-state halted-prematurely)
           (iteration-next-funcall (it-next iterator) (it-state iterator))

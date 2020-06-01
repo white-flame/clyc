@@ -290,13 +290,19 @@ Return 1: Whether quiescence terminated early due to running out of keys."
            (fort-p function))))
 
 ;; Implementation taken from kb-mapping.lisp/map-nart-arg-index
+;; TODO - since the next-form above is missing-larkc, this likely won't run anyway
 (defmacro do-nart-arg-index ((var term &key index function done) &body body)
+  ;; TODO - keyword param usage might be off, as they seem to be nil in dependent-narts usage
+  (when done
+    (error ":done keyword not yet supported in do-nart-arg-index"))
   `(when (do-nart-arg-index-key-validator ,term ,index ,function)
-     (let ((iterator-var (new-nart-final-index-spec-iterator ,term ,index ,function))
+     ;; TODO - extract generic iteration macro in iteration.lisp
+     (let ((iterator-var (new-nart-arg-final-index-spec-iterator ,term ,index ,function))
            (done-var nil)
+           ;; This is the 'invalid token' return value for the 'next' calls
            (token-var nil))
        (until done-var
-         (let* ((final-index-spec (iteration-next-wtihout-values-macro-helper iterator-var token-var))
+         (let* ((final-index-spec (iteration-next-without-values-macro-helper iterator-var token-var))
                 (valid (not (eq token-var final-index-spec))))
            (when valid
              (let ((final-index-iterator nil))
@@ -306,7 +312,7 @@ Return 1: Whether quiescence terminated early due to running out of keys."
                                        (token-var2 nil))
                                    (until done-var2
                                      (let* ((,var (iteration-next-without-values-macro-helper final-index-iterator token-var2))
-                                            (valid2 (not eq token-var2 ,var)))
+                                            (valid2 (not (eq token-var2 ,var))))
                                        (when valid2
                                          ,@body)
                                        (setf done-var2 (not valid2))))))
@@ -330,6 +336,28 @@ Return 1: Whether quiescence terminated early due to running out of keys."
       (new-gaf-simple-final-index-spec function '(2 0) #$termOfUnit *tou-mt*)
       (list function :function-extent)))
 
+;; From kb-indexing, dependent-narts
+(defmacro do-function-extent-index ((var function &key done) &body body)
+  ;; TODO - is this the value held in token-var, distinguishing from NIL?
+  (when done
+    (error ":done keyword not yet supported in do-function-extent-index"))
+  ;; This one doesn't have an index spec iterator, just a singular spec
+  `(when (do-function-extent-index-key-validator ,function)
+     (let ((final-index-spec (function-extent-final-index-spec ,function)))
+       ;; TODO - iteration macro, seems to be in a simpler form?
+       (let ((final-index-iterator nil))
+         (unwind-protect (progn
+                           (setf final-index-iterator (new-final-index-iterator final-index-spec :gaf nil nil))
+                           (let ((done-var nil)
+                                 (token-var nil))
+                             (until done-var
+                               (let* ((,var (iteration-next-without-values-macro-helper final-index-iterator token-var))
+                                      (valid (not (eq token-var ,var))))
+                                 (when valid
+                                   ,@body)
+                                 (setf done-var (not valid))))))
+           (when final-index-iterator
+             (destroy-final-index-iterator final-index-iterator)))))))
 
 
 
@@ -387,9 +415,11 @@ Return 1: Whether quiescence terminated early due to running out of keys."
            (direction-p direction))))
 
 
+;; TODO - extract do-predicate-rule-index from kb-mapping map-predicate-rule-index
+
 (defun predicate-rule-final-index-spec-iterator-refill-mt-keys (state)
   "[Cyc] Refill the mt-keys by popping a sense but don't actually pop the sense if it's fresh, just note that it's unfresh now."
-  (with-predicate-rule-final-index-spec-iterator-state state
+  (with-predicate-rule-final-index-spec-iterator state
     (if (eq :sense-keys-are-fresh note)
         (setf note nil)
         (pop sense-keys))
@@ -402,7 +432,7 @@ Return 1: Whether quiescence terminated early due to running out of keys."
 
 (defun predicate-rule-final-index-spec-iterator-refill-direction-keys (state)
   "[Cyc] Refill the direction-keys by popping an MT but don't actually pop the MT if it's fresh, just note that it's unfresh now."
-  (with-predicate-rule-final-index-spec-iterator-state state
+  (with-predicate-rule-final-index-spec-iterator state
     (if (eq :mt-keys-are-fresh note)
         (setf note nil)
         (pop mt-keys))
@@ -725,6 +755,31 @@ Return 1: Whether quiescence terminated early due to running out of keys."
 (defun other-index-assertion-match-p (assertion term)
   (matches-other-index assertion term))
 
+;; From kb-indexing, dependent-narts
+(defmacro do-other-index ((var term &key type truth direction done) &body body)
+  ;; Body is after a missing-larkc, so is never entered
+  (declare (ignore body))
+  (when (or truth direction done)
+    (error "Unhandled keyword parameters in do-other-index: :TRUTH ~s, :DIRECTION ~s, :DONE ~s" truth direction done))
+  ;; TODO - are we multi-evaluating things like TERM?  are these intended to be simple literals/varnames in usage?
+  `(when (do-other-index-key-validator ,term ,type)
+     (let ((final-index-spec (other-final-index-spec ,term))
+           (final-index-iterator nil))
+       (unwind-protect (progn
+                         (setf final-index-iterator (new-final-index-iterator final-index-spec nil nil nil))
+                         (let ((done-var nil)
+                               (token-var nil))
+                           (until done-var
+                             (let* ((,var (iteration-next-without-values-macro-helper final-index-iterator token-var))
+                                    (valid (not (eq token-var ,var))))
+                               (when valid
+                                 (missing-larkc 30388)
+                                 ;;,@body
+                                 )
+                               (setf done-var (not valid))))))
+         (when final-index-iterator
+           (destroy-final-index-iterator final-index-iterator))))))
+
 
 
 ;; TERM - unique, doesn't use the define- macro, dispatches to the above iterators
@@ -912,11 +967,6 @@ ASSERTION-FUNC: We will (funcall ASSERTION-FUNC assertion term), and the asserti
 
 
 
-;; These 2 funs support the memoized function below
-
-(defun clear-simple-term-assertion-list-filtered ()
-  (when-let ((cs *simple-term-assertion-list-filtered-caching-state*))
-    (caching-state-clear cs)))
 
 (defun* simple-term-assertion-list-filtered-internal (simple-final-index-spec type truth direction) (:inline t)
   "[Cyc] Returns the list of all assertions referencing the TERM in FINAL-INDEX-SPEC which match TYPE, TRUTH, DIRECTION, and the syntactic constraints expressed in FINAL-INDEX-SPEC."
@@ -1046,7 +1096,7 @@ RULE-FINAL-INDEX-SPEC: a (SENSE ASENT-FUNC) pair."
 
 (defun decontextualized-ist-predicate-rule-index-asent-match-p (asent predicate)
   (and (eq #$ist (atomic-sentence-predicate asent))
-       (eq predicate (literal-predicate (atmoic-sentence-arg2 asent)))
+       (eq predicate (literal-predicate (atomic-sentence-arg2 asent)))
        (missing-larkc 30350)))
 
 (defun genls-rule-index-asent-match-p (asent collection)

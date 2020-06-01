@@ -166,7 +166,7 @@ This is suitable for fast-fails."
                  (eq psn 2)))
            
            ;; These have actual bodies, but I don't think the return value matters
-           ((unrefied-soken-term? term)
+           ((unreified-skolem-term? term)
             (let ((seqvar (sequence-var (second term))))
               (and (not (member? seqvar bound-vars))
                    (funcall var? seqvar)
@@ -1339,7 +1339,7 @@ Returns NIL if LITERAL is negative or is not an EL formula."
                                                        :ignore)))
            (cond
              ;; TODO - empty COND body again.
-             ((member? term vars :test #'equal))
+             ((member? term vars #'equal))
              ((funcall var? term) (push term vars))
              ((unreified-skolem-term? term) (push term vars))
              ((naut? term) (missing-larkc 30622))

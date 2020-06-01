@@ -198,7 +198,19 @@ and permission notice:
 
 ;; Derived macros
 
+;; TODO - this is likely still manually used everywhere, because it's small
 (defmacro with-all-mts (&body body)
-  `(let ((*relevant-mt-function* 'relevant-mt-is-everything)
+  `(let ((*relevant-mt-function* #'relevant-mt-is-everything)
          (*mt* #$EverythingPSC))
      ,@body))
+
+;; From kb-indexing, dependent-narts
+(defmacro with-inference-mt-relevance (mt &body body)
+  "[Cyc] BODY evaluated with the same relevance used for inferences in MT. This is like WITH-GENL-MTS, except it is special-cased to WITH-ALL-MTS when the MT is #$EverythingPSC, WITH-ANY-MT when the MT is #$InferencePSC. Also, WITH-INFERENCE-MT-RELEVANCE errors if passed NIL for an MT."
+  ;; TODO - verify that the docstring matches the functionality of these helper calls
+  `(let ((mt-var (with-inference-mt-relevance-validate ,mt)))
+     (let ((*mt* (update-inference-mt-relevant-mt mt-var))
+           (*relevant-mt-function* (update-inference-mt-relevance-function mt-var))
+           (*relevant-mts* (update-inference-mt-relevance-mt-list mt-var)))
+       ,@body)
+     ))

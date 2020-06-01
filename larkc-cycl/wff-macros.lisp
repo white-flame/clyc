@@ -40,6 +40,7 @@ and permission notice:
   "[Cyc] Return T iff currently within wff checking."
   *within-wff?*)
 
+;; TODO - where's the defun-memoized that matches this?
 (defun* possibly-new-wff-memoization-state () (:inline t)
   (or *wff-memoization-state*
       (new-memoization-state)))

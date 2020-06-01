@@ -46,7 +46,7 @@ and permission notice:
 
 (defun* relevant-pred-is-spec-pred (pred) (:inline t)
   (or (relevant-pred-is-eq pred)
-      (cached-spec-pred? *pred pred)))
+      (cached-spec-pred? *pred* pred)))
 
 (defun* relevant-pred-is-spec-inverse (pred) (:inline t)
   (cached-spec-inverse? *pred* pred))
@@ -58,7 +58,7 @@ and permission notice:
       (funcall *relevant-pred-function* pred)))
 
 (defun* pred-relevance-undefined-p () (:inline t)
-  (null *relevant-pred-function))
+  (null *relevant-pred-function*))
 
 (defun* all-preds-are-relevant? () (:inline t)
   (or (pred-relevant-undefined-p)

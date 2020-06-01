@@ -121,7 +121,7 @@ Hardcodes the type hierarchy:
   (asserted-argument-tv belief))
 
 (defun* asserted-argument-p (object) (:inline t)
-  "[Cyc] Return T iff OBJECT is an HL asserted argumen tstructure."
+  "[Cyc] Return T iff OBJECT is an HL asserted argument structure."
   (asserted-argument-token-p object))
 
 (defun* create-asserted-argument (assertion tv) (:inline t)
@@ -154,7 +154,7 @@ Hardcodes the type hierarchy:
   *asserted-arguments*)
 
 (defun* asserted-argument-token-p (object) (:inline t)
-  (member? object *asserted-arguments* :test #'eq))
+  (member? object *asserted-arguments* #'eq))
 
 (defun* asserted-argument-token-from-tv (tv) (:inline t)
   (car (find tv *asserted-argument-tv-table* :test #'eq :key #'second)))

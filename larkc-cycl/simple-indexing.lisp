@@ -342,8 +342,13 @@ and permission notice:
 (defparameter *within-noting-terms-to-toggle-indexing-mode* nil)
 (defparameter *terms-to-toggle-indexing-mode* nil)
 
+(defun noting-terms-to-toggle-indexing-mode-internal ()
+  (dolist (term *terms-to-toggle-indexing-mode*)
+    (toggle-term-index-mode term)))
+
+;; Taken from kb-indexing, add-assertion-indices
+;; TODO - any parameters?
 (defmacro noting-terms-to-toggle-indexing-mode (&body body)
-  ;; Taken from kb-indexing add-assertion-indices
   `(let ((*within-noting-terms-to-toggle-indexing-mode* t)
          (*terms-to-toggle-indexing-mode* nil))
      ,@body
@@ -351,9 +356,6 @@ and permission notice:
      (when *terms-to-toggle-indexing-mode*
        (noting-terms-to-toggle-indexing-mode-internal))))
 
-(defun noting-terms-to-toggle-indexing-mode-internal ()
-  (dolist (term *terms-to-toggle-indexing-mode*)
-    (toggle-term-index-mode term)))
 
 ;; TODO - should these be constants?  the last 3 don't update if the 1st 2 change
 (defparameter *index-convert-threshold* 20)
