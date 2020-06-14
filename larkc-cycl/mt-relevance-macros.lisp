@@ -127,16 +127,32 @@ and permission notice:
       *relevant-mt-function*
       'relevant-mt-is-genl-mt))
 
-(defun possibly-in-mt-determine-mt (mt)
+(defun* possibly-in-mt-determine-mt (mt) (:inline t)
   (or mt *mt*))
 
-(defun possibly-with-just-mt-determine-function (mt)
+;; Taken from kb-mapping-utilities, some-pred-value-in-relelvant-mts
+(defmacro possibly-in-mt ((mt) &body body)
+  (once-only (mt)
+    `(let ((*relevant-mt-function* (possibly-in-mt-determine-function ,mt))
+           (*mt* (possibly-in-mt-determine-mt ,mt)))
+       ,@body)))
+
+
+(defun* possibly-with-just-mt-determine-function (mt) (:inline t)
   (if (not mt)
       *relevant-mt-function*
-      'relevant-mt-is-eq))
+      #'relevant-mt-is-eq))
 
-(defun possibly-with-just-mt-determine-mt (mt)
+(defun* possibly-with-just-mt-determine-mt (mt) (:inline t)
   (or mt *mt*))
+
+
+;; Taken from many uses in kb-mapping, and inlined
+(defmacro possibly-with-just-mt ((mt) &body body)
+  (once-only (mt)
+    `(let ((*relevant-mt-function* (if ,mt *relevant-mt-function* #'relevant-mt-is-eq))
+           (*mt* (if ,mt ,mt *mt*)))
+       ,@body)))
 
 (defun with-inference-mt-relevance-validate (mt)
   (or mt (error "No microtheory was specified.")))

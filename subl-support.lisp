@@ -37,7 +37,9 @@
           alexandria:when-let
           alexandria:when-let*
           alexandria:if-let
-          alexandria:deletef))
+          alexandria:deletef
+          alexandria:once-only
+          alexandria:with-gensyms))
 
 
 (cl:defvar *macro-helpers* nil
