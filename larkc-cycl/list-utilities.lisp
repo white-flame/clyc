@@ -625,9 +625,9 @@ and permission notice:
         (cdr pair)
         default)))
 
-(declaim (inline alist-has-key-p))
-(defun alist-has-key-p (alist key &optional (test #'eql))
-  "[Cyc] Returns wheher KEY is a key in the association list ALIST."
+(declaim (inline alist-has-key?))
+(defun alist-has-key? (alist key &optional (test #'eql))
+  "[Cyc] Returns whether KEY is a key in the association list ALIST."
   (member alist key :test test))
 
 (defun alist-enter (alist key value &optional (test #'eql))
