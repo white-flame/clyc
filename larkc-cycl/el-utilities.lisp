@@ -466,6 +466,12 @@ OBJECT is not required to be well-formed."
   (and (el-formula-p object)
        (formula-arity= object 1)))
 
+(defun el-binary-formula-p (object)
+  "[Cyc] Return T iff OBJECT is a formula of arity 2.
+OBJECT is not required to be well-formed."
+  (and (el-formula-p object)
+       (formula-arity= object 2)))
+
 ;; TODO - subl -> cl
 (defun subl-escape-p (object)
   "[Cyc] Return T iff OBJECT is an escape to SubL, which should not be analyzed recursively."

@@ -197,6 +197,14 @@ and permission notice:
     ((genl-mts-of-listed-mts-are-relevant?) (make-formula #$MtUnionFn *relevant-mts*))
     (t *mt*)))
 
+(defun mt-info (&optional mt)
+  (cond
+    ((all-mts-are-relevant?) #$EverythingPSC)
+    ((any-mt-is-relevant?) #$InferencePSC)
+    ((genl-mts-of-listed-mts-are-relevant?) (make-formula #$MtUnionFn *relevant-mts*))
+    (mt mt)
+    (t *mt*)))
+
 (defun any-or-all-mts-relevant-to-mt? (mt)
   (or (with-inference-any-mt-relevance? mt)
       (with-inference-mt-relevance-all-mts? mt)))
@@ -225,7 +233,7 @@ and permission notice:
   "[Cyc] BODY evaluated with the same relevance used for inferences in MT. This is like WITH-GENL-MTS, except it is special-cased to WITH-ALL-MTS when the MT is #$EverythingPSC, WITH-ANY-MT when the MT is #$InferencePSC. Also, WITH-INFERENCE-MT-RELEVANCE errors if passed NIL for an MT."
   ;; TODO - verify that the docstring matches the functionality of these helper calls
   `(let ((mt-var (with-inference-mt-relevance-validate ,mt)))
-     (let ((*mt* (update-inference-mt-relevant-mt mt-var))
+     (let ((*mt* (update-inference-mt-relevance-mt mt-var))
            (*relevant-mt-function* (update-inference-mt-relevance-function mt-var))
            (*relevant-mts* (update-inference-mt-relevance-mt-list mt-var)))
        ,@body)

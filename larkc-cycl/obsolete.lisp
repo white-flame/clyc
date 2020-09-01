@@ -53,3 +53,4 @@ and permission notice:
 
 (defun cnat-p (object &optional (var? #'cyc-var?))
   (closed-naut? object var?))
+

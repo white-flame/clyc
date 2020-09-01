@@ -63,7 +63,8 @@ and permission notice:
                                        (setf ,inner-done (or (not ,inner-valid)
                                                              ,done-place)))))
                    (destroy-final-index-iterator ,final-index-iterator))))
-             (setf ,done (not ,valid))))))))
+             (setf ,done (or (not ,valid)
+                             ,done-place))))))))
 
 (defun some-pred-value (term pred &optional (index-arg 1) (truth :true))
   "[Cyc] Find the first gaf assertion such that:
@@ -232,6 +233,9 @@ Return T if such an assertion exists, otherwise return NIL."
           (pushnew (gaf-arg assertion gather-psn) answer :test test)
           (push (gaf-arg assertion gather-psn) answer))))
     answer))
+
+;; TODO - referenced in kb-accessors
+(missing-function-implementation pred-arg-values-in-relevant-mts)
 
 (defun pred-value-tuples (term pred index-arg gather-args &optional (truth :true))
   "[Cyc] Find all gaf assertions such that:

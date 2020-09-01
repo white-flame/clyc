@@ -180,6 +180,10 @@
 (defmacro missing-larkc (num)
   `(error ,(format nil "This call was replaced for LarKC purposes. Originally a method was called. Refer to number ~a" num)))
 
+(defmacro missing-function-implementation (name)
+  `(defun ,name (&rest args)
+     (error "LarKC declared, referenced, but didn't implement function: ~s" (cons ',name args))))
+
 (let ((package (find-package "KEYWORD")))
   (defun make-keyword (str)
     (intern (string str) package)))

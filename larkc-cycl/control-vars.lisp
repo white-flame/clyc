@@ -228,6 +228,9 @@ and permission notice:
 (defvar *cyc-image-id* nil
   "[Cyc] A string consisting of '<machine-name>-<universal-time>-<process-id>'.")
 
+;; TODO - referenced from kb-accessors
+(missing-function-implementation mapping-funcall-arg)
+
 (defun make-cyc-image-id ()
   "[Cyc] Make a unique identifier for a cyc image: '<machine-name>-<universal-time>-<process-id>"
   (let ((machine-name (string-downcase (machine-instance)))
