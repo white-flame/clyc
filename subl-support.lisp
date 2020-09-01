@@ -219,7 +219,7 @@
     (error "Got invalid type for object: ~s. Wanted type: ~a Actual type: ~s" obj predicate (type-of obj))))
 
 (defmacro csome ((var list exit-test) &body body)
-  "This is often used in general list iteration processing, not necessarily as an exists check. DONE-FORM is a form called before each iteration. If it returns non-NIL the loop is aborted. VAR and LIST work like dolist. Returns the last computed value from the body, or NIL if no iteration ran, which is the main difference from CL:SOME."
+  "This is often used in general list iteration processing, not necessarily as an exists check. DONE-FORM is a form called before each iteration. If it returns non-NIL the loop is aborted. VAR and LIST work like dolist. Returns the last computed value from the body, or NIL if no iteration ran, which is the main difference from CL:SOME. If the result is simply a boolean, it can probably be reduced to CL:SOME."
   `(let ((result nil))
      (dolist (,var ,list)
        (when ,exit-test

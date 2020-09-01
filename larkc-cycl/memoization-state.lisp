@@ -165,6 +165,11 @@ and permission notice:
 ;;  hit the cache lookup by hashing the params without consing, and checking the list of collisions
 ;;  define the cache-miss expression to generate the value for the params
 
+
+;; draw from calls in java:
+;;  (create-global-caching-state-for-name name cs-variable (capacity nil) (test eql) (args-length auto) size)
+;;  memoization_state.register_hl_store_cache_clear_callback(..) => :clear-when :hl-store-modified
+
 ;; kb-mapping-macros simple-term-assertion-list-filtered also registers a clearing parameter from the hl-store being cleared, and :CLEAR-WHEN is in the java stuff here, surrounded by other keywords that we're going to try to use.
 (defmacro defun-memoized (name params (&key (capacity nil) (test 'eql) (initial-size 0) declare doc clear-when) &body calculate-cache-miss)
   "Define a memoized function.  The body can still have a docstring & declarations."
